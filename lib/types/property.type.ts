@@ -81,6 +81,22 @@ export interface Property extends BaseEntity {
   laundry?: boolean;
   heatingCooling?: boolean;
   balcony?: boolean;
+  wifi?: boolean;
+  gym?: boolean;
+  pool?: boolean;
+  elevator?: boolean;
+  security?: boolean;
+  garden?: boolean;
+  dishwasher?: boolean;
+  fireplace?: boolean;
+  wifi?: boolean;
+  gym?: boolean;
+  pool?: boolean;
+  elevator?: boolean;
+  security?: boolean;
+  garden?: boolean;
+  dishwasher?: boolean;
+  fireplace?: boolean;
   otherAmenities?: string;
 
   // Location
@@ -99,6 +115,12 @@ export interface Property extends BaseEntity {
   petsAllowed?: boolean;
   guestsAllowed?: boolean;
   sublettingAllowed?: boolean;
+  partiesAllowed?: boolean;
+  quietHours?: boolean;
+  maintenanceResponsibility?: boolean;
+  partiesAllowed?: boolean;
+  quietHours?: boolean;
+  maintenanceResponsibility?: boolean;
 
   // Contact & Viewing
   contactName: string;
@@ -134,6 +156,14 @@ export interface PropertyInput {
   laundry?: boolean;
   heatingCooling?: boolean;
   balcony?: boolean;
+  wifi?: boolean;
+  gym?: boolean;
+  pool?: boolean;
+  elevator?: boolean;
+  security?: boolean;
+  garden?: boolean;
+  dishwasher?: boolean;
+  fireplace?: boolean;
   otherAmenities?: string;
   address: string;
   city: string;
@@ -148,6 +178,9 @@ export interface PropertyInput {
   petsAllowed?: boolean;
   guestsAllowed?: boolean;
   sublettingAllowed?: boolean;
+  partiesAllowed?: boolean;
+  quietHours?: boolean;
+  maintenanceResponsibility?: boolean;
   contactName: string;
   preferredContactMethod: ContactMethod[];
   contactInfo: ContactInfo;
@@ -179,6 +212,14 @@ export interface PropertyUpdateInput {
   laundry?: boolean;
   heatingCooling?: boolean;
   balcony?: boolean;
+  wifi?: boolean;
+  gym?: boolean;
+  pool?: boolean;
+  elevator?: boolean;
+  security?: boolean;
+  garden?: boolean;
+  dishwasher?: boolean;
+  fireplace?: boolean;
   otherAmenities?: string;
   address?: string;
   city?: string;
@@ -193,6 +234,9 @@ export interface PropertyUpdateInput {
   petsAllowed?: boolean;
   guestsAllowed?: boolean;
   sublettingAllowed?: boolean;
+  partiesAllowed?: boolean;
+  quietHours?: boolean;
+  maintenanceResponsibility?: boolean;
   contactName?: string;
   preferredContactMethod?: ContactMethod[];
   contactInfo?: ContactInfo;

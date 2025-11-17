@@ -59,6 +59,26 @@ import {
   GraduationCap,
   MoreHorizontal,
   Package,
+  Phone,
+  Mail,
+  PhoneCall,
+  Car,
+  Shirt,
+  Wind,
+  Sun,
+  Wifi,
+  Dumbbell,
+  Waves,
+  ArrowUpDown,
+  Shield,
+  TreePine,
+  UtensilsCrossed,
+  Flame,
+  Volume2,
+  Music,
+  Clock,
+  Wrench,
+  Key,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/utils/image-optimization";
 
@@ -142,38 +162,51 @@ export const PropertyForm = forwardRef<
         furnishing:
           (formData.furnishing as PropertyFormData["furnishing"]) ||
           "unfurnished",
-        area: formData.area,
-        floorNumber: formData.floorNumber,
-        totalFloors: formData.totalFloors,
-        price: (formData as any).price,
-        rent: (formData as any).rent,
-        securityDeposit: (formData as any).securityDeposit,
-        leaseLength: (formData as any).leaseLength,
-        availableFrom: (formData as any).availableFrom,
+        area: formData.area ?? undefined,
+        floorNumber: formData.floorNumber ?? undefined,
+        totalFloors: formData.totalFloors ?? undefined,
+        price: (formData as any).price ?? undefined,
+        rent: (formData as any).rent ?? undefined,
+        securityDeposit: (formData as any).securityDeposit ?? undefined,
+        leaseLength: (formData as any).leaseLength ?? undefined,
+        availableFrom: (formData as any).availableFrom ?? undefined,
         paymentFrequency: ((formData as any).paymentFrequency || "monthly") as
           | "monthly"
           | "weekly"
           | "yearly",
-        utilitiesIncluded: (formData as any).utilitiesIncluded,
-        isShared: (formData as any).isShared,
+        utilitiesIncluded: (formData as any).utilitiesIncluded ?? false,
+        isShared: (formData as any).isShared ?? false,
         sharingDetails: (formData as any).sharingDetails,
-        parkingAvailable: formData.parkingAvailable,
-        laundry: formData.laundry,
-        heatingCooling: formData.heatingCooling,
-        balcony: formData.balcony,
-        otherAmenities: formData.otherAmenities,
+        parkingAvailable: formData.parkingAvailable ?? false,
+        laundry: formData.laundry ?? false,
+        heatingCooling: formData.heatingCooling ?? false,
+        balcony: formData.balcony ?? false,
+        wifi: (formData as any).wifi ?? false,
+        gym: (formData as any).gym ?? false,
+        pool: (formData as any).pool ?? false,
+        elevator: (formData as any).elevator ?? false,
+        security: (formData as any).security ?? false,
+        garden: (formData as any).garden ?? false,
+        dishwasher: (formData as any).dishwasher ?? false,
+        fireplace: (formData as any).fireplace ?? false,
+        otherAmenities: formData.otherAmenities ?? undefined,
         address: formData.address || locAddress || "",
         city: formData.city || locCity || "",
         state: formData.state || locState || "",
         zipCode: formData.zipCode || locZip || undefined,
-        nearbyTransit: formData.nearbyTransit,
+        nearbyTransit: formData.nearbyTransit ?? undefined,
         location: initialLocation,
-        smokingAllowed: formData.smokingAllowed,
-        petsAllowed: formData.petsAllowed,
-        guestsAllowed: formData.guestsAllowed,
-        sublettingAllowed: formData.sublettingAllowed,
+        smokingAllowed: formData.smokingAllowed ?? false,
+        petsAllowed: formData.petsAllowed ?? false,
+        guestsAllowed: formData.guestsAllowed ?? false,
+        sublettingAllowed: formData.sublettingAllowed ?? false,
+        partiesAllowed: (formData as any).partiesAllowed ?? false,
+        quietHours: (formData as any).quietHours ?? false,
+        maintenanceResponsibility: (formData as any).maintenanceResponsibility ?? false,
         contactName: formData.contactName || "",
-        preferredContactMethod: formData.preferredContactMethod || [],
+        preferredContactMethod: Array.isArray(formData.preferredContactMethod)
+          ? (formData.preferredContactMethod[0] as PropertyFormData["preferredContactMethod"]) || "phone"
+          : ((formData.preferredContactMethod as PropertyFormData["preferredContactMethod"]) || "phone"),
         contactInfo: formData.contactInfo || { phone: "", email: "" },
         viewingAvailability: formData.viewingAvailability,
         images: formData.images || [],
@@ -310,6 +343,14 @@ export const PropertyForm = forwardRef<
             "laundry",
             "heatingCooling",
             "balcony",
+            "wifi",
+            "gym",
+            "pool",
+            "elevator",
+            "security",
+            "garden",
+            "dishwasher",
+            "fireplace",
             "otherAmenities",
           ];
         case 7:
@@ -318,14 +359,20 @@ export const PropertyForm = forwardRef<
             "petsAllowed",
             "guestsAllowed",
             "sublettingAllowed",
+            "partiesAllowed",
+            "quietHours",
+            "maintenanceResponsibility",
           ];
         case 8:
-          return [
-            "contactName",
-            "preferredContactMethod",
-            "contactInfo",
-            "viewingAvailability",
-          ];
+          const preferredMethod = form.getValues("preferredContactMethod");
+          const fieldsToValidate = ["contactName", "preferredContactMethod"];
+          if (preferredMethod === "phone" || preferredMethod === "both") {
+            fieldsToValidate.push("contactInfo.phone");
+          }
+          if (preferredMethod === "email" || preferredMethod === "both") {
+            fieldsToValidate.push("contactInfo.email");
+          }
+          return fieldsToValidate;
         case 9:
           return ["images", "videoTourUrl"];
         default:
@@ -1008,8 +1055,11 @@ function BasicInfoStep({
                       <Input
                         type="number"
                         {...field}
+                        value={field.value ?? ""}
                         onChange={(e) =>
-                          field.onChange(parseInt(e.target.value) || 0)
+                          field.onChange(
+                            e.target.value === "" ? 0 : parseInt(e.target.value) || 0
+                          )
                         }
                         min={0}
                         className="transition-all focus:scale-[1.01]"
@@ -1040,8 +1090,11 @@ function BasicInfoStep({
                     <Input
                       type="number"
                       {...field}
+                      value={field.value ?? ""}
                       onChange={(e) =>
-                        field.onChange(parseInt(e.target.value) || 0)
+                        field.onChange(
+                          e.target.value === "" ? 0 : parseInt(e.target.value) || 0
+                        )
                       }
                       min={0}
                       className="transition-all focus:scale-[1.01]"
@@ -1194,8 +1247,11 @@ function PricingStep({
                   <Input
                     type="number"
                     {...field}
+                    value={field.value ?? ""}
                     onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
+                      field.onChange(
+                        e.target.value === "" ? undefined : parseFloat(e.target.value) || 0
+                      )
                     }
                     min={0}
                     placeholder="0"
@@ -1227,8 +1283,11 @@ function PricingStep({
                 <Input
                   type="number"
                   {...field}
+                  value={field.value ?? ""}
                   onChange={(e) =>
-                    field.onChange(parseFloat(e.target.value) || 0)
+                    field.onChange(
+                      e.target.value === "" ? undefined : parseFloat(e.target.value) || 0
+                    )
                   }
                   min={0}
                   placeholder="0"
@@ -1275,8 +1334,11 @@ function PricingStep({
                   <Input
                     type="number"
                     {...field}
+                    value={field.value ?? ""}
                     onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
+                      field.onChange(
+                        e.target.value === "" ? undefined : parseInt(e.target.value) || 0
+                      )
                     }
                     min={1}
                     placeholder="12"
@@ -1459,8 +1521,9 @@ function SharedPropertyStep({
                     <Input
                       type="number"
                       {...field}
+                      value={field.value ?? ""}
                       onChange={(e) => {
-                        const value = parseInt(e.target.value) || 0;
+                        const value = e.target.value === "" ? 0 : parseInt(e.target.value) || 0;
                         const currentDetails = form.getValues("sharingDetails");
                         form.setValue("sharingDetails", {
                           sharingType: currentDetails?.sharingType ?? "room",
@@ -1525,12 +1588,75 @@ function SharedPropertyStep({
   );
 }
 
-// Step 5: Amenities
+// Step 6: Amenities
 function AmenitiesStep({
   form,
 }: {
   form: ReturnType<typeof useForm<PropertyFormData>>;
 }) {
+  const amenities = [
+    {
+      name: "parkingAvailable" as const,
+      label: "Parking Available",
+      icon: Car,
+    },
+    {
+      name: "laundry" as const,
+      label: "Laundry",
+      icon: Shirt,
+    },
+    {
+      name: "heatingCooling" as const,
+      label: "Heating & Cooling",
+      icon: Wind,
+    },
+    {
+      name: "balcony" as const,
+      label: "Balcony",
+      icon: Sun,
+    },
+    {
+      name: "wifi" as const,
+      label: "WiFi / Internet",
+      icon: Wifi,
+    },
+    {
+      name: "gym" as const,
+      label: "Gym / Fitness Center",
+      icon: Dumbbell,
+    },
+    {
+      name: "pool" as const,
+      label: "Swimming Pool",
+      icon: Waves,
+    },
+    {
+      name: "elevator" as const,
+      label: "Elevator",
+      icon: ArrowUpDown,
+    },
+    {
+      name: "security" as const,
+      label: "Security System",
+      icon: Shield,
+    },
+    {
+      name: "garden" as const,
+      label: "Garden / Yard",
+      icon: TreePine,
+    },
+    {
+      name: "dishwasher" as const,
+      label: "Dishwasher",
+      icon: UtensilsCrossed,
+    },
+    {
+      name: "fireplace" as const,
+      label: "Fireplace",
+      icon: Flame,
+    },
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -1541,69 +1667,34 @@ function AmenitiesStep({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="parkingAvailable"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <FormLabel>Parking Available</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="laundry"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <FormLabel>Laundry</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="heatingCooling"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <FormLabel>Heating & Cooling</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="balcony"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <FormLabel>Balcony</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          {amenities.map((amenity) => {
+            const Icon = amenity.icon;
+            return (
+              <FormField
+                key={amenity.name}
+                control={form.control}
+                name={amenity.name}
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <FormLabel
+                      htmlFor={`amenity-${amenity.name}`}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <Icon className="h-4 w-4" />
+                      {amenity.label}
+                    </FormLabel>
+                    <FormControl>
+                      <Switch
+                        id={`amenity-${amenity.name}`}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            );
+          })}
         </div>
 
         <FormField
@@ -1628,12 +1719,50 @@ function AmenitiesStep({
   );
 }
 
-// Step 6: Policies
+// Step 7: Policies
 function PoliciesStep({
   form,
 }: {
   form: ReturnType<typeof useForm<PropertyFormData>>;
 }) {
+  const policies = [
+    {
+      name: "smokingAllowed" as const,
+      label: "Smoking Allowed",
+      icon: Flame,
+    },
+    {
+      name: "petsAllowed" as const,
+      label: "Pets Allowed",
+      icon: HomeIcon,
+    },
+    {
+      name: "guestsAllowed" as const,
+      label: "Guests Allowed",
+      icon: Home,
+    },
+    {
+      name: "sublettingAllowed" as const,
+      label: "Subletting Allowed",
+      icon: Key,
+    },
+    {
+      name: "partiesAllowed" as const,
+      label: "Parties Allowed",
+      icon: Music,
+    },
+    {
+      name: "quietHours" as const,
+      label: "Quiet Hours Enforced",
+      icon: Volume2,
+    },
+    {
+      name: "maintenanceResponsibility" as const,
+      label: "Tenant Maintenance",
+      icon: Wrench,
+    },
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -1642,82 +1771,47 @@ function PoliciesStep({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="smokingAllowed"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <FormLabel>Smoking Allowed</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="petsAllowed"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <FormLabel>Pets Allowed</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="guestsAllowed"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <FormLabel>Guests Allowed</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sublettingAllowed"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <FormLabel>Subletting Allowed</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          {policies.map((policy) => {
+            const Icon = policy.icon;
+            return (
+              <FormField
+                key={policy.name}
+                control={form.control}
+                name={policy.name}
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <FormLabel
+                      htmlFor={`policy-${policy.name}`}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <Icon className="h-4 w-4" />
+                      {policy.label}
+                    </FormLabel>
+                    <FormControl>
+                      <Switch
+                        id={`policy-${policy.name}`}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            );
+          })}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-// Step 7: Contact & Viewing
+// Step 8: Contact & Viewing
 function ContactStep({
   form,
 }: {
   form: ReturnType<typeof useForm<PropertyFormData>>;
 }) {
-  const watchedContactMethods = form.watch("preferredContactMethod") || [];
+  const watchedContactMethod = form.watch("preferredContactMethod");
 
   return (
     <Card>
@@ -1727,7 +1821,7 @@ function ContactStep({
           How can interested parties contact you?
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <FormField
           control={form.control}
           name="contactName"
@@ -1742,88 +1836,144 @@ function ContactStep({
           )}
         />
 
+        {/* Preferred Contact Method - Tabbed UI */}
         <FormField
           control={form.control}
           name="preferredContactMethod"
-          render={() => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Preferred Contact Method *</FormLabel>
-              <div className="space-y-2">
-                {(["phone", "email", "both"] as const).map((method) => (
-                  <FormField
-                    key={method}
-                    control={form.control}
-                    name="preferredContactMethod"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={method}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(method)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, method])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== method
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal capitalize">
-                            {method === "both" ? "Both Phone & Email" : method}
-                          </FormLabel>
-                        </FormItem>
-                      );
-                    }}
-                  />
-                ))}
-              </div>
+              <FormControl>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    {
+                      value: "phone",
+                      label: "Phone",
+                      icon: Phone,
+                      color: "text-blue-600",
+                      bgColor: "bg-blue-50 dark:bg-blue-950/20",
+                      borderColor: "border-blue-200 dark:border-blue-800",
+                    },
+                    {
+                      value: "email",
+                      label: "Email",
+                      icon: Mail,
+                      color: "text-green-600",
+                      bgColor: "bg-green-50 dark:bg-green-950/20",
+                      borderColor: "border-green-200 dark:border-green-800",
+                    },
+                    {
+                      value: "both",
+                      label: "Both",
+                      icon: PhoneCall,
+                      color: "text-purple-600",
+                      bgColor: "bg-purple-50 dark:bg-purple-950/20",
+                      borderColor: "border-purple-200 dark:border-purple-800",
+                    },
+                  ].map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = field.value === option.value;
+                    return (
+                      <motion.button
+                        key={option.value}
+                        type="button"
+                        onClick={() => field.onChange(option.value)}
+                        className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                          isSelected
+                            ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                            : "border-border bg-muted/30 hover:bg-muted/50"
+                        }`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {isSelected && (
+                          <motion.div
+                            className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                            layoutId="contactMethodBg"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          />
+                        )}
+                        <div className="relative z-10 flex flex-col items-center gap-2">
+                          <Icon
+                            className={`h-6 w-6 ${
+                              isSelected ? option.color : "text-muted-foreground"
+                            }`}
+                          />
+                          <span
+                            className={`text-sm font-medium ${
+                              isSelected ? "text-foreground" : "text-muted-foreground"
+                            }`}
+                          >
+                            {option.label}
+                          </span>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {(watchedContactMethods.includes("phone") ||
-          watchedContactMethods.includes("both")) && (
-          <FormField
-            control={form.control}
-            name="contactInfo.phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="tel"
-                    placeholder="Optional: +1 (555) 123-4567"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Conditional Phone Field */}
+        {(watchedContactMethod === "phone" || watchedContactMethod === "both") && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FormField
+              control={form.control}
+              name="contactInfo.phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Phone Number *
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
         )}
 
-        {(watchedContactMethods.includes("email") ||
-          watchedContactMethods.includes("both")) && (
-          <FormField
-            control={form.control}
-            name="contactInfo.email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                  <Input {...field} type="email" placeholder="Optional: your@email.com" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Conditional Email Field */}
+        {(watchedContactMethod === "email" || watchedContactMethod === "both") && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FormField
+              control={form.control}
+              name="contactInfo.email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email Address *
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} type="email" placeholder="your@email.com" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
         )}
 
         <FormField

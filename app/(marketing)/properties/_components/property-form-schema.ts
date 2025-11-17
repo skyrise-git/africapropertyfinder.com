@@ -53,15 +53,24 @@ const basePropertySchema = z.object({
   laundry: z.boolean().optional(),
   heatingCooling: z.boolean().optional(),
   balcony: z.boolean().optional(),
+  wifi: z.boolean().optional(),
+  gym: z.boolean().optional(),
+  pool: z.boolean().optional(),
+  elevator: z.boolean().optional(),
+  security: z.boolean().optional(),
+  garden: z.boolean().optional(),
+  dishwasher: z.boolean().optional(),
+  fireplace: z.boolean().optional(),
   otherAmenities: z.string().optional(),
   smokingAllowed: z.boolean().optional(),
   petsAllowed: z.boolean().optional(),
   guestsAllowed: z.boolean().optional(),
   sublettingAllowed: z.boolean().optional(),
+  partiesAllowed: z.boolean().optional(),
+  quietHours: z.boolean().optional(),
+  maintenanceResponsibility: z.boolean().optional(),
   contactName: z.string().min(1, "Contact name is required"),
-  preferredContactMethod: z
-    .array(z.enum(["phone", "email", "both"]))
-    .min(1, "At least one contact method is required"),
+  preferredContactMethod: z.enum(["phone", "email", "both"]),
   contactInfo: z.object({
     phone: z.string().optional(),
     email: z.string().email().optional(),
@@ -132,9 +141,10 @@ export const propertyFormSchema = z.discriminatedUnion("listingType", [
   studentHousingSchema,
 ]);
 
-// Refinement for shared property details
+// Refinement for shared property details and contact info
 export const refinedPropertyFormSchema = propertyFormSchema.superRefine(
   (data, ctx) => {
+    // Shared property validation
     if (
       (data.listingType === "rent" || data.listingType === "student-housing") &&
       data.isShared === true
@@ -167,6 +177,32 @@ export const refinedPropertyFormSchema = propertyFormSchema.superRefine(
             path: ["sharingDetails", "preferredTenantType"],
           });
         }
+      }
+    }
+
+    // Contact info validation based on preferred method
+    if (data.preferredContactMethod === "phone" || data.preferredContactMethod === "both") {
+      if (!data.contactInfo.phone || data.contactInfo.phone.trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Phone number is required",
+          path: ["contactInfo", "phone"],
+        });
+      }
+    }
+    if (data.preferredContactMethod === "email" || data.preferredContactMethod === "both") {
+      if (!data.contactInfo.email || data.contactInfo.email.trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Email address is required",
+          path: ["contactInfo", "email"],
+        });
+      } else if (!z.string().email().safeParse(data.contactInfo.email).success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Please enter a valid email address",
+          path: ["contactInfo", "email"],
+        });
       }
     }
   },
