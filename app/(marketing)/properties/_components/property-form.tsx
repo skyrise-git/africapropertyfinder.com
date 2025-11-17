@@ -57,6 +57,7 @@ import {
   HomeIcon,
   DollarSign,
   GraduationCap,
+  MoreHorizontal,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/utils/image-optimization";
 
@@ -270,9 +271,11 @@ export const PropertyForm = forwardRef<
         case 1:
           return ["location"]; // address, city, state, zipCode are set automatically when location is selected
         case 2:
+          return ["propertyType"];
+        case 3:
           return [
+            "listingType",
             "title",
-            "propertyType",
             "numBedrooms",
             "numBathrooms",
             "furnishing",
@@ -280,7 +283,7 @@ export const PropertyForm = forwardRef<
             "floorNumber",
             "totalFloors",
           ];
-        case 3:
+        case 4:
           const listingType = form.getValues("listingType");
           if (listingType === "sale") {
             return ["price"];
@@ -294,9 +297,9 @@ export const PropertyForm = forwardRef<
               "utilitiesIncluded",
             ];
           }
-        case 4:
-          return ["isShared", "sharingDetails"];
         case 5:
+          return ["isShared", "sharingDetails"];
+        case 6:
           return [
             "parkingAvailable",
             "laundry",
@@ -304,21 +307,21 @@ export const PropertyForm = forwardRef<
             "balcony",
             "otherAmenities",
           ];
-        case 6:
+        case 7:
           return [
             "smokingAllowed",
             "petsAllowed",
             "guestsAllowed",
             "sublettingAllowed",
           ];
-        case 7:
+        case 8:
           return [
             "contactName",
             "preferredContactMethod",
             "contactInfo",
             "viewingAvailability",
           ];
-        case 8:
+        case 9:
           return ["images", "videoTourUrl"];
         default:
           return [];
@@ -383,12 +386,14 @@ export const PropertyForm = forwardRef<
         case 1:
           return <LocationStep form={form} />;
         case 2:
-          return <BasicInfoStep form={form} />;
+          return <PropertyTypeStep form={form} />;
         case 3:
+          return <BasicInfoStep form={form} />;
+        case 4:
           return (
             <PricingStep form={form} watchedListingType={watchedListingType} />
           );
-        case 4:
+        case 5:
           return (
             <SharedPropertyStep
               form={form}
@@ -396,13 +401,13 @@ export const PropertyForm = forwardRef<
               watchedIsShared={watchedIsShared}
             />
           );
-        case 5:
-          return <AmenitiesStep form={form} />;
         case 6:
-          return <PoliciesStep form={form} />;
+          return <AmenitiesStep form={form} />;
         case 7:
-          return <ContactStep form={form} />;
+          return <PoliciesStep form={form} />;
         case 8:
+          return <ContactStep form={form} />;
+        case 9:
           return (
             <PhotosStep
               form={form}
@@ -611,7 +616,7 @@ function LocationStep({
               <FormControl>
                 <Textarea
                   {...field}
-                  placeholder="Describe nearby transit options (e.g., '5 min walk to Metro station')"
+                  placeholder="Optional: Describe nearby transit options (e.g., '5 min walk to Metro station')"
                   rows={3}
                 />
               </FormControl>
@@ -624,7 +629,140 @@ function LocationStep({
   );
 }
 
-// Step 2: Listing Type & Basic Info
+// Step 2: Property Type Selection
+function PropertyTypeStep({
+  form,
+}: {
+  form: ReturnType<typeof useForm<PropertyFormData>>;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Property Type</CardTitle>
+        <CardDescription>Select the type of property you're listing</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Property Type Selection */}
+        <FormField
+          control={form.control}
+          name="propertyType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Property Type *</FormLabel>
+              <FormControl>
+                <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+                  {[
+                    {
+                      value: "apartment",
+                      label: "Apartment",
+                      icon: Building2,
+                      color: "text-blue-600",
+                      bgColor: "bg-blue-50 dark:bg-blue-950/20",
+                      borderColor: "border-blue-200 dark:border-blue-800",
+                    },
+                    {
+                      value: "house",
+                      label: "House",
+                      icon: HomeIcon,
+                      color: "text-green-600",
+                      bgColor: "bg-green-50 dark:bg-green-950/20",
+                      borderColor: "border-green-200 dark:border-green-800",
+                    },
+                    {
+                      value: "condo",
+                      label: "Condo",
+                      icon: Building2,
+                      color: "text-purple-600",
+                      bgColor: "bg-purple-50 dark:bg-purple-950/20",
+                      borderColor: "border-purple-200 dark:border-purple-800",
+                    },
+                    {
+                      value: "townhouse",
+                      label: "Townhouse",
+                      icon: Building2,
+                      color: "text-orange-600",
+                      bgColor: "bg-orange-50 dark:bg-orange-950/20",
+                      borderColor: "border-orange-200 dark:border-orange-800",
+                    },
+                    {
+                      value: "studio",
+                      label: "Studio",
+                      icon: HomeIcon,
+                      color: "text-pink-600",
+                      bgColor: "bg-pink-50 dark:bg-pink-950/20",
+                      borderColor: "border-pink-200 dark:border-pink-800",
+                    },
+                    {
+                      value: "room",
+                      label: "Room",
+                      icon: HomeIcon,
+                      color: "text-cyan-600",
+                      bgColor: "bg-cyan-50 dark:bg-cyan-950/20",
+                      borderColor: "border-cyan-200 dark:border-cyan-800",
+                    },
+                    {
+                      value: "other",
+                      label: "Other",
+                      icon: MoreHorizontal,
+                      color: "text-gray-600",
+                      bgColor: "bg-gray-50 dark:bg-gray-950/20",
+                      borderColor: "border-gray-200 dark:border-gray-800",
+                    },
+                  ].map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = field.value === option.value;
+                    return (
+                      <motion.button
+                        key={option.value}
+                        type="button"
+                        onClick={() => field.onChange(option.value)}
+                        className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                          isSelected
+                            ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                            : "border-border bg-muted/30 hover:bg-muted/50"
+                        }`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {isSelected && (
+                          <motion.div
+                            className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                            layoutId="propertyTypeBg"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          />
+                        )}
+                        <div className="relative z-10 flex flex-col items-center gap-2">
+                          <Icon
+                            className={`h-6 w-6 ${
+                              isSelected ? option.color : "text-muted-foreground"
+                            }`}
+                          />
+                          <span
+                            className={`text-sm font-medium ${
+                              isSelected ? "text-foreground" : "text-muted-foreground"
+                            }`}
+                          >
+                            {option.label}
+                          </span>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+// Step 3: Basic Info
 function BasicInfoStep({
   form,
 }: {
@@ -751,78 +889,40 @@ function BasicInfoStep({
           />
         </motion.div>
 
-        {/* Property Type & Furnishing */}
-        <div className="grid grid-cols-2 gap-4">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <FormField
-              control={form.control}
-              name="propertyType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4" />
-                    Property Type *
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="transition-all focus:scale-[1.01]">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="apartment">Apartment</SelectItem>
-                      <SelectItem value="house">House</SelectItem>
-                      <SelectItem value="condo">Condo</SelectItem>
-                      <SelectItem value="townhouse">Townhouse</SelectItem>
-                      <SelectItem value="studio">Studio</SelectItem>
-                      <SelectItem value="room">Room</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <FormField
-              control={form.control}
-              name="furnishing"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Sofa className="h-4 w-4" />
-                    Furnishing *
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="transition-all focus:scale-[1.01]">
-                        <SelectValue placeholder="Select furnishing" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="furnished">Furnished</SelectItem>
-                      <SelectItem value="semi-furnished">
-                        Semi-Furnished
-                      </SelectItem>
-                      <SelectItem value="unfurnished">Unfurnished</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </motion.div>
-        </div>
+        {/* Furnishing */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <FormField
+            control={form.control}
+            name="furnishing"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Sofa className="h-4 w-4" />
+                  Furnishing *
+                </FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="transition-all focus:scale-[1.01]">
+                      <SelectValue placeholder="Select furnishing" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="furnished">Furnished</SelectItem>
+                    <SelectItem value="semi-furnished">
+                      Semi-Furnished
+                    </SelectItem>
+                    <SelectItem value="unfurnished">Unfurnished</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </motion.div>
 
         {/* Bedrooms & Bathrooms */}
         <div className="grid grid-cols-2 gap-4">
@@ -946,6 +1046,7 @@ function BasicInfoStep({
                     <Input
                       type="number"
                       {...field}
+                      value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(
                           e.target.value ? parseInt(e.target.value) : undefined
@@ -953,6 +1054,7 @@ function BasicInfoStep({
                       }
                       min={0}
                       className="transition-all focus:scale-[1.01]"
+                      placeholder="Optional"
                     />
                   </FormControl>
                   <FormMessage />
@@ -979,6 +1081,7 @@ function BasicInfoStep({
                     <Input
                       type="number"
                       {...field}
+                      value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(
                           e.target.value ? parseInt(e.target.value) : undefined
@@ -986,6 +1089,7 @@ function BasicInfoStep({
                       }
                       min={0}
                       className="transition-all focus:scale-[1.01]"
+                      placeholder="Optional"
                     />
                   </FormControl>
                   <FormMessage />
@@ -1083,13 +1187,14 @@ function PricingStep({
                   <Input
                     type="number"
                     {...field}
+                    value={field.value ?? ""}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value ? parseFloat(e.target.value) : undefined
                       )
                     }
                     min={0}
-                    placeholder="0"
+                    placeholder="Optional"
                   />
                 </FormControl>
                 <FormMessage />
@@ -1433,7 +1538,7 @@ function AmenitiesStep({
               <FormControl>
                 <Textarea
                   {...field}
-                  placeholder="List any other amenities (e.g., gym, pool, garden)"
+                  placeholder="Optional: List any other amenities (e.g., gym, pool, garden)"
                   rows={3}
                 />
               </FormControl>
@@ -1618,7 +1723,7 @@ function ContactStep({
                   <Input
                     {...field}
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="Optional: +1 (555) 123-4567"
                   />
                 </FormControl>
                 <FormMessage />
@@ -1636,7 +1741,7 @@ function ContactStep({
               <FormItem>
                 <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                  <Input {...field} type="email" placeholder="your@email.com" />
+                  <Input {...field} type="email" placeholder="Optional: your@email.com" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -1653,7 +1758,7 @@ function ContactStep({
               <FormControl>
                 <Textarea
                   {...field}
-                  placeholder="e.g., Weekdays 9am-5pm, Weekends by appointment"
+                  placeholder="Optional: e.g., Weekdays 9am-5pm, Weekends by appointment"
                   rows={3}
                 />
               </FormControl>
@@ -1763,7 +1868,7 @@ function PhotosStep({
                 <Input
                   {...field}
                   type="url"
-                  placeholder="https://youtube.com/watch?v=..."
+                  placeholder="Optional: https://youtube.com/watch?v=..."
                 />
               </FormControl>
               <FormDescription>

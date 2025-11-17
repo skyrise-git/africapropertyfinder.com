@@ -14,7 +14,7 @@ interface PropertyFormStepsProps {
   initialData?: Partial<PropertyFormData>;
 }
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 export function PropertyFormSteps({
   onSubmit,
