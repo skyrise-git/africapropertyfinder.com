@@ -264,6 +264,7 @@ export function TestimonialsMarquee() {
                 <Marquee
                   vertical
                   repeat={3}
+                  pauseOnHover
                   className={cn("h-full", {
                     "[--duration:60s]": i === 1,
                     "[--duration:30s]": i === 2,
