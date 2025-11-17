@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useAppStore } from "@/hooks/use-app-store";
-import { LogOut, Settings, Home } from "lucide-react";
+import { LogOut, Settings, LifeBuoy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -96,8 +96,8 @@ export function MarketingProfileDropdown() {
               asChild
             >
               <Link href="/list-property">
-                <Home className="mr-2 h-4 w-4" />
-                List Property
+                <LifeBuoy className="mr-2 h-4 w-4" />
+                Help & Support
               </Link>
             </Button>
             {user.role && (
