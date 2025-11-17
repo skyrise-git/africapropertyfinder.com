@@ -29,7 +29,8 @@ const defaultCenter = {
   lng: 77.209,
 };
 
-export function LocationMapPicker({
+// Inner component that uses usePlacesAutocomplete hook
+function LocationMapPickerInner({
   value,
   onChange,
   error,
@@ -41,12 +42,6 @@ export function LocationMapPicker({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const markerRef = useRef<google.maps.Marker | null>(null);
-
-  const { isLoaded: isApiLoaded, loadError } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-    libraries,
-  });
 
   const {
     ready,
@@ -209,31 +204,6 @@ export function LocationMapPicker({
     }
   }, [selectedLocation]);
 
-  if (loadError) {
-    return (
-      <div className="space-y-4">
-        <div className="rounded-md border border-destructive bg-destructive/10 p-4">
-          <p className="text-sm text-destructive">
-            Failed to load Google Maps. Please check your API key configuration.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isApiLoaded) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-center h-[400px] rounded-lg border">
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading map...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       {/* Autocomplete Input */}
@@ -330,4 +300,44 @@ export function LocationMapPicker({
       </div>
     </div>
   );
+}
+
+// Outer wrapper component that handles API loading
+export function LocationMapPicker({
+  value,
+  onChange,
+  error,
+}: LocationMapPickerProps) {
+  const { isLoaded: isApiLoaded, loadError } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries,
+  });
+
+  if (loadError) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-md border border-destructive bg-destructive/10 p-4">
+          <p className="text-sm text-destructive">
+            Failed to load Google Maps. Please check your API key configuration.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isApiLoaded) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-center h-[400px] rounded-lg border">
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Loading map...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <LocationMapPickerInner value={value} onChange={onChange} error={error} />;
 }
