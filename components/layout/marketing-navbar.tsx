@@ -100,7 +100,7 @@ export function MarketingNavbar() {
             {user ? (
               <>
                 <Button size="sm" asChild>
-                  <Link href="/list-property" className="flex items-center gap-1">
+                  <Link href="/properties/create" className="flex items-center gap-1">
                     <Home className="size-4" />
                     List Property
                   </Link>

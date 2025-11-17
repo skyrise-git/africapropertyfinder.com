@@ -244,7 +244,7 @@ export function MobileMenu({
                   <>
                     <Button className="w-full" asChild>
                       <Link
-                        href="/list-property"
+                        href="/properties/create"
                         className="flex items-center justify-center gap-2"
                         onClick={onClose}
                       >

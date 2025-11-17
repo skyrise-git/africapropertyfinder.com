@@ -38,7 +38,7 @@ export const marketingSite = {
     },
     {
       label: "List your property",
-      href: "/list-property",
+      href: "/properties/create",
     },
     {
       label: "Contact our team",
@@ -52,7 +52,7 @@ export const marketingSite = {
       items: [
         {
           label: "List Property",
-          href: "/list-property",
+          href: "/properties/create",
           icon: "Home",
           description:
             "List your property with us and reach thousands of potential buyers and renters",
@@ -99,6 +99,7 @@ export const marketingSite = {
         { label: "Buy Property", href: "/buy" },
         { label: "Rent Property", href: "/rent" },
         { label: "Sell Property", href: "/sell" },
+        { label: "List Property", href: "/properties/create" },
         { label: "Featured Listings", href: "/blogs" },
         { label: "New Developments", href: "/developments" },
       ],

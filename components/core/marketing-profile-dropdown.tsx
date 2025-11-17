@@ -95,9 +95,9 @@ export function MarketingProfileDropdown() {
               className="w-full justify-start h-9"
               asChild
             >
-              <Link href="/list-property">
+              <Link href="/properties/create">
                 <LifeBuoy className="mr-2 h-4 w-4" />
-                Help & Support
+                List Property
               </Link>
             </Button>
             {user.role && (
