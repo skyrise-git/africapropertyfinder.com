@@ -15,8 +15,10 @@ export function useAuthGuard(redirectPaths: string[] = ["/login"]) {
     if (!user) return;
 
     // If user is authenticated and on one of the redirect paths, redirect to their dashboard
-    if (redirectPaths.includes(pathname) && user.role) {
-      router.replace(`/${user.role}/dashboard`);
+    if (redirectPaths.includes(pathname)) {
+      if (user.role === "admin" || user.role === "staff")
+        router.replace(`/${user.role}/dashboard`);
+      if (user.role === "user") router.replace(`/`);
     }
   }, [user, pathname, router, redirectPaths]);
 }

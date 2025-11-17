@@ -3,7 +3,7 @@ import { BaseEntity } from "./common.type";
 // Status types
 export type Status = "active" | "inactive";
 export type UserStatus = "active" | "inactive" | "pending";
-export type UserRole = "admin" | "staff";
+export type UserRole = "admin" | "staff" | "user";
 
 export interface User extends BaseEntity {
   uid: string;

@@ -43,7 +43,7 @@ const createAuthFormSchema = (
     phone: showPhoneField
       ? z
           .string()
-          .min(10, "Phone number must be at least 10 digits")
+          .min(1, "Phone number is required")
           .regex(/^[\d\s\-\+\(\)]+$/, "Please enter a valid phone number")
       : z.string().optional(),
     acceptTerms: requireTermsAcceptance
