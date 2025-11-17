@@ -2,18 +2,16 @@
 
 import { firebaseAuth } from "@atechhub/firebase";
 import { AuthForm, type AuthFormData } from "../_components/auth-form";
+
 export default function SignInPage() {
   const handleEmailSignIn = async (data: AuthFormData) => {
     try {
-      const res = await firebaseAuth({
+      await firebaseAuth({
         action: "login",
         email: data.email,
         password: data.password,
       });
-      console.log(res);
     } catch (error) {
-      console.error("Signin error:", error);
-
       // Handle specific Firebase errors
       if (error instanceof Error) {
         if (
