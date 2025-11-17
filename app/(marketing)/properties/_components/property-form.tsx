@@ -42,7 +42,22 @@ import {
   type PropertyFormData,
 } from "./property-form-schema";
 import type { Location, Image } from "@/lib/types/property.type";
-import { X, Plus, Upload } from "lucide-react";
+import {
+  X,
+  Plus,
+  Upload,
+  Home,
+  Tag,
+  Sofa,
+  Bed,
+  Bath,
+  Square,
+  Building2,
+  Layers,
+  HomeIcon,
+  DollarSign,
+  GraduationCap,
+} from "lucide-react";
 import { formatFileSize } from "@/lib/utils/image-optimization";
 
 interface PropertyFormProps {
@@ -615,13 +630,16 @@ function BasicInfoStep({
 }: {
   form: ReturnType<typeof useForm<PropertyFormData>>;
 }) {
+  const listingType = form.watch("listingType");
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Basic Information</CardTitle>
         <CardDescription>Tell us about your property</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
+        {/* Animated Listing Type Tabs */}
         <FormField
           control={form.control}
           name="listingType"
@@ -629,221 +647,348 @@ function BasicInfoStep({
             <FormItem>
               <FormLabel>Listing Type *</FormLabel>
               <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  className="flex flex-row gap-6"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="sale" id="sale" />
-                    <label htmlFor="sale" className="cursor-pointer">
-                      Sale
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="rent" id="rent" />
-                    <label htmlFor="rent" className="cursor-pointer">
-                      Rent
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value="student-housing"
-                      id="student-housing"
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    {
+                      value: "sale",
+                      label: "Sale",
+                      icon: DollarSign,
+                      color: "text-green-600",
+                      bgColor: "bg-green-50 dark:bg-green-950/20",
+                      borderColor: "border-green-200 dark:border-green-800",
+                    },
+                    {
+                      value: "rent",
+                      label: "Rent",
+                      icon: HomeIcon,
+                      color: "text-blue-600",
+                      bgColor: "bg-blue-50 dark:bg-blue-950/20",
+                      borderColor: "border-blue-200 dark:border-blue-800",
+                    },
+                    {
+                      value: "student-housing",
+                      label: "Student Housing",
+                      icon: GraduationCap,
+                      color: "text-purple-600",
+                      bgColor: "bg-purple-50 dark:bg-purple-950/20",
+                      borderColor: "border-purple-200 dark:border-purple-800",
+                    },
+                  ].map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = field.value === option.value;
+                    return (
+                      <motion.button
+                        key={option.value}
+                        type="button"
+                        onClick={() => field.onChange(option.value)}
+                        className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                          isSelected
+                            ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                            : "border-border bg-muted/30 hover:bg-muted/50"
+                        }`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {isSelected && (
+                          <motion.div
+                            className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                            layoutId="listingTypeBg"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          />
+                        )}
+                        <div className="relative z-10 flex flex-col items-center gap-2">
+                          <Icon
+                            className={`h-6 w-6 ${
+                              isSelected ? option.color : "text-muted-foreground"
+                            }`}
+                          />
+                          <span
+                            className={`text-sm font-medium ${
+                              isSelected ? "text-foreground" : "text-muted-foreground"
+                            }`}
+                          >
+                            {option.label}
+                          </span>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Property Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  Property Title *
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="e.g., Beautiful 2BR Apartment in Downtown"
+                    className="transition-all focus:scale-[1.01]"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </motion.div>
+
+        {/* Property Type & Furnishing */}
+        <div className="grid grid-cols-2 gap-4">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <FormField
+              control={form.control}
+              name="propertyType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Property Type *
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="transition-all focus:scale-[1.01]">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="apartment">Apartment</SelectItem>
+                      <SelectItem value="house">House</SelectItem>
+                      <SelectItem value="condo">Condo</SelectItem>
+                      <SelectItem value="townhouse">Townhouse</SelectItem>
+                      <SelectItem value="studio">Studio</SelectItem>
+                      <SelectItem value="room">Room</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <FormField
+              control={form.control}
+              name="furnishing"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Sofa className="h-4 w-4" />
+                    Furnishing *
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="transition-all focus:scale-[1.01]">
+                        <SelectValue placeholder="Select furnishing" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="furnished">Furnished</SelectItem>
+                      <SelectItem value="semi-furnished">
+                        Semi-Furnished
+                      </SelectItem>
+                      <SelectItem value="unfurnished">Unfurnished</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
+        </div>
+
+        {/* Bedrooms & Bathrooms */}
+        <div className="grid grid-cols-2 gap-4">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <FormField
+              control={form.control}
+              name="numBedrooms"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Bed className="h-4 w-4" />
+                    Bedrooms *
+                  </FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
+                        min={0}
+                        className="transition-all focus:scale-[1.01]"
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <FormField
+              control={form.control}
+              name="numBathrooms"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Bath className="h-4 w-4" />
+                    Bathrooms *
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseInt(e.target.value) || 0)
+                      }
+                      min={0}
+                      className="transition-all focus:scale-[1.01]"
                     />
-                    <label htmlFor="student-housing" className="cursor-pointer">
-                      Student Housing
-                    </label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Property Title *</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="e.g., Beautiful 2BR Apartment in Downtown"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="propertyType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Property Type *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="apartment">Apartment</SelectItem>
-                    <SelectItem value="house">House</SelectItem>
-                    <SelectItem value="condo">Condo</SelectItem>
-                    <SelectItem value="townhouse">Townhouse</SelectItem>
-                    <SelectItem value="studio">Studio</SelectItem>
-                    <SelectItem value="room">Room</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="furnishing"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Furnishing *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select furnishing" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="furnished">Furnished</SelectItem>
-                    <SelectItem value="semi-furnished">
-                      Semi-Furnished
-                    </SelectItem>
-                    <SelectItem value="unfurnished">Unfurnished</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="numBedrooms"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bedrooms *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
-                    }
-                    min={0}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="numBathrooms"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bathrooms *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
-                    }
-                    min={0}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
+        {/* Area, Floor Number, Total Floors */}
         <div className="grid grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="area"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Area (sq ft) *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
-                    }
-                    min={0}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <FormField
+              control={form.control}
+              name="area"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Square className="h-4 w-4" />
+                    Area (sq ft) *
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
+                      min={0}
+                      className="transition-all focus:scale-[1.01]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
 
-          <FormField
-            control={form.control}
-            name="floorNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Floor Number</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value ? parseInt(e.target.value) : undefined
-                      )
-                    }
-                    min={0}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <FormField
+              control={form.control}
+              name="floorNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    Floor Number
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseInt(e.target.value) : undefined
+                        )
+                      }
+                      min={0}
+                      className="transition-all focus:scale-[1.01]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
 
-          <FormField
-            control={form.control}
-            name="totalFloors"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Total Floors</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value ? parseInt(e.target.value) : undefined
-                      )
-                    }
-                    min={0}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <FormField
+              control={form.control}
+              name="totalFloors"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Total Floors
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseInt(e.target.value) : undefined
+                        )
+                      }
+                      min={0}
+                      className="transition-all focus:scale-[1.01]"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
         </div>
       </CardContent>
     </Card>
