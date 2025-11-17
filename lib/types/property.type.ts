@@ -138,7 +138,7 @@ export interface PropertyInput {
   address: string;
   city: string;
   state: string;
-  zipCode: string;
+  zipCode?: string;
   nearbyTransit?: string;
   location: {
     latitude: number;

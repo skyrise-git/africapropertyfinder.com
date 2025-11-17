@@ -1,25 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import usePlacesAutocomplete, {
+  getGeocode,
+  getLatLng,
+} from "use-places-autocomplete";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, MapPin } from "lucide-react";
+import { MapPin, Loader2 } from "lucide-react";
 import type { Location } from "@/lib/types/property.type";
+import { env } from "@/lib/env";
 
-// Fix default marker icons for Next.js
-if (typeof window !== "undefined") {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-    iconUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-    shadowUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  });
-}
+const libraries: ("places" | "geometry")[] = ["places", "geometry"];
 
 interface LocationMapPickerProps {
   value?: Location | null;
@@ -27,257 +19,303 @@ interface LocationMapPickerProps {
   error?: string;
 }
 
-interface NominatimResult {
-  place_id: number;
-  lat: string;
-  lon: string;
-  display_name: string;
-  address?: {
-    house_number?: string;
-    road?: string;
-    city?: string;
-    town?: string;
-    state?: string;
-    postcode?: string;
-    country?: string;
-  };
-}
+const mapContainerStyle = {
+  width: "100%",
+  height: "400px",
+};
+
+const defaultCenter = {
+  lat: 28.6139,
+  lng: 77.209,
+};
 
 export function LocationMapPicker({
   value,
   onChange,
   error,
 }: LocationMapPickerProps) {
-  const mapRef = useRef<L.Map | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     value || null,
   );
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const markerRef = useRef<google.maps.Marker | null>(null);
 
-  // Initialize map
+  const { isLoaded: isApiLoaded, loadError } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries,
+  });
+
+  const {
+    ready,
+    value: autocompleteValue,
+    setValue: setAutocompleteValue,
+    suggestions: { status, data },
+    clearSuggestions,
+  } = usePlacesAutocomplete({
+    debounce: 300,
+  });
+
+  // Initialize with value if provided
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (value) {
+      setSelectedLocation(value);
+      setAutocompleteValue(value.address);
+    }
+  }, [value, setAutocompleteValue]);
 
-    const map = L.map(containerRef.current).setView(
-      value
-        ? [value.latitude, value.longitude]
-        : [28.6139, 77.209], // Default to a central location
-      13,
-    );
+  // Update map center when location changes
+  useEffect(() => {
+    if (map && selectedLocation) {
+      map.setCenter({
+        lat: selectedLocation.latitude,
+        lng: selectedLocation.longitude,
+      });
+      map.setZoom(15);
+    }
+  }, [map, selectedLocation]);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-      maxZoom: 19,
-    }).addTo(map);
+  const extractAddressComponents = (
+    addressComponents: google.maps.GeocoderAddressComponent[],
+  ) => {
+    const components: {
+      street?: string;
+      city?: string;
+      state?: string;
+      zipCode?: string;
+    } = {};
 
-    mapRef.current = map;
-
-    // Add click handler for map
-    map.on("click", async (e) => {
-      const { lat, lng } = e.latlng;
-      await handleLocationSelect(lat, lng);
+    addressComponents.forEach((component) => {
+      const types = component.types;
+      if (types.includes("street_number")) {
+        components.street = component.long_name;
+      } else if (types.includes("route")) {
+        components.street = components.street
+          ? `${components.street} ${component.long_name}`
+          : component.long_name;
+      } else if (
+        types.includes("locality") ||
+        types.includes("administrative_area_level_2")
+      ) {
+        components.city = component.long_name;
+      } else if (types.includes("administrative_area_level_1")) {
+        components.state = component.short_name;
+      } else if (types.includes("postal_code")) {
+        components.zipCode = component.long_name;
+      }
     });
 
-    // If we have an initial value, set marker
-    if (value) {
-      setMarker(value.latitude, value.longitude);
-    }
+    return components;
+  };
 
-    return () => {
-      map.remove();
-    };
-  }, []);
+  const handleSelect = useCallback(
+    async (placeId: string, description: string) => {
+      setIsGeocoding(true);
+      clearSuggestions();
 
-  // Update marker when selectedLocation changes
-  useEffect(() => {
-    if (selectedLocation && mapRef.current) {
-      setMarker(selectedLocation.latitude, selectedLocation.longitude);
-      mapRef.current.setView(
-        [selectedLocation.latitude, selectedLocation.longitude],
-        15,
-      );
+      try {
+        const results = await getGeocode({ placeId });
+        const { lat, lng } = await getLatLng(results[0]);
+
+        const addressComponents = results[0].address_components || [];
+        const components = extractAddressComponents(addressComponents);
+
+        const location: Location = {
+          latitude: lat,
+          longitude: lng,
+          address: description,
+          city: components.city || "",
+          state: components.state || "",
+          zipCode: components.zipCode || "",
+        };
+
+        setSelectedLocation(location);
+        onChange(location);
+        setAutocompleteValue(description, false);
+      } catch (error) {
+        console.error("Error selecting place:", error);
+      } finally {
+        setIsGeocoding(false);
+      }
+    },
+    [clearSuggestions, onChange, setAutocompleteValue],
+  );
+
+  const handleMapClick = useCallback(
+    async (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng) return;
+
+      setIsGeocoding(true);
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+
+      try {
+        const geocoder = new google.maps.Geocoder();
+        const results = await new Promise<google.maps.GeocoderResult[]>(
+          (resolve, reject) => {
+            geocoder.geocode(
+              { location: { lat, lng } },
+              (results, status) => {
+                if (status === "OK" && results) {
+                  resolve(results);
+                } else {
+                  reject(new Error(`Geocoding failed: ${status}`));
+                }
+              },
+            );
+          },
+        );
+
+        if (results && results[0]) {
+          const result = results[0];
+          const addressComponents = result.address_components || [];
+          const components = extractAddressComponents(addressComponents);
+
+          const location: Location = {
+            latitude: lat,
+            longitude: lng,
+            address: result.formatted_address || "",
+            city: components.city || "",
+            state: components.state || "",
+            zipCode: components.zipCode || "",
+          };
+
+          setSelectedLocation(location);
+          onChange(location);
+          setAutocompleteValue(result.formatted_address || "", false);
+        }
+      } catch (error) {
+        console.error("Error reverse geocoding:", error);
+      } finally {
+        setIsGeocoding(false);
+      }
+    },
+    [onChange, setAutocompleteValue],
+  );
+
+  const onMapLoad = useCallback((mapInstance: google.maps.Map) => {
+    setMap(mapInstance);
+    setIsLoaded(true);
+
+    // Set initial center if we have a value
+    if (selectedLocation) {
+      mapInstance.setCenter({
+        lat: selectedLocation.latitude,
+        lng: selectedLocation.longitude,
+      });
+      mapInstance.setZoom(15);
     }
   }, [selectedLocation]);
 
-  const setMarker = (lat: number, lng: number) => {
-    if (!mapRef.current) return;
+  if (loadError) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-md border border-destructive bg-destructive/10 p-4">
+          <p className="text-sm text-destructive">
+            Failed to load Google Maps. Please check your API key configuration.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-    // Remove existing marker
-    if (markerRef.current) {
-      markerRef.current.remove();
-    }
-
-    // Add new marker
-    const marker = L.marker([lat, lng], {
-      icon: L.icon({
-        iconUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-        iconRetinaUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-      }),
-    }).addTo(mapRef.current);
-
-    markerRef.current = marker;
-  };
-
-  const geocodeAddress = async (address: string): Promise<NominatimResult[]> => {
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=5&addressdetails=1`,
-        {
-          headers: {
-            "User-Agent": "SkyRise Real Estate Property Listing",
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Geocoding failed");
-      }
-
-      const data = await response.json();
-      return data as NominatimResult[];
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      return [];
-    }
-  };
-
-  const reverseGeocode = async (
-    lat: number,
-    lng: number,
-  ): Promise<NominatimResult | null> => {
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-        {
-          headers: {
-            "User-Agent": "SkyRise Real Estate Property Listing",
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Reverse geocoding failed");
-      }
-
-      const data = await response.json();
-      return data as NominatimResult;
-    } catch (error) {
-      console.error("Reverse geocoding error:", error);
-      return null;
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    setIsSearching(true);
-    const results = await geocodeAddress(searchQuery);
-    setSearchResults(results);
-    setIsSearching(false);
-  };
-
-  const handleLocationSelect = async (lat: number, lng: number) => {
-    const result = await reverseGeocode(lat, lng);
-    if (!result) return;
-
-    const address = result.address || {};
-    const location: Location = {
-      latitude: lat,
-      longitude: lng,
-      address:
-        result.display_name ||
-        `${address.house_number || ""} ${address.road || ""}`.trim() ||
-        "Unknown address",
-      city: address.city || address.town || "",
-      state: address.state || "",
-      zipCode: address.postcode || "",
-    };
-
-    setSelectedLocation(location);
-    onChange(location);
-    setSearchQuery(location.address);
-    setSearchResults([]);
-  };
-
-  const handleResultClick = async (result: NominatimResult) => {
-    const lat = parseFloat(result.lat);
-    const lng = parseFloat(result.lon);
-    await handleLocationSelect(lat, lng);
-  };
+  if (!isApiLoaded) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-center h-[400px] rounded-lg border">
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Loading map...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      {/* Search Input */}
+      {/* Autocomplete Input */}
       <div className="relative">
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search for an address..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setSearchResults([]);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleSearch();
-                }
-              }}
-              className="pl-9"
-            />
-          </div>
-          <Button
-            type="button"
-            onClick={handleSearch}
-            disabled={isSearching || !searchQuery.trim()}
-          >
-            {isSearching ? "Searching..." : "Search"}
-          </Button>
+        <div className="relative">
+          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            type="text"
+            placeholder="Search for an address..."
+            value={autocompleteValue}
+            onChange={(e) => setAutocompleteValue(e.target.value)}
+            disabled={!ready || isGeocoding}
+            className="pl-9"
+          />
         </div>
 
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <div className="absolute z-50 mt-2 w-full rounded-md border bg-background shadow-lg">
-            {searchResults.map((result) => (
+        {/* Suggestions Dropdown */}
+        {status === "OK" && data.length > 0 && (
+          <div className="absolute z-50 mt-2 w-full rounded-md border bg-background shadow-lg max-h-60 overflow-y-auto">
+            {data.map(({ place_id, description }) => (
               <button
-                key={result.place_id}
+                key={place_id}
                 type="button"
-                onClick={() => handleResultClick(result)}
-                className="w-full px-4 py-2 text-left hover:bg-muted"
+                onClick={() => handleSelect(place_id, description)}
+                className="w-full px-4 py-2 text-left hover:bg-muted transition-colors"
+                disabled={isGeocoding}
               >
                 <div className="flex items-start gap-2">
-                  <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{result.display_name}</span>
+                  <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm">{description}</span>
                 </div>
               </button>
             ))}
+          </div>
+        )}
+
+        {isGeocoding && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           </div>
         )}
       </div>
 
       {/* Map */}
       <div className="space-y-2">
-        <div
-          ref={containerRef}
-          className="w-full h-[400px] rounded-lg border"
-          style={{ zIndex: 0 }}
-        />
+        <div className="rounded-lg border overflow-hidden">
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={
+              selectedLocation
+                ? {
+                    lat: selectedLocation.latitude,
+                    lng: selectedLocation.longitude,
+                  }
+                : defaultCenter
+            }
+            zoom={selectedLocation ? 15 : 13}
+            onLoad={onMapLoad}
+            onClick={handleMapClick}
+            options={{
+              disableDefaultUI: false,
+              zoomControl: true,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: true,
+            }}
+          >
+            {selectedLocation && (
+              <Marker
+                position={{
+                  lat: selectedLocation.latitude,
+                  lng: selectedLocation.longitude,
+                }}
+              />
+            )}
+          </GoogleMap>
+        </div>
+
         {error && (
           <p className="text-sm text-destructive">{error}</p>
         )}
+
         {selectedLocation && (
           <div className="rounded-md border bg-muted/50 p-3 text-sm">
             <p className="font-medium">Selected Location:</p>
@@ -293,4 +331,3 @@ export function LocationMapPicker({
     </div>
   );
 }
-

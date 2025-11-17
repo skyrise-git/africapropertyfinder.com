@@ -91,15 +91,15 @@ export const PropertyForm = forwardRef<
       area: formData.area || 0,
       floorNumber: formData.floorNumber,
       totalFloors: formData.totalFloors,
-      price: formData.price,
-      rent: formData.rent,
-      securityDeposit: formData.securityDeposit,
-      leaseLength: formData.leaseLength,
-      availableFrom: formData.availableFrom,
-      paymentFrequency: (formData.paymentFrequency as PropertyFormData["paymentFrequency"]) || "monthly",
-      utilitiesIncluded: formData.utilitiesIncluded,
-      isShared: formData.isShared,
-      sharingDetails: formData.sharingDetails,
+      price: (formData as any).price,
+      rent: (formData as any).rent,
+      securityDeposit: (formData as any).securityDeposit,
+      leaseLength: (formData as any).leaseLength,
+      availableFrom: (formData as any).availableFrom,
+      paymentFrequency: ((formData as any).paymentFrequency || "monthly") as "monthly" | "weekly" | "yearly",
+      utilitiesIncluded: (formData as any).utilitiesIncluded,
+      isShared: (formData as any).isShared,
+      sharingDetails: (formData as any).sharingDetails,
       parkingAvailable: formData.parkingAvailable,
       laundry: formData.laundry,
       heatingCooling: formData.heatingCooling,
@@ -773,9 +773,11 @@ function SharedPropertyStep({
                   <FormLabel>Sharing Type *</FormLabel>
                   <Select
                     onValueChange={(value) => {
+                      const currentDetails = form.getValues("sharingDetails");
                       form.setValue("sharingDetails", {
-                        ...form.getValues("sharingDetails"),
                         sharingType: value as "room" | "apartment" | "house",
+                        currentOccupants: currentDetails?.currentOccupants ?? 0,
+                        preferredTenantType: currentDetails?.preferredTenantType ?? "anyone",
                       });
                       field.onChange(value);
                     }}
@@ -809,9 +811,11 @@ function SharedPropertyStep({
                       {...field}
                       onChange={(e) => {
                         const value = parseInt(e.target.value) || 0;
+                        const currentDetails = form.getValues("sharingDetails");
                         form.setValue("sharingDetails", {
-                          ...form.getValues("sharingDetails"),
+                          sharingType: currentDetails?.sharingType ?? "room",
                           currentOccupants: value,
+                          preferredTenantType: currentDetails?.preferredTenantType ?? "anyone",
                         });
                         field.onChange(value);
                       }}
@@ -831,8 +835,10 @@ function SharedPropertyStep({
                   <FormLabel>Preferred Tenant Type *</FormLabel>
                   <Select
                     onValueChange={(value) => {
+                      const currentDetails = form.getValues("sharingDetails");
                       form.setValue("sharingDetails", {
-                        ...form.getValues("sharingDetails"),
+                        sharingType: currentDetails?.sharingType ?? "room",
+                        currentOccupants: currentDetails?.currentOccupants ?? 0,
                         preferredTenantType: value as
                           | "students"
                           | "professionals"
