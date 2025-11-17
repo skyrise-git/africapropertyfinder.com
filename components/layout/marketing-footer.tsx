@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { marketingSite } from "@/lib/marketing-config";
 import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
@@ -28,9 +29,22 @@ export function MarketingFooter() {
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="space-y-2">
-          <p className="text-base font-semibold text-foreground">
-            {marketingSite.title}
-          </p>
+          <Link href="/" className="inline-block">
+            <Image
+              src="/logo.png"
+              alt={marketingSite.title}
+              width={120}
+              height={40}
+              className="h-8 w-auto dark:hidden"
+            />
+            <Image
+              src="/white_logo_transparent_background.png"
+              alt={marketingSite.title}
+              width={120}
+              height={40}
+              className="hidden h-8 w-auto dark:block"
+            />
+          </Link>
           <p>
             © {year} {marketingSite.domain}. All rights reserved.
           </p>

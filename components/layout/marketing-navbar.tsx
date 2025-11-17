@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useTheme } from "next-themes";
 import { marketingSite } from "@/lib/marketing-config";
@@ -37,8 +38,23 @@ export function MarketingNavbar() {
     <>
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="text-base font-semibold tracking-tight">
-            {marketingSite.title}
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo.png"
+              alt={marketingSite.title}
+              width={120}
+              height={40}
+              className="h-8 w-auto dark:hidden"
+              priority
+            />
+            <Image
+              src="/white_logo_transparent_background.png"
+              alt={marketingSite.title}
+              width={120}
+              height={40}
+              className="hidden h-8 w-auto dark:block"
+              priority
+            />
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
