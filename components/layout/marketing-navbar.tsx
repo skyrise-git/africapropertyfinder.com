@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { marketingSite } from "@/lib/marketing-config";
+import { marketingSite } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/core/theme-toggle";
 import {

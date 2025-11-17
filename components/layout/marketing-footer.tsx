@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { marketingSite } from "@/lib/marketing-config";
+import { marketingSite } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
 import {

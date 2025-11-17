@@ -68,14 +68,16 @@ export const marketingSite = {
           label: "Rent",
           href: "/rent",
           icon: "Key",
-          description: "Find the perfect rental property that fits your needs and budget",
+          description:
+            "Find the perfect rental property that fits your needs and budget",
           featured: true,
         },
         {
           label: "Sell",
           href: "/sell",
           icon: "TrendingUp",
-          description: "Get the best price for your property with our expert selling services",
+          description:
+            "Get the best price for your property with our expert selling services",
           featured: true,
         },
       ],
@@ -84,3 +86,4 @@ export const marketingSite = {
 } as const;
 
 export type MarketingSite = typeof marketingSite;
+

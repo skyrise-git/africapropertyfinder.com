@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/core/theme-toggle";
-import type { MarketingSite } from "@/lib/marketing-config";
+import type { MarketingSite } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 const iconMap = {

@@ -23,7 +23,7 @@ import {
   Key,
   TrendingUp,
 } from "lucide-react";
-import type { MarketingSite } from "@/lib/marketing-config";
+import type { MarketingSite } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 const iconMap = {
