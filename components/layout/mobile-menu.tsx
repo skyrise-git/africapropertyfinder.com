@@ -12,6 +12,10 @@ import {
   ExternalLink,
   LogIn,
   ArrowRight,
+  Home,
+  ShoppingCart,
+  Key,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +34,10 @@ const iconMap = {
   Settings,
   Image,
   FileCode,
+  Home,
+  ShoppingCart,
+  Key,
+  TrendingUp,
 } as const;
 
 type MegaMenuItem = MarketingSite["megaMenu"][number]["items"][number];
@@ -100,7 +108,7 @@ export function MobileMenu({
               <div className="flex-1 overflow-y-auto px-4 py-6">
                 <nav className="flex flex-col gap-1">
                   {navLinks.map((link, index) => {
-                    if (link.href === "#resources") {
+                    if (link.href === "#services") {
                       return (
                         <Accordion
                           key={link.href}
@@ -109,7 +117,7 @@ export function MobileMenu({
                           className="w-full"
                         >
                           <AccordionItem
-                            value="resources"
+                            value="services"
                             className="border-none"
                           >
                             <AccordionTrigger className="py-3 text-sm font-medium text-gray-900 dark:text-gray-100 hover:no-underline">

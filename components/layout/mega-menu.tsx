@@ -18,6 +18,10 @@ import {
   Image,
   FileCode,
   ExternalLink,
+  Home,
+  ShoppingCart,
+  Key,
+  TrendingUp,
 } from "lucide-react";
 import type { MarketingSite } from "@/lib/marketing-config";
 import { cn } from "@/lib/utils";
@@ -27,6 +31,10 @@ const iconMap = {
   Settings,
   Image,
   FileCode,
+  Home,
+  ShoppingCart,
+  Key,
+  TrendingUp,
 } as const;
 
 type MegaMenuItem = MarketingSite["megaMenu"][number]["items"][number];
