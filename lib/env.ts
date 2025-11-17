@@ -25,6 +25,10 @@ const envSchema = z.object({
   NEXT_PUBLIC_FIREBASE_AUTH_URL: z
     .string()
     .url("Firebase Auth URL must be a valid URL"),
+  // Google Maps Configuration
+  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z
+    .string()
+    .min(1, "Google Maps API Key is required"),
   // UploadThing Configuration (server-only, optional)
   UPLOADTHING_TOKEN: z.string().min(1).optional(),
 });
@@ -46,6 +50,7 @@ function validateEnv() {
         process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
       NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
       NEXT_PUBLIC_FIREBASE_AUTH_URL: process.env.NEXT_PUBLIC_FIREBASE_AUTH_URL,
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
       UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN || undefined,
     });
   } catch (error) {
