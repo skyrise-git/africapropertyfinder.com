@@ -65,8 +65,8 @@ export function MarketingFooter() {
 
         <div className="flex flex-col gap-4 text-sm md:items-end">
           <Button variant="secondary" asChild size="sm">
-            <Link href="/signup" className="flex items-center gap-2">
-              Start your project
+            <Link href="/list-property" className="flex items-center gap-2">
+              List your property
               <ArrowRight className="size-4" />
             </Link>
           </Button>
