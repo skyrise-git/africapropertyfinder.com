@@ -28,6 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/core/theme-toggle";
 import type { MarketingSite } from "@/lib/config";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/hooks/use-app-store";
+import { MarketingProfileDropdown } from "@/components/core/marketing-profile-dropdown";
 
 const iconMap = {
   Database,
@@ -59,6 +61,8 @@ export function MobileMenu({
   resourcesItems,
   toggleTheme,
 }: MobileMenuProps) {
+  const { user } = useAppStore();
+
   React.useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -236,26 +240,46 @@ export function MobileMenu({
                   </div>
                   <span>Toggle theme</span>
                 </div>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link
-                    href="/signin"
-                    className="flex items-center justify-center gap-2"
-                    onClick={onClose}
-                  >
-                    <LogIn className="size-4" />
-                    Sign in
-                  </Link>
-                </Button>
-                <Button className="w-full" asChild>
-                  <Link
-                    href="/signup"
-                    className="flex items-center justify-center gap-2"
-                    onClick={onClose}
-                  >
-                    Get started
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
+                {user ? (
+                  <>
+                    <Button className="w-full" asChild>
+                      <Link
+                        href="/list-property"
+                        className="flex items-center justify-center gap-2"
+                        onClick={onClose}
+                      >
+                        <Home className="size-4" />
+                        List Property
+                      </Link>
+                    </Button>
+                    <div className="flex items-center justify-center">
+                      <MarketingProfileDropdown />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link
+                        href="/signin"
+                        className="flex items-center justify-center gap-2"
+                        onClick={onClose}
+                      >
+                        <LogIn className="size-4" />
+                        Sign in
+                      </Link>
+                    </Button>
+                    <Button className="w-full" asChild>
+                      <Link
+                        href="/signup"
+                        className="flex items-center justify-center gap-2"
+                        onClick={onClose}
+                      >
+                        Get started
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

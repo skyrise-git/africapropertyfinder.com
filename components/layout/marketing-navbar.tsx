@@ -15,10 +15,12 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { AnimatePresence, motion } from "motion/react";
-import { Menu, X, ArrowRight, LogIn } from "lucide-react";
+import { Menu, X, ArrowRight, LogIn, Home } from "lucide-react";
 import { MegaMenu } from "@/components/layout/mega-menu";
 import { MobileMenu } from "@/components/layout/mobile-menu";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/hooks/use-app-store";
+import { MarketingProfileDropdown } from "@/components/core/marketing-profile-dropdown";
 
 const marketingNavLinks = [
   { label: "Home", href: "/" },
@@ -29,6 +31,7 @@ const marketingNavLinks = [
 export function MarketingNavbar() {
   const [open, setOpen] = useState(false);
   const { theme, resolvedTheme, setTheme } = useTheme();
+  const { user } = useAppStore();
 
   const toggleMenu = () => setOpen((prev) => !prev);
 
@@ -94,18 +97,32 @@ export function MarketingNavbar() {
 
           <div className="hidden items-center gap-3 md:flex">
             <ThemeToggle />
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/signin" className="flex items-center gap-1">
-                <LogIn className="size-4" />
-                Sign in
-              </Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/signup" className="flex items-center gap-1">
-                Get started
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+            {user ? (
+              <>
+                <Button size="sm" asChild>
+                  <Link href="/list-property" className="flex items-center gap-1">
+                    <Home className="size-4" />
+                    List Property
+                  </Link>
+                </Button>
+                <MarketingProfileDropdown />
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/signin" className="flex items-center gap-1">
+                    <LogIn className="size-4" />
+                    Sign in
+                  </Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/signup" className="flex items-center gap-1">
+                    Get started
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <Button
