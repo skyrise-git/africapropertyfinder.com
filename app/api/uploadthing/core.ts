@@ -47,8 +47,12 @@ export const ourFileRouter = {
       return {};
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Upload complete:", file.url);
-      return { url: file.url };
+      console.log("Upload complete:", file.url, "Key:", file.key, "Name:", file.name);
+      return {
+        url: file.url,
+        key: file.key,
+        name: file.name,
+      };
     }),
 
   documentUploader: f({

@@ -85,6 +85,8 @@ import {
   UserCheck,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/utils/image-optimization";
+import { ImageEditor } from "@/components/ui/image-editor";
+import { useAppStore } from "@/hooks/use-app-store";
 
 interface PropertyFormProps {
   step: number;
@@ -105,6 +107,12 @@ export const PropertyForm = forwardRef<
     ref
   ) => {
     const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+    const [pendingImages, setPendingImages] = useState<
+      Array<{ file: File; preview: string }>
+    >([]);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [showImageEditor, setShowImageEditor] = useState(false);
+    const { user } = useAppStore();
 
     // Read location from URL for initial form values
     const [locLat] = useQueryState("locLat", parseAsString.withDefault("0"));
@@ -133,19 +141,10 @@ export const PropertyForm = forwardRef<
       formData.location
     );
 
-    const { startUpload, isUploading } = useUploadThing("imageUploader", {
+    const { startUpload, isUploading } = useUploadThing("multipleImageUploader", {
       onClientUploadComplete: async (res) => {
-        if (res?.[0]?.url && res?.[0]?.key) {
-          const newImage: Image = {
-            url: res[0].url,
-            path: res[0].name || "",
-            fileKey: res[0].key,
-          };
-
-          const currentImages = form.getValues("images") || [];
-          form.setValue("images", [...currentImages, newImage]);
-          toast.success("Image uploaded successfully!");
-        }
+        // This will be called when we upload on submit
+        console.log("Upload complete:", res);
       },
       onUploadError: (error: Error) => {
         toast.error(`Upload failed: ${error.message}`);
@@ -272,7 +271,7 @@ export const PropertyForm = forwardRef<
       }
     };
 
-    const handleFileSelect = async (file: File) => {
+    const handleFileSelect = (file: File) => {
       if (!file.type.startsWith("image/")) {
         toast.error("Please select an image file");
         return;
@@ -283,11 +282,31 @@ export const PropertyForm = forwardRef<
         return;
       }
 
-      try {
-        await startUpload([file]);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
+      setSelectedFile(file);
+      setShowImageEditor(true);
+    };
+
+    const handleImageEditorSave = (optimizedFile: File) => {
+      // Create preview URL
+      const preview = URL.createObjectURL(optimizedFile);
+      setPendingImages((prev) => [...prev, { file: optimizedFile, preview }]);
+      setShowImageEditor(false);
+      setSelectedFile(null);
+      toast.success("Image added! It will be uploaded when you submit.");
+    };
+
+    const handleImageEditorCancel = () => {
+      setShowImageEditor(false);
+      setSelectedFile(null);
+    };
+
+    const handleDeletePendingImage = (index: number) => {
+      setPendingImages((prev) => {
+        const newImages = [...prev];
+        URL.revokeObjectURL(newImages[index].preview);
+        newImages.splice(index, 1);
+        return newImages;
+      });
     };
 
     const handleFormSubmit = async (data: PropertyFormData) => {
@@ -297,6 +316,63 @@ export const PropertyForm = forwardRef<
       console.log("✅ Form is valid:", form.formState.isValid);
 
       if (isLastStep) {
+        // Upload pending images first
+        if (pendingImages.length > 0) {
+          try {
+            toast.loading(`Uploading ${pendingImages.length} image(s)...`, {
+              id: "uploading-images",
+            });
+
+            const uid = user?.uid || "anonymous";
+            
+            // Rename all files with uid-Date.now().webp format
+            const filesToUpload = pendingImages.map(({ file }, index) => {
+              const timestamp = Date.now() + index; // Add index to ensure uniqueness
+              const newFileName = `${uid}-${timestamp}.webp`;
+              return new File([file], newFileName, { type: "image/webp" });
+            });
+
+            // Upload all images at once
+            const uploadResults = await startUpload(filesToUpload);
+
+            const uploadedImages: Image[] = [];
+            if (uploadResults && uploadResults.length > 0) {
+              uploadResults.forEach((result, index) => {
+                uploadedImages.push({
+                  url: result.url,
+                  path: result.name || filesToUpload[index].name,
+                  fileKey: result.key,
+                });
+              });
+            }
+
+            if (uploadedImages.length > 0) {
+              // Add uploaded images to form data
+              const currentImages = data.images || [];
+              data.images = [...currentImages, ...uploadedImages];
+
+              // Clean up preview URLs
+              pendingImages.forEach(({ preview }) => {
+                URL.revokeObjectURL(preview);
+              });
+              setPendingImages([]);
+
+              toast.success(
+                `Successfully uploaded ${uploadedImages.length} image(s)!`,
+                { id: "uploading-images" },
+              );
+            } else {
+              throw new Error("No images were uploaded");
+            }
+          } catch (error) {
+            console.error("Error uploading images:", error);
+            toast.error("Failed to upload images. Please try again.", {
+              id: "uploading-images",
+            });
+            return;
+          }
+        }
+
         await onSubmit(data);
       } else {
         onNext(data);
@@ -378,7 +454,13 @@ export const PropertyForm = forwardRef<
           }
           return fieldsToValidate;
         case 9:
-          return ["images", "videoTourUrl"];
+          // Validate that we have at least one image (uploaded or pending)
+          const currentImages = form.getValues("images") || [];
+          const pendingCount = pendingImages.length;
+          if (currentImages.length === 0 && pendingCount === 0) {
+            return ["images"];
+          }
+          return ["videoTourUrl"];
         default:
           return [];
       }
@@ -390,6 +472,20 @@ export const PropertyForm = forwardRef<
         console.log("📍 Current step:", step);
         console.log("📍 Current location value:", form.getValues("location"));
         console.log("📋 Current form errors:", form.formState.errors);
+
+        // Special validation for step 9 (images)
+        if (step === 9) {
+          const currentImages = form.getValues("images") || [];
+          const pendingCount = pendingImages.length;
+          if (currentImages.length === 0 && pendingCount === 0) {
+            form.setError("images", {
+              type: "manual",
+              message: "At least one image is required",
+            });
+            toast.error("Please add at least one image before submitting.");
+            return;
+          }
+        }
 
         // Get fields to validate for current step
         const fieldsToValidate = getFieldsToValidate(step);
@@ -465,13 +561,29 @@ export const PropertyForm = forwardRef<
           return <ContactStep form={form} />;
         case 9:
           return (
-            <PhotosStep
-              form={form}
-              watchedImages={watchedImages}
-              isUploading={isUploading}
-              onFileSelect={handleFileSelect}
-              onDeleteImage={deleteImage}
-            />
+            <>
+              <PhotosStep
+                form={form}
+                watchedImages={watchedImages}
+                pendingImages={pendingImages}
+                isUploading={isUploading}
+                onFileSelect={handleFileSelect}
+                onDeleteImage={deleteImage}
+                onDeletePendingImage={handleDeletePendingImage}
+              />
+              {selectedFile && (
+                <ImageEditor
+                  imageFile={selectedFile}
+                  onSave={handleImageEditorSave}
+                  onCancel={handleImageEditorCancel}
+                  open={showImageEditor}
+                  aspectRatio={4 / 3}
+                  circularCrop={false}
+                  title="Crop & Optimize Image"
+                  description="Crop your image to the desired size (4:3 aspect ratio). It will be automatically converted to WebP format for optimization."
+                />
+              )}
+            </>
           );
         default:
           return null;
@@ -2127,20 +2239,25 @@ function ContactStep({
   );
 }
 
-// Step 8: Photos & Media
+// Step 9: Photos & Media
 function PhotosStep({
   form,
   watchedImages,
+  pendingImages,
   isUploading,
   onFileSelect,
   onDeleteImage,
+  onDeletePendingImage,
 }: {
   form: ReturnType<typeof useForm<PropertyFormData>>;
   watchedImages: Image[];
+  pendingImages: Array<{ file: File; preview: string }>;
   isUploading: boolean;
   onFileSelect: (file: File) => void;
   onDeleteImage: (image: Image, index: number) => void;
+  onDeletePendingImage: (index: number) => void;
 }) {
+  const totalImages = watchedImages.length + pendingImages.length;
   return (
     <Card>
       <CardHeader>
@@ -2162,7 +2279,7 @@ function PhotosStep({
                       className="flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 hover:bg-muted"
                     >
                       <Upload className="h-4 w-4" />
-                      {isUploading ? "Uploading..." : "Upload Image"}
+                      Add Image
                     </label>
                     <input
                       id="image-upload"
@@ -2174,15 +2291,18 @@ function PhotosStep({
                         if (file) {
                           onFileSelect(file);
                         }
+                        // Reset input so same file can be selected again
+                        e.target.value = "";
                       }}
                       disabled={isUploading}
                     />
                   </div>
 
-                  {watchedImages.length > 0 && (
+                  {totalImages > 0 && (
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                      {/* Show uploaded images */}
                       {watchedImages.map((image, index) => (
-                        <div key={index} className="relative group">
+                        <div key={`uploaded-${index}`} className="relative group">
                           <img
                             src={image.url}
                             alt={`Property ${index + 1}`}
@@ -2199,12 +2319,41 @@ function PhotosStep({
                           </Button>
                         </div>
                       ))}
+
+                      {/* Show pending images (to be uploaded on submit) */}
+                      {pendingImages.map(({ preview }, index) => (
+                        <div key={`pending-${index}`} className="relative group">
+                          <img
+                            src={preview}
+                            alt={`Pending ${index + 1}`}
+                            className="h-48 w-full rounded-md object-cover"
+                          />
+                          <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                            Pending
+                          </div>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => onDeletePendingImage(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   )}
 
-                  {watchedImages.length === 0 && (
+                  {totalImages === 0 && (
                     <p className="text-sm text-muted-foreground">
-                      No images uploaded yet. At least one image is required.
+                      No images added yet. At least one image is required. Images will be uploaded when you click Submit.
+                    </p>
+                  )}
+
+                  {pendingImages.length > 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      {pendingImages.length} image(s) pending upload. They will be uploaded when you click Submit.
                     </p>
                   )}
                 </div>
