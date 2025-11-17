@@ -58,206 +58,365 @@ interface PropertyFormProps {
 export const PropertyForm = forwardRef<
   { triggerSubmit: () => void },
   PropertyFormProps
->(({ step, formData, onNext, onSubmit, onPrevious, canGoBack, isLastStep }, ref) => {
-  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+>(
+  (
+    { step, formData, onNext, onSubmit, onPrevious, canGoBack, isLastStep },
+    ref
+  ) => {
+    const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
-  const { startUpload, isUploading } = useUploadThing("imageUploader", {
-    onClientUploadComplete: async (res) => {
-      if (res?.[0]?.url && res?.[0]?.key) {
-        const newImage: Image = {
-          url: res[0].url,
-          path: res[0].name || "",
-          fileKey: res[0].key,
-        };
+    // Read location from URL for initial form values
+    const [locLat] = useQueryState("locLat", parseAsString.withDefault("0"));
+    const [locLng] = useQueryState("locLng", parseAsString.withDefault("0"));
+    const [locAddress] = useQueryState(
+      "locAddress",
+      parseAsString.withDefault("")
+    );
+    const [locCity] = useQueryState("locCity", parseAsString.withDefault(""));
+    const [locState] = useQueryState("locState", parseAsString.withDefault(""));
+    const [locZip] = useQueryState("locZip", parseAsString.withDefault(""));
 
+    // Build initial location from URL if available
+    const initialLocation =
+      locLat && locLng && (locLat !== "0" || locLng !== "0")
+        ? {
+            latitude: Number(locLat),
+            longitude: Number(locLng),
+          }
+        : formData.location || { latitude: 0, longitude: 0 };
+
+    console.log("🏗️ Form initialization - initialLocation:", initialLocation);
+    console.log("🏗️ Form initialization - locLat:", locLat, "locLng:", locLng);
+    console.log(
+      "🏗️ Form initialization - formData.location:",
+      formData.location
+    );
+
+    const { startUpload, isUploading } = useUploadThing("imageUploader", {
+      onClientUploadComplete: async (res) => {
+        if (res?.[0]?.url && res?.[0]?.key) {
+          const newImage: Image = {
+            url: res[0].url,
+            path: res[0].name || "",
+            fileKey: res[0].key,
+          };
+
+          const currentImages = form.getValues("images") || [];
+          form.setValue("images", [...currentImages, newImage]);
+          toast.success("Image uploaded successfully!");
+        }
+      },
+      onUploadError: (error: Error) => {
+        toast.error(`Upload failed: ${error.message}`);
+      },
+    });
+
+    const form = useForm<PropertyFormData>({
+      resolver: zodResolver(refinedPropertyFormSchema),
+      defaultValues: {
+        listingType:
+          (formData.listingType as PropertyFormData["listingType"]) || "sale",
+        title: formData.title || "",
+        propertyType:
+          (formData.propertyType as PropertyFormData["propertyType"]) ||
+          "apartment",
+        numBedrooms: formData.numBedrooms || 0,
+        numBathrooms: formData.numBathrooms || 0,
+        furnishing:
+          (formData.furnishing as PropertyFormData["furnishing"]) ||
+          "unfurnished",
+        area: formData.area || 0,
+        floorNumber: formData.floorNumber,
+        totalFloors: formData.totalFloors,
+        price: (formData as any).price,
+        rent: (formData as any).rent,
+        securityDeposit: (formData as any).securityDeposit,
+        leaseLength: (formData as any).leaseLength,
+        availableFrom: (formData as any).availableFrom,
+        paymentFrequency: ((formData as any).paymentFrequency || "monthly") as
+          | "monthly"
+          | "weekly"
+          | "yearly",
+        utilitiesIncluded: (formData as any).utilitiesIncluded,
+        isShared: (formData as any).isShared,
+        sharingDetails: (formData as any).sharingDetails,
+        parkingAvailable: formData.parkingAvailable,
+        laundry: formData.laundry,
+        heatingCooling: formData.heatingCooling,
+        balcony: formData.balcony,
+        otherAmenities: formData.otherAmenities,
+        address: formData.address || locAddress || "",
+        city: formData.city || locCity || "",
+        state: formData.state || locState || "",
+        zipCode: formData.zipCode || locZip || undefined,
+        nearbyTransit: formData.nearbyTransit,
+        location: initialLocation,
+        smokingAllowed: formData.smokingAllowed,
+        petsAllowed: formData.petsAllowed,
+        guestsAllowed: formData.guestsAllowed,
+        sublettingAllowed: formData.sublettingAllowed,
+        contactName: formData.contactName || "",
+        preferredContactMethod: formData.preferredContactMethod || [],
+        contactInfo: formData.contactInfo || { phone: "", email: "" },
+        viewingAvailability: formData.viewingAvailability,
+        images: formData.images || [],
+        videoTourUrl: formData.videoTourUrl,
+      },
+    });
+
+    const watchedListingType = form.watch("listingType");
+    const watchedIsShared = form.watch("isShared");
+    const watchedImages = form.watch("images") || [];
+
+    // Sync form data when formData prop changes
+    useEffect(() => {
+      if (formData) {
+        Object.keys(formData).forEach((key) => {
+          const value = formData[key as keyof PropertyFormData];
+          if (value !== undefined) {
+            form.setValue(key as any, value as any);
+          }
+        });
+      }
+    }, [formData, form]);
+
+    // Delete image from UploadThing and form
+    const deleteImage = async (image: Image, index: number) => {
+      try {
+        // Delete from UploadThing
+        if (image.fileKey) {
+          const response = await fetch(
+            `/api/uploadthing/delete?fileKey=${encodeURIComponent(
+              image.fileKey
+            )}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to delete file");
+          }
+        }
+
+        // Remove from form
         const currentImages = form.getValues("images") || [];
-        form.setValue("images", [...currentImages, newImage]);
-        toast.success("Image uploaded successfully!");
-      }
-    },
-    onUploadError: (error: Error) => {
-      toast.error(`Upload failed: ${error.message}`);
-    },
-  });
+        form.setValue(
+          "images",
+          currentImages.filter((_, i) => i !== index)
+        );
 
-  const form = useForm<PropertyFormData>({
-    resolver: zodResolver(refinedPropertyFormSchema),
-    defaultValues: {
-      listingType: (formData.listingType as PropertyFormData["listingType"]) || "sale",
-      title: formData.title || "",
-      propertyType: (formData.propertyType as PropertyFormData["propertyType"]) || "apartment",
-      numBedrooms: formData.numBedrooms || 0,
-      numBathrooms: formData.numBathrooms || 0,
-      furnishing: (formData.furnishing as PropertyFormData["furnishing"]) || "unfurnished",
-      area: formData.area || 0,
-      floorNumber: formData.floorNumber,
-      totalFloors: formData.totalFloors,
-      price: (formData as any).price,
-      rent: (formData as any).rent,
-      securityDeposit: (formData as any).securityDeposit,
-      leaseLength: (formData as any).leaseLength,
-      availableFrom: (formData as any).availableFrom,
-      paymentFrequency: ((formData as any).paymentFrequency || "monthly") as "monthly" | "weekly" | "yearly",
-      utilitiesIncluded: (formData as any).utilitiesIncluded,
-      isShared: (formData as any).isShared,
-      sharingDetails: (formData as any).sharingDetails,
-      parkingAvailable: formData.parkingAvailable,
-      laundry: formData.laundry,
-      heatingCooling: formData.heatingCooling,
-      balcony: formData.balcony,
-      otherAmenities: formData.otherAmenities,
-      address: formData.address || "",
-      city: formData.city || "",
-      state: formData.state || "",
-      zipCode: formData.zipCode,
-      nearbyTransit: formData.nearbyTransit,
-      location: formData.location || { latitude: 0, longitude: 0 },
-      smokingAllowed: formData.smokingAllowed,
-      petsAllowed: formData.petsAllowed,
-      guestsAllowed: formData.guestsAllowed,
-      sublettingAllowed: formData.sublettingAllowed,
-      contactName: formData.contactName || "",
-      preferredContactMethod: formData.preferredContactMethod || [],
-      contactInfo: formData.contactInfo || { phone: "", email: "" },
-      viewingAvailability: formData.viewingAvailability,
-      images: formData.images || [],
-      videoTourUrl: formData.videoTourUrl,
-    },
-  });
-
-  const watchedListingType = form.watch("listingType");
-  const watchedIsShared = form.watch("isShared");
-  const watchedImages = form.watch("images") || [];
-
-  // Sync form data when formData prop changes
-  useEffect(() => {
-    if (formData) {
-      Object.keys(formData).forEach((key) => {
-        const value = formData[key as keyof PropertyFormData];
-        if (value !== undefined) {
-          form.setValue(key as any, value as any);
+        // Track for database cleanup
+        if (image.fileKey) {
+          setImagesToDelete((prev) => [...prev, image.fileKey]);
         }
-      });
-    }
-  }, [formData, form]);
 
-  // Delete image from UploadThing and form
-  const deleteImage = async (image: Image, index: number) => {
-    try {
-      // Delete from UploadThing
-      if (image.fileKey) {
-        const response = await fetch(
-          `/api/uploadthing/delete?fileKey=${encodeURIComponent(image.fileKey)}`,
-          {
-            method: "DELETE",
-          },
-        );
+        toast.success("Image deleted");
+      } catch (error) {
+        console.error("Error deleting image:", error);
+        toast.error("Failed to delete image");
+      }
+    };
 
-        if (!response.ok) {
-          throw new Error("Failed to delete file");
-        }
+    const handleFileSelect = async (file: File) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file");
+        return;
       }
 
-      // Remove from form
-      const currentImages = form.getValues("images") || [];
-      form.setValue(
-        "images",
-        currentImages.filter((_, i) => i !== index),
-      );
-
-      // Track for database cleanup
-      if (image.fileKey) {
-        setImagesToDelete((prev) => [...prev, image.fileKey]);
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Image size must be less than 10MB");
+        return;
       }
 
-      toast.success("Image deleted");
-    } catch (error) {
-      console.error("Error deleting image:", error);
-      toast.error("Failed to delete image");
-    }
-  };
+      try {
+        await startUpload([file]);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    };
 
-  const handleFileSelect = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
+    const handleFormSubmit = async (data: PropertyFormData) => {
+      console.log("✅ handleFormSubmit called with data:", data);
+      console.log("📍 Location in submitted data:", data.location);
+      console.log("📋 Form errors:", form.formState.errors);
+      console.log("✅ Form is valid:", form.formState.isValid);
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image size must be less than 10MB");
-      return;
-    }
+      if (isLastStep) {
+        await onSubmit(data);
+      } else {
+        onNext(data);
+      }
+    };
 
-    try {
-      await startUpload([file]);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    }
-  };
+    // Get fields to validate based on current step
+    const getFieldsToValidate = (currentStep: number): string[] => {
+      switch (currentStep) {
+        case 1:
+          return ["location"]; // address, city, state, zipCode are set automatically when location is selected
+        case 2:
+          return [
+            "title",
+            "propertyType",
+            "numBedrooms",
+            "numBathrooms",
+            "furnishing",
+            "area",
+            "floorNumber",
+            "totalFloors",
+          ];
+        case 3:
+          const listingType = form.getValues("listingType");
+          if (listingType === "sale") {
+            return ["price"];
+          } else {
+            return [
+              "rent",
+              "securityDeposit",
+              "leaseLength",
+              "availableFrom",
+              "paymentFrequency",
+              "utilitiesIncluded",
+            ];
+          }
+        case 4:
+          return ["isShared", "sharingDetails"];
+        case 5:
+          return [
+            "parkingAvailable",
+            "laundry",
+            "heatingCooling",
+            "balcony",
+            "otherAmenities",
+          ];
+        case 6:
+          return [
+            "smokingAllowed",
+            "petsAllowed",
+            "guestsAllowed",
+            "sublettingAllowed",
+          ];
+        case 7:
+          return [
+            "contactName",
+            "preferredContactMethod",
+            "contactInfo",
+            "viewingAvailability",
+          ];
+        case 8:
+          return ["images", "videoTourUrl"];
+        default:
+          return [];
+      }
+    };
 
-  const handleFormSubmit = async (data: PropertyFormData) => {
-    if (isLastStep) {
-      await onSubmit(data);
-    } else {
-      onNext(data);
-    }
-  };
+    useImperativeHandle(ref, () => ({
+      triggerSubmit: () => {
+        console.log("🔘 triggerSubmit called");
+        console.log("📍 Current step:", step);
+        console.log("📍 Current location value:", form.getValues("location"));
+        console.log("📋 Current form errors:", form.formState.errors);
 
-  useImperativeHandle(ref, () => ({
-    triggerSubmit: () => {
-      form.handleSubmit(handleFormSubmit)();
-    },
-  }));
-
-  // Render step content
-  const renderStepContent = () => {
-    switch (step) {
-      case 1:
-        return <LocationStep form={form} />;
-      case 2:
-        return <BasicInfoStep form={form} />;
-      case 3:
-        return <PricingStep form={form} watchedListingType={watchedListingType} />;
-      case 4:
-        return (
-          <SharedPropertyStep
-            form={form}
-            watchedListingType={watchedListingType}
-            watchedIsShared={watchedIsShared}
-          />
+        // Get fields to validate for current step
+        const fieldsToValidate = getFieldsToValidate(step);
+        console.log(
+          "📋 Fields to validate for step",
+          step,
+          ":",
+          fieldsToValidate
         );
-      case 5:
-        return <AmenitiesStep form={form} />;
-      case 6:
-        return <PoliciesStep form={form} />;
-      case 7:
-        return <ContactStep form={form} />;
-      case 8:
-        return (
-          <PhotosStep
-            form={form}
-            watchedImages={watchedImages}
-            isUploading={isUploading}
-            onFileSelect={handleFileSelect}
-            onDeleteImage={deleteImage}
-          />
-        );
-      default:
-        return null;
-    }
-  };
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        {renderStepContent()}
-        <div className="hidden">
-          <Button type="submit">Submit</Button>
-        </div>
-      </form>
-    </Form>
-  );
-});
+        // Trigger validation only for current step fields
+        // @ts-expect-error - react-hook-form trigger accepts string[] but types are strict
+        form.trigger(fieldsToValidate).then((isValid) => {
+          console.log("🔍 Validation result:", isValid);
+          console.log("📋 Errors after trigger:", form.formState.errors);
+
+          if (isValid) {
+            console.log("✅ Step validation passed, proceeding to next step");
+            // Get current form values and proceed without full form validation
+            // This allows us to move between steps even if other steps aren't filled yet
+            const currentFormData = form.getValues();
+            console.log("📝 Current form data:", currentFormData);
+            handleFormSubmit(currentFormData as PropertyFormData);
+          } else {
+            console.log("❌ Step validation failed, cannot proceed");
+            console.log("📋 Detailed errors:", form.formState.errors);
+            // Show errors for current step only
+            const stepErrors: Record<string, any> = {};
+            fieldsToValidate.forEach((field) => {
+              if (
+                form.formState.errors[
+                  field as keyof typeof form.formState.errors
+                ]
+              ) {
+                stepErrors[field] =
+                  form.formState.errors[
+                    field as keyof typeof form.formState.errors
+                  ];
+              }
+            });
+            console.log("📋 Step-specific errors:", stepErrors);
+          }
+        });
+      },
+    }));
+
+    // Render step content
+    const renderStepContent = () => {
+      switch (step) {
+        case 1:
+          return <LocationStep form={form} />;
+        case 2:
+          return <BasicInfoStep form={form} />;
+        case 3:
+          return (
+            <PricingStep form={form} watchedListingType={watchedListingType} />
+          );
+        case 4:
+          return (
+            <SharedPropertyStep
+              form={form}
+              watchedListingType={watchedListingType}
+              watchedIsShared={watchedIsShared}
+            />
+          );
+        case 5:
+          return <AmenitiesStep form={form} />;
+        case 6:
+          return <PoliciesStep form={form} />;
+        case 7:
+          return <ContactStep form={form} />;
+        case 8:
+          return (
+            <PhotosStep
+              form={form}
+              watchedImages={watchedImages}
+              isUploading={isUploading}
+              onFileSelect={handleFileSelect}
+              onDeleteImage={deleteImage}
+            />
+          );
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleFormSubmit)}
+          className="space-y-6"
+        >
+          {renderStepContent()}
+          <div className="hidden">
+            <Button type="submit">Submit</Button>
+          </div>
+        </form>
+      </Form>
+    );
+  }
+);
 
 PropertyForm.displayName = "PropertyForm";
 
@@ -270,58 +429,104 @@ function LocationStep({
   // URL-backed state for location so it survives refresh and can be read from other components
   const [locLat, setLocLat] = useQueryState(
     "locLat",
-    parseAsString.withDefault("0"),
+    parseAsString.withDefault("0")
   );
   const [locLng, setLocLng] = useQueryState(
     "locLng",
-    parseAsString.withDefault("0"),
+    parseAsString.withDefault("0")
   );
   const [locAddress, setLocAddress] = useQueryState(
     "locAddress",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
   const [locCity, setLocCity] = useQueryState(
     "locCity",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
   const [locState, setLocState] = useQueryState(
     "locState",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
   const [locZip, setLocZip] = useQueryState(
     "locZip",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
 
   // Seed form values from URL on first render if location is present
   useEffect(() => {
+    console.log("🔄 LocationStep useEffect - syncing from URL");
+    console.log("📍 URL values - locLat:", locLat, "locLng:", locLng);
+
     if (locLat && locLng && (locLat !== "0" || locLng !== "0")) {
       const latitude = Number(locLat);
       const longitude = Number(locLng);
 
+      console.log(
+        "📍 Parsed coordinates - latitude:",
+        latitude,
+        "longitude:",
+        longitude
+      );
+
       if (!Number.isNaN(latitude) && !Number.isNaN(longitude)) {
         const currentLocation = form.getValues("location");
-        const isDefaultLocation =
-          !currentLocation ||
-          (currentLocation.latitude === 0 && currentLocation.longitude === 0);
+        console.log("📍 Current form location:", currentLocation);
 
-        if (isDefaultLocation) {
-          form.setValue("location", { latitude, longitude });
+        // Always sync from URL if URL has valid values and form doesn't match
+        const shouldUpdate =
+          !currentLocation ||
+          currentLocation.latitude !== latitude ||
+          currentLocation.longitude !== longitude;
+
+        console.log("🔄 Should update location?", shouldUpdate);
+
+        if (shouldUpdate) {
+          console.log("✅ Setting location in form:", { latitude, longitude });
+          form.setValue(
+            "location",
+            { latitude, longitude },
+            { shouldValidate: true }
+          );
+          console.log(
+            "📍 Location after setValue:",
+            form.getValues("location")
+          );
         }
       }
     }
 
     if (locAddress) {
-      form.setValue("address", locAddress);
+      const currentAddress = form.getValues("address");
+      if (currentAddress !== locAddress) {
+        form.setValue("address", locAddress, { shouldValidate: true });
+      }
     }
     if (locCity) {
-      form.setValue("city", locCity);
+      const currentCity = form.getValues("city");
+      if (currentCity !== locCity) {
+        form.setValue("city", locCity, { shouldValidate: true });
+      }
     }
     if (locState) {
-      form.setValue("state", locState);
+      const currentState = form.getValues("state");
+      if (currentState !== locState) {
+        form.setValue("state", locState, { shouldValidate: true });
+      }
     }
     if (locZip) {
-      form.setValue("zipCode", locZip);
+      const currentZip = form.getValues("zipCode");
+      if (currentZip !== locZip) {
+        form.setValue("zipCode", locZip, { shouldValidate: true });
+      }
+    }
+
+    // Trigger validation for location field after syncing from URL
+    if (locLat && locLng && (locLat !== "0" || locLng !== "0")) {
+      console.log("🔍 Triggering location validation");
+      form.trigger("location").then((isValid) => {
+        console.log("🔍 Location validation result:", isValid);
+        console.log("📋 Location errors:", form.formState.errors.location);
+      });
     }
   }, [locLat, locLng, locAddress, locCity, locState, locZip, form]);
   return (
@@ -329,7 +534,8 @@ function LocationStep({
       <CardHeader>
         <CardTitle>Location Selection</CardTitle>
         <CardDescription>
-          Search for an address and confirm the location on the map. This is required.
+          Search for an address and confirm the location on the map. This is
+          required.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -404,7 +610,11 @@ function LocationStep({
 }
 
 // Step 2: Listing Type & Basic Info
-function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormData>> }) {
+function BasicInfoStep({
+  form,
+}: {
+  form: ReturnType<typeof useForm<PropertyFormData>>;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -437,7 +647,10 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="student-housing" id="student-housing" />
+                    <RadioGroupItem
+                      value="student-housing"
+                      id="student-housing"
+                    />
                     <label htmlFor="student-housing" className="cursor-pointer">
                       Student Housing
                     </label>
@@ -456,7 +669,10 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
             <FormItem>
               <FormLabel>Property Title *</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="e.g., Beautiful 2BR Apartment in Downtown" />
+                <Input
+                  {...field}
+                  placeholder="e.g., Beautiful 2BR Apartment in Downtown"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -505,7 +721,9 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="furnished">Furnished</SelectItem>
-                    <SelectItem value="semi-furnished">Semi-Furnished</SelectItem>
+                    <SelectItem value="semi-furnished">
+                      Semi-Furnished
+                    </SelectItem>
                     <SelectItem value="unfurnished">Unfurnished</SelectItem>
                   </SelectContent>
                 </Select>
@@ -526,7 +744,9 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      field.onChange(parseInt(e.target.value) || 0)
+                    }
                     min={0}
                   />
                 </FormControl>
@@ -545,7 +765,9 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      field.onChange(parseInt(e.target.value) || 0)
+                    }
                     min={0}
                   />
                 </FormControl>
@@ -566,7 +788,9 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
                     min={0}
                   />
                 </FormControl>
@@ -586,7 +810,9 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
                     type="number"
                     {...field}
                     onChange={(e) =>
-                      field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                      field.onChange(
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
                     }
                     min={0}
                   />
@@ -607,7 +833,9 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
                     type="number"
                     {...field}
                     onChange={(e) =>
-                      field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                      field.onChange(
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
                     }
                     min={0}
                   />
@@ -635,7 +863,9 @@ function PricingStep({
       <Card>
         <CardHeader>
           <CardTitle>Pricing</CardTitle>
-          <CardDescription>Set the sale price for your property</CardDescription>
+          <CardDescription>
+            Set the sale price for your property
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <FormField
@@ -648,7 +878,9 @@ function PricingStep({
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
                     min={0}
                     placeholder="0"
                   />
@@ -679,7 +911,9 @@ function PricingStep({
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    field.onChange(parseFloat(e.target.value) || 0)
+                  }
                   min={0}
                   placeholder="0"
                 />
@@ -701,7 +935,9 @@ function PricingStep({
                     type="number"
                     {...field}
                     onChange={(e) =>
-                      field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)
+                      field.onChange(
+                        e.target.value ? parseFloat(e.target.value) : undefined
+                      )
                     }
                     min={0}
                     placeholder="0"
@@ -722,7 +958,9 @@ function PricingStep({
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      field.onChange(parseInt(e.target.value) || 0)
+                    }
                     min={1}
                     placeholder="12"
                   />
@@ -784,7 +1022,10 @@ function PricingStep({
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -823,13 +1064,18 @@ function SharedPropertyStep({
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-base">Is this a shared property?</FormLabel>
+                <FormLabel className="text-base">
+                  Is this a shared property?
+                </FormLabel>
                 <FormDescription>
                   Check this if the property will be shared with other tenants
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -849,7 +1095,8 @@ function SharedPropertyStep({
                       form.setValue("sharingDetails", {
                         sharingType: value as "room" | "apartment" | "house",
                         currentOccupants: currentDetails?.currentOccupants ?? 0,
-                        preferredTenantType: currentDetails?.preferredTenantType ?? "anyone",
+                        preferredTenantType:
+                          currentDetails?.preferredTenantType ?? "anyone",
                       });
                       field.onChange(value);
                     }}
@@ -887,7 +1134,8 @@ function SharedPropertyStep({
                         form.setValue("sharingDetails", {
                           sharingType: currentDetails?.sharingType ?? "room",
                           currentOccupants: value,
-                          preferredTenantType: currentDetails?.preferredTenantType ?? "anyone",
+                          preferredTenantType:
+                            currentDetails?.preferredTenantType ?? "anyone",
                         });
                         field.onChange(value);
                       }}
@@ -928,7 +1176,9 @@ function SharedPropertyStep({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="students">Students</SelectItem>
-                      <SelectItem value="professionals">Professionals</SelectItem>
+                      <SelectItem value="professionals">
+                        Professionals
+                      </SelectItem>
                       <SelectItem value="families">Families</SelectItem>
                       <SelectItem value="anyone">Anyone</SelectItem>
                     </SelectContent>
@@ -945,12 +1195,18 @@ function SharedPropertyStep({
 }
 
 // Step 5: Amenities
-function AmenitiesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormData>> }) {
+function AmenitiesStep({
+  form,
+}: {
+  form: ReturnType<typeof useForm<PropertyFormData>>;
+}) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Amenities</CardTitle>
-        <CardDescription>Select the amenities available in your property</CardDescription>
+        <CardDescription>
+          Select the amenities available in your property
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -961,7 +1217,10 @@ function AmenitiesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <FormLabel>Parking Available</FormLabel>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -974,7 +1233,10 @@ function AmenitiesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <FormLabel>Laundry</FormLabel>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -987,7 +1249,10 @@ function AmenitiesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <FormLabel>Heating & Cooling</FormLabel>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -1000,7 +1265,10 @@ function AmenitiesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <FormLabel>Balcony</FormLabel>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -1030,7 +1298,11 @@ function AmenitiesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormD
 }
 
 // Step 6: Policies
-function PoliciesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormData>> }) {
+function PoliciesStep({
+  form,
+}: {
+  form: ReturnType<typeof useForm<PropertyFormData>>;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -1046,7 +1318,10 @@ function PoliciesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormDa
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <FormLabel>Smoking Allowed</FormLabel>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -1059,7 +1334,10 @@ function PoliciesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormDa
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <FormLabel>Pets Allowed</FormLabel>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -1072,7 +1350,10 @@ function PoliciesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormDa
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <FormLabel>Guests Allowed</FormLabel>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -1085,7 +1366,10 @@ function PoliciesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormDa
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <FormLabel>Subletting Allowed</FormLabel>
                 <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -1097,14 +1381,20 @@ function PoliciesStep({ form }: { form: ReturnType<typeof useForm<PropertyFormDa
 }
 
 // Step 7: Contact & Viewing
-function ContactStep({ form }: { form: ReturnType<typeof useForm<PropertyFormData>> }) {
+function ContactStep({
+  form,
+}: {
+  form: ReturnType<typeof useForm<PropertyFormData>>;
+}) {
   const watchedContactMethods = form.watch("preferredContactMethod") || [];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Contact & Viewing</CardTitle>
-        <CardDescription>How can interested parties contact you?</CardDescription>
+        <CardDescription>
+          How can interested parties contact you?
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <FormField
@@ -1146,7 +1436,9 @@ function ContactStep({ form }: { form: ReturnType<typeof useForm<PropertyFormDat
                                 return checked
                                   ? field.onChange([...field.value, method])
                                   : field.onChange(
-                                      field.value?.filter((value) => value !== method),
+                                      field.value?.filter(
+                                        (value) => value !== method
+                                      )
                                     );
                               }}
                             />
@@ -1174,7 +1466,11 @@ function ContactStep({ form }: { form: ReturnType<typeof useForm<PropertyFormDat
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input {...field} type="tel" placeholder="+1 (555) 123-4567" />
+                  <Input
+                    {...field}
+                    type="tel"
+                    placeholder="+1 (555) 123-4567"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -1332,4 +1628,3 @@ function PhotosStep({
     </Card>
   );
 }
-

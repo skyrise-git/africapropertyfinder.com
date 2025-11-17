@@ -54,8 +54,15 @@ export function PropertyFormSteps({
   };
 
   const handleNextClick = () => {
+    console.log("🖱️ Next button clicked");
+    console.log("📍 Current step:", currentStep);
+    console.log("📍 URL location state - locLat:", locLat, "locLng:", locLng);
+    
     if (formRef.current) {
+      console.log("✅ formRef.current exists, calling triggerSubmit");
       formRef.current.triggerSubmit();
+    } else {
+      console.log("❌ formRef.current is null!");
     }
   };
 
