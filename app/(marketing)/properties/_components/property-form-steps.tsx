@@ -23,7 +23,7 @@ export function PropertyFormSteps({
   const [formData, setFormData] = useState<Partial<PropertyFormData>>(
     initialData || {},
   );
-  const formRef = useRef<{ triggerSubmit: () => void }>(null);
+  const formRef = useRef<{ triggerSubmit: () => void; getFormState: () => { errors: any } }>(null);
 
   const handleNext = (data: Partial<PropertyFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -83,6 +83,12 @@ export function PropertyFormSteps({
             onPrevious={handlePrevious}
             canGoBack={currentStep > 1}
             isLastStep={currentStep === TOTAL_STEPS}
+            onFormChange={(data) => {
+              // Update formData when location changes
+              if (data.location) {
+                setFormData((prev) => ({ ...prev, location: data.location }));
+              }
+            }}
           />
         </motion.div>
       </AnimatePresence>
@@ -99,7 +105,12 @@ export function PropertyFormSteps({
           Previous
         </Button>
         <div className="text-sm text-muted-foreground">
-          {currentStep === 1 && "Location selection is required"}
+          {currentStep === 1 &&
+            (formData.location &&
+            formData.location.latitude !== 0 &&
+            formData.location.longitude !== 0
+              ? ""
+              : "Location selection is required")}
         </div>
         {currentStep < TOTAL_STEPS ? (
           <Button type="button" onClick={handleNextClick}>

@@ -52,12 +52,13 @@ interface PropertyFormProps {
   onPrevious: () => void;
   canGoBack: boolean;
   isLastStep: boolean;
+  onFormChange?: (data: Partial<PropertyFormData>) => void;
 }
 
 export const PropertyForm = forwardRef<
-  { triggerSubmit: () => void },
+  { triggerSubmit: () => void; getFormState: () => ReturnType<typeof useForm<PropertyFormData>>["formState"] },
   PropertyFormProps
->(({ step, formData, onNext, onSubmit, onPrevious, canGoBack, isLastStep }, ref) => {
+>(({ step, formData, onNext, onSubmit, onPrevious, canGoBack, isLastStep, onFormChange }, ref) => {
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
   const { startUpload, isUploading } = useUploadThing("imageUploader", {
@@ -206,13 +207,14 @@ export const PropertyForm = forwardRef<
     triggerSubmit: () => {
       form.handleSubmit(handleFormSubmit)();
     },
+    getFormState: () => form.formState,
   }));
 
   // Render step content
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <LocationStep form={form} />;
+        return <LocationStep form={form} onFormChange={onFormChange} />;
       case 2:
         return <BasicInfoStep form={form} />;
       case 3:
@@ -261,7 +263,13 @@ export const PropertyForm = forwardRef<
 PropertyForm.displayName = "PropertyForm";
 
 // Step 1: Location Selection
-function LocationStep({ form }: { form: ReturnType<typeof useForm<PropertyFormData>> }) {
+function LocationStep({ 
+  form, 
+  onFormChange 
+}: { 
+  form: ReturnType<typeof useForm<PropertyFormData>>;
+  onFormChange?: (data: Partial<PropertyFormData>) => void;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -292,14 +300,28 @@ function LocationStep({ form }: { form: ReturnType<typeof useForm<PropertyFormDa
                       : null
                   }
                   onChange={(location: Location) => {
-                    field.onChange({
+                    const locationValue = {
                       latitude: location.latitude,
                       longitude: location.longitude,
-                    });
+                    };
+                    field.onChange(locationValue);
                     form.setValue("address", location.address);
                     form.setValue("city", location.city);
                     form.setValue("state", location.state);
                     form.setValue("zipCode", location.zipCode);
+                    // Trigger validation for location field
+                    form.trigger("location");
+                    // Update formData in parent component
+                    if (onFormChange) {
+                      onFormChange({
+                        ...form.getValues(),
+                        location: locationValue,
+                        address: location.address,
+                        city: location.city,
+                        state: location.state,
+                        zipCode: location.zipCode,
+                      });
+                    }
                   }}
                   error={form.formState.errors.location?.message}
                 />
