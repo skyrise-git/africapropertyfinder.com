@@ -58,6 +58,7 @@ import {
   DollarSign,
   GraduationCap,
   MoreHorizontal,
+  Package,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/utils/image-optimization";
 
@@ -298,6 +299,10 @@ export const PropertyForm = forwardRef<
             ];
           }
         case 5:
+          const listingTypeForStep5 = form.getValues("listingType");
+          if (listingTypeForStep5 === "sale") {
+            return []; // No validation needed for sale listings
+          }
           return ["isShared", "sharingDetails"];
         case 6:
           return [
@@ -904,20 +909,78 @@ function BasicInfoStep({
                   <Sofa className="h-4 w-4" />
                   Furnishing *
                 </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="transition-all focus:scale-[1.01]">
-                      <SelectValue placeholder="Select furnishing" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="furnished">Furnished</SelectItem>
-                    <SelectItem value="semi-furnished">
-                      Semi-Furnished
-                    </SelectItem>
-                    <SelectItem value="unfurnished">Unfurnished</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      {
+                        value: "furnished",
+                        label: "Furnished",
+                        icon: Sofa,
+                        color: "text-green-600",
+                        bgColor: "bg-green-50 dark:bg-green-950/20",
+                        borderColor: "border-green-200 dark:border-green-800",
+                      },
+                      {
+                        value: "semi-furnished",
+                        label: "Semi-Furnished",
+                        icon: Package,
+                        color: "text-orange-600",
+                        bgColor: "bg-orange-50 dark:bg-orange-950/20",
+                        borderColor: "border-orange-200 dark:border-orange-800",
+                      },
+                      {
+                        value: "unfurnished",
+                        label: "Unfurnished",
+                        icon: Square,
+                        color: "text-gray-600",
+                        bgColor: "bg-gray-50 dark:bg-gray-950/20",
+                        borderColor: "border-gray-200 dark:border-gray-800",
+                      },
+                    ].map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = field.value === option.value;
+                      return (
+                        <motion.button
+                          key={option.value}
+                          type="button"
+                          onClick={() => field.onChange(option.value)}
+                          className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                            isSelected
+                              ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                              : "border-border bg-muted/30 hover:bg-muted/50"
+                          }`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {isSelected && (
+                            <motion.div
+                              className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                              layoutId="furnishingBg"
+                              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            />
+                          )}
+                          <div className="relative z-10 flex flex-col items-center gap-2">
+                            <Icon
+                              className={`h-6 w-6 ${
+                                isSelected ? option.color : "text-muted-foreground"
+                              }`}
+                            />
+                            <span
+                              className={`text-sm font-medium ${
+                                isSelected ? "text-foreground" : "text-muted-foreground"
+                              }`}
+                            >
+                              {option.label}
+                            </span>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -1289,7 +1352,7 @@ function PricingStep({
   );
 }
 
-// Step 4: Shared Property Details
+// Step 5: Shared Property Details
 function SharedPropertyStep({
   form,
   watchedListingType,
@@ -1300,7 +1363,21 @@ function SharedPropertyStep({
   watchedIsShared?: boolean;
 }) {
   if (watchedListingType === "sale") {
-    return null;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Shared Property Details</CardTitle>
+          <CardDescription>
+            This step is not applicable for sale listings
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-sm">
+            Shared property details are only relevant for rental and student housing listings. You can proceed to the next step.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
