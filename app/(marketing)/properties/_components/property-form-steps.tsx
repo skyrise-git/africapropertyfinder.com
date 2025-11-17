@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 import { useQueryState, parseAsString } from "nuqs";
 import type { PropertyFormData } from "./property-form-schema";
 import { PropertyForm } from "./property-form";
@@ -129,7 +129,12 @@ export function PropertyFormSteps({
             Next
             <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
-        ) : null}
+        ) : (
+          <Button type="button" onClick={handleNextClick}>
+            <Save className="mr-2 h-4 w-4" />
+            Submit
+          </Button>
+        )}
       </div>
     </div>
   );

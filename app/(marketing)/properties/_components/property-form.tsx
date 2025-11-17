@@ -79,6 +79,10 @@ import {
   Clock,
   Wrench,
   Key,
+  Users,
+  Briefcase,
+  Baby,
+  UserCheck,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/utils/image-optimization";
 
@@ -1488,30 +1492,87 @@ function SharedPropertyStep({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sharing Type *</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      const currentDetails = form.getValues("sharingDetails");
-                      form.setValue("sharingDetails", {
-                        sharingType: value as "room" | "apartment" | "house",
-                        currentOccupants: currentDetails?.currentOccupants ?? 0,
-                        preferredTenantType:
-                          currentDetails?.preferredTenantType ?? "anyone",
-                      });
-                      field.onChange(value);
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select sharing type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="room">Room</SelectItem>
-                      <SelectItem value="apartment">Apartment</SelectItem>
-                      <SelectItem value="house">House</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        {
+                          value: "room",
+                          label: "Room",
+                          icon: HomeIcon,
+                          color: "text-blue-600",
+                          bgColor: "bg-blue-50 dark:bg-blue-950/20",
+                          borderColor: "border-blue-200 dark:border-blue-800",
+                        },
+                        {
+                          value: "apartment",
+                          label: "Apartment",
+                          icon: Building2,
+                          color: "text-green-600",
+                          bgColor: "bg-green-50 dark:bg-green-950/20",
+                          borderColor: "border-green-200 dark:border-green-800",
+                        },
+                        {
+                          value: "house",
+                          label: "House",
+                          icon: Home,
+                          color: "text-purple-600",
+                          bgColor: "bg-purple-50 dark:bg-purple-950/20",
+                          borderColor: "border-purple-200 dark:border-purple-800",
+                        },
+                      ].map((option) => {
+                        const Icon = option.icon;
+                        const isSelected = field.value === option.value;
+                        return (
+                          <motion.button
+                            key={option.value}
+                            type="button"
+                            onClick={() => {
+                              const currentDetails = form.getValues("sharingDetails");
+                              form.setValue("sharingDetails", {
+                                sharingType: option.value as "room" | "apartment" | "house",
+                                currentOccupants: currentDetails?.currentOccupants ?? 0,
+                                preferredTenantType:
+                                  currentDetails?.preferredTenantType ?? "anyone",
+                              });
+                              field.onChange(option.value);
+                            }}
+                            className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                              isSelected
+                                ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                                : "border-border bg-muted/30 hover:bg-muted/50"
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {isSelected && (
+                              <motion.div
+                                className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                                layoutId="sharingTypeBg"
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                              />
+                            )}
+                            <div className="relative z-10 flex flex-col items-center gap-2">
+                              <Icon
+                                className={`h-6 w-6 ${
+                                  isSelected ? option.color : "text-muted-foreground"
+                                }`}
+                              />
+                              <span
+                                className={`text-sm font-medium ${
+                                  isSelected ? "text-foreground" : "text-muted-foreground"
+                                }`}
+                              >
+                                {option.label}
+                              </span>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -1553,36 +1614,98 @@ function SharedPropertyStep({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Preferred Tenant Type *</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      const currentDetails = form.getValues("sharingDetails");
-                      form.setValue("sharingDetails", {
-                        sharingType: currentDetails?.sharingType ?? "room",
-                        currentOccupants: currentDetails?.currentOccupants ?? 0,
-                        preferredTenantType: value as
-                          | "students"
-                          | "professionals"
-                          | "families"
-                          | "anyone",
-                      });
-                      field.onChange(value);
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select preferred tenant type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="students">Students</SelectItem>
-                      <SelectItem value="professionals">
-                        Professionals
-                      </SelectItem>
-                      <SelectItem value="families">Families</SelectItem>
-                      <SelectItem value="anyone">Anyone</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                      {[
+                        {
+                          value: "students",
+                          label: "Students",
+                          icon: GraduationCap,
+                          color: "text-blue-600",
+                          bgColor: "bg-blue-50 dark:bg-blue-950/20",
+                          borderColor: "border-blue-200 dark:border-blue-800",
+                        },
+                        {
+                          value: "professionals",
+                          label: "Professionals",
+                          icon: Briefcase,
+                          color: "text-green-600",
+                          bgColor: "bg-green-50 dark:bg-green-950/20",
+                          borderColor: "border-green-200 dark:border-green-800",
+                        },
+                        {
+                          value: "families",
+                          label: "Families",
+                          icon: Baby,
+                          color: "text-purple-600",
+                          bgColor: "bg-purple-50 dark:bg-purple-950/20",
+                          borderColor: "border-purple-200 dark:border-purple-800",
+                        },
+                        {
+                          value: "anyone",
+                          label: "Anyone",
+                          icon: UserCheck,
+                          color: "text-orange-600",
+                          bgColor: "bg-orange-50 dark:bg-orange-950/20",
+                          borderColor: "border-orange-200 dark:border-orange-800",
+                        },
+                      ].map((option) => {
+                        const Icon = option.icon;
+                        const isSelected = field.value === option.value;
+                        return (
+                          <motion.button
+                            key={option.value}
+                            type="button"
+                            onClick={() => {
+                              const currentDetails = form.getValues("sharingDetails");
+                              form.setValue("sharingDetails", {
+                                sharingType: currentDetails?.sharingType ?? "room",
+                                currentOccupants: currentDetails?.currentOccupants ?? 0,
+                                preferredTenantType: option.value as
+                                  | "students"
+                                  | "professionals"
+                                  | "families"
+                                  | "anyone",
+                              });
+                              field.onChange(option.value);
+                            }}
+                            className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                              isSelected
+                                ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                                : "border-border bg-muted/30 hover:bg-muted/50"
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {isSelected && (
+                              <motion.div
+                                className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                                layoutId="preferredTenantTypeBg"
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                              />
+                            )}
+                            <div className="relative z-10 flex flex-col items-center gap-2">
+                              <Icon
+                                className={`h-6 w-6 ${
+                                  isSelected ? option.color : "text-muted-foreground"
+                                }`}
+                              />
+                              <span
+                                className={`text-sm font-medium ${
+                                  isSelected ? "text-foreground" : "text-muted-foreground"
+                                }`}
+                              >
+                                {option.label}
+                              </span>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
