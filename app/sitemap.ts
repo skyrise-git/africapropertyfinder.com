@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 import { marketingSite } from "@/lib/config";
-import { blogService } from "@/lib/services/blog.service";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = marketingSite.url;
@@ -31,29 +30,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.5,
     },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
   ];
 
-  // Fetch published blogs dynamically
-  let blogPages: MetadataRoute.Sitemap = [];
-  try {
-    const publishedBlogs = await blogService.getPublished();
-    blogPages = publishedBlogs.map((blog) => ({
-      url: `${baseUrl}/blogs/${blog.slug}`,
-      lastModified:
-        blog.updatedAt && typeof blog.updatedAt === "string"
-          ? new Date(blog.updatedAt)
-          : blog.publishedAt && typeof blog.publishedAt === "number"
-            ? new Date(blog.publishedAt)
-            : blog.createdAt && typeof blog.createdAt === "string"
-              ? new Date(blog.createdAt)
-              : new Date(),
-      changeFrequency: "weekly" as const,
-      priority: blog.featured ? 0.8 : 0.7,
-    }));
-  } catch (error) {
-    console.error("Error fetching blogs for sitemap:", error);
-    // Continue with static pages even if blog fetch fails
-  }
+  // Note: Blog pages are not included here because Firebase client SDK
+  // doesn't work in server-side build context. To include dynamic blog pages:
+  // 1. Use Firebase Admin SDK for server-side operations, OR
+  // 2. Generate sitemap dynamically at runtime with ISR, OR
+  // 3. Use a separate API route that fetches blogs and generates sitemap
+  // For now, only static pages are included in the sitemap.
 
-  return [...staticPages, ...blogPages];
+  return staticPages;
 }
