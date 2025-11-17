@@ -213,7 +213,7 @@ export const PropertyForm = forwardRef<
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <LocationStep form={form} onFormChange={onFormChange} />;
+        return <LocationStep form={form} />;
       case 2:
         return <BasicInfoStep form={form} />;
       case 3:

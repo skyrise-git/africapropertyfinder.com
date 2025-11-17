@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
+import { useQueryState, parseAsString } from "nuqs";
 import type { PropertyFormData } from "./property-form-schema";
 import { PropertyForm } from "./property-form";
 
@@ -21,10 +21,12 @@ export function PropertyFormSteps({
   initialData,
 }: PropertyFormStepsProps) {
   // URL-backed step so wizard position survives refresh
-  const [currentStep, setCurrentStep] = useQueryState(
+  const [stepQuery, setStepQuery] = useQueryState(
     "step",
-    parseAsInteger.withDefault(1),
+    parseAsString.withDefault("1"),
   );
+  const currentStep = Number(stepQuery) || 1;
+  const setCurrentStep = (step: number) => setStepQuery(String(step));
   const [formData, setFormData] = useState<Partial<PropertyFormData>>(
     initialData || {},
   );
