@@ -15,6 +15,7 @@ export const marketingSite = {
     linkedin: "https://www.linkedin.com/company/skyriserealestate",
     youtube: "https://www.youtube.com/@skyriserealestate",
     facebook: "https://www.facebook.com/skyriserealestate",
+    instagram: "https://www.instagram.com/skyriserealestate",
   },
   stack: [
     "Expert property listings and market analysis",
@@ -83,6 +84,47 @@ export const marketingSite = {
       ],
     },
   ],
+  footer: {
+    newsletter: {
+      title: "Stay Updated with Real Estate Trends",
+      description:
+        "Subscribe to our newsletter for market insights and exclusive property listings",
+    },
+    companyInfo: {
+      tagline: "Your trusted partner in real estate.",
+      address: "123 Luxury Avenue, Premium City, 12345",
+    },
+    links: {
+      properties: [
+        { label: "Buy Property", href: "/buy" },
+        { label: "Rent Property", href: "/rent" },
+        { label: "Sell Property", href: "/sell" },
+        { label: "Featured Listings", href: "/blogs" },
+        { label: "New Developments", href: "/developments" },
+      ],
+      company: [
+        { label: "About Us", href: "/about" },
+        { label: "Our Team", href: "/team" },
+        { label: "Careers", href: "/careers" },
+        { label: "Press & Media", href: "/press" },
+        { label: "Contact Us", href: "/contact" },
+      ],
+      resources: [
+        { label: "Market Analysis", href: "/market-analysis" },
+        { label: "Investment Guide", href: "/investment-guide" },
+        { label: "Buying Guide", href: "/buying-guide" },
+        { label: "Property News", href: "/blogs" },
+        { label: "FAQs", href: "/#faq" },
+      ],
+    },
+    legal: [
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Cookie Policy", href: "/cookies" },
+      { label: "Disclaimer", href: "/disclaimer" },
+      { label: "Sitemap", href: "/sitemap" },
+    ],
+  },
 } as const;
 
 export type MarketingSite = typeof marketingSite;
