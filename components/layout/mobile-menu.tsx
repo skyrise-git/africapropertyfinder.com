@@ -219,16 +219,23 @@ export function MobileMenu({
 
               {/* Footer */}
               <div className="border-t border-gray-200 dark:border-gray-800 p-4 space-y-3">
-                <button
-                  type="button"
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={toggleTheme}
-                  className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      toggleTheme();
+                    }
+                  }}
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
                 >
-                  <div className="pointer-events-none">
+                  <div onClick={(e) => e.stopPropagation()}>
                     <ThemeToggle />
                   </div>
                   <span>Toggle theme</span>
-                </button>
+                </div>
                 <Button variant="outline" className="w-full" asChild>
                   <Link
                     href="/signin"
