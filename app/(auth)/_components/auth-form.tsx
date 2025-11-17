@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, User, Mail, Lock, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,7 @@ import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BorderTrail } from "@/components/ui/border-trail";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -28,16 +29,33 @@ import {
 import { Input } from "@/components/ui/input";
 
 // Zod validation schema factory
-const createAuthFormSchema = (showNameField: boolean) =>
+const createAuthFormSchema = (
+  showNameField: boolean,
+  showPhoneField: boolean,
+  requireTermsAcceptance: boolean,
+) =>
   z.object({
     name: showNameField
       ? z.string().min(2, "Name must be at least 2 characters")
       : z.string().optional(),
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
+    phone: showPhoneField
+      ? z
+          .string()
+          .min(10, "Phone number must be at least 10 digits")
+          .regex(/^[\d\s\-\+\(\)]+$/, "Please enter a valid phone number")
+      : z.string().optional(),
+    acceptTerms: requireTermsAcceptance
+      ? z.boolean().refine((val) => val === true, {
+          message: "You must accept the terms and conditions",
+        })
+      : z.boolean().optional(),
   });
 
-export type AuthFormData = z.infer<ReturnType<typeof createAuthFormSchema>>;
+export type AuthFormData = z.infer<
+  ReturnType<typeof createAuthFormSchema>
+>;
 
 interface AuthFormProps {
   title: string;
@@ -48,6 +66,9 @@ interface AuthFormProps {
   footerLinkHref?: string;
   onSubmit: (data: AuthFormData) => Promise<void>;
   showNameField?: boolean;
+  showPhoneField?: boolean;
+  requireTermsAcceptance?: boolean;
+  onSuccess?: () => void;
 }
 
 export function AuthForm({
@@ -59,17 +80,24 @@ export function AuthForm({
   footerLinkHref = "",
   onSubmit,
   showNameField = false,
+  showPhoneField = false,
+  requireTermsAcceptance = false,
+  onSuccess,
 }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<AuthFormData>({
-    resolver: zodResolver(createAuthFormSchema(showNameField)),
+    resolver: zodResolver(
+      createAuthFormSchema(showNameField, showPhoneField, requireTermsAcceptance),
+    ),
     defaultValues: {
       name: "",
       email: "",
       password: "",
+      phone: "",
+      acceptTerms: false,
     },
   });
 
@@ -78,6 +106,9 @@ export function AuthForm({
     setIsLoading(true);
     try {
       await onSubmit(data);
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -120,11 +151,15 @@ export function AuthForm({
                   <FormItem>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="John Doe"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="John Doe"
+                          {...field}
+                          disabled={isLoading}
+                          className="pl-10"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,17 +174,46 @@ export function AuthForm({
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="you@example.com"
-                      {...field}
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        type="email"
+                        placeholder="you@example.com"
+                        {...field}
+                        disabled={isLoading}
+                        className="pl-10"
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {showPhoneField && (
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          type="tel"
+                          placeholder="+1 (555) 123-4567"
+                          {...field}
+                          disabled={isLoading}
+                          className="pl-10"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -159,12 +223,13 @@ export function AuthForm({
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         {...field}
                         disabled={isLoading}
-                        className="pr-10"
+                        className="pl-10 pr-10"
                       />
                       <Button
                         type="button"
@@ -186,6 +251,47 @@ export function AuthForm({
                 </FormItem>
               )}
             />
+
+            {requireTermsAcceptance && (
+              <FormField
+                control={form.control}
+                name="acceptTerms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-normal">
+                        I agree to the{" "}
+                        <Link
+                          href="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline hover:no-underline"
+                        >
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          href="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline hover:no-underline"
+                        >
+                          Privacy Policy
+                        </Link>
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+            )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Loading..." : submitText}
