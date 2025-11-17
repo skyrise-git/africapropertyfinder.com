@@ -1,5 +1,5 @@
 import { FAQSection } from "@/components/home/faq-section";
-import { TestimonialsMarquee } from "@/components/mvpblocks/testimonials-marquee";
+import { TestimonialsMarquee } from "@/components/home/testimonials-marquee";
 import { faqData } from "@/lib/config";
 
 export default function MarketingHome() {

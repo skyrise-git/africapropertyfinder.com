@@ -25,7 +25,7 @@ interface FAQItem {
 }
 
 interface FAQSectionProps {
-  questions: FAQItem[];
+  questions: readonly FAQItem[];
 }
 
 // Icon mapping object
