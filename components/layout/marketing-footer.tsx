@@ -15,7 +15,6 @@ import {
   Mail,
   MapPin,
   Building2,
-  Search,
 } from "lucide-react";
 
 export function MarketingFooter() {
@@ -199,7 +198,7 @@ export function MarketingFooter() {
               </Link>
             </nav>
 
-            {/* Legal Links + Search - Right */}
+            {/* Legal Links - Right */}
             <div className="flex flex-wrap items-center justify-end gap-4 order-3 lg:order-none">
               {marketingSite.footer.legal.map((link) => (
                 <Link
@@ -210,14 +209,6 @@ export function MarketingFooter() {
                   {link.label}
                 </Link>
               ))}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full shrink-0"
-                aria-label="Search"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </div>

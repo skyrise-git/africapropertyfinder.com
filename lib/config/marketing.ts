@@ -120,8 +120,6 @@ export const marketingSite = {
     legal: [
       { label: "Terms of Service", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
-      { label: "Cookie Policy", href: "/cookies" },
-      { label: "Disclaimer", href: "/disclaimer" },
       { label: "Sitemap", href: "/sitemap" },
     ],
   },
