@@ -55,7 +55,9 @@ export default function CreatePropertyPage() {
             : undefined,
         sharingDetails:
           data.listingType === "rent" || data.listingType === "student-housing"
-            ? data.sharingDetails
+            ? data.isShared
+              ? data.sharingDetails
+              : undefined
             : undefined,
         parkingAvailable: data.parkingAvailable,
         laundry: data.laundry,

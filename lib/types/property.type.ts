@@ -35,9 +35,9 @@ export interface Location {
 }
 
 export interface SharingDetails {
-  sharingType: SharingType;
-  currentOccupants: number;
-  preferredTenantType: PreferredTenantType;
+  sharingType?: SharingType;
+  currentOccupants?: number;
+  preferredTenantType?: PreferredTenantType;
 }
 
 export interface ContactInfo {

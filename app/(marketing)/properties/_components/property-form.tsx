@@ -1467,7 +1467,13 @@ function SharedPropertyStep({
               <FormControl>
                 <Switch
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    if (!checked) {
+                      // Clear sharing details when isShared is set to false
+                      form.setValue("sharingDetails", undefined);
+                    }
+                  }}
                 />
               </FormControl>
             </FormItem>

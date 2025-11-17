@@ -98,14 +98,14 @@ const rentSchema = basePropertySchema.extend({
   isShared: z.boolean().optional(),
   sharingDetails: z
     .object({
-      sharingType: z.enum(["room", "apartment", "house"]),
-      currentOccupants: z.number().int().min(0),
+      sharingType: z.enum(["room", "apartment", "house"]).optional(),
+      currentOccupants: z.number().int().min(0).optional(),
       preferredTenantType: z.enum([
         "students",
         "professionals",
         "families",
         "anyone",
-      ]),
+      ]).optional(),
     })
     .optional(),
 });
@@ -122,14 +122,14 @@ const studentHousingSchema = basePropertySchema.extend({
   isShared: z.boolean().optional(),
   sharingDetails: z
     .object({
-      sharingType: z.enum(["room", "apartment", "house"]),
-      currentOccupants: z.number().int().min(0),
+      sharingType: z.enum(["room", "apartment", "house"]).optional(),
+      currentOccupants: z.number().int().min(0).optional(),
       preferredTenantType: z.enum([
         "students",
         "professionals",
         "families",
         "anyone",
-      ]),
+      ]).optional(),
     })
     .optional(),
 });
