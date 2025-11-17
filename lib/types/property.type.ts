@@ -59,7 +59,7 @@ export interface Property extends BaseEntity {
   numBedrooms: number;
   numBathrooms: number;
   furnishing: FurnishingType;
-  area: number; // in square feet or square meters
+  area?: number; // in square feet or square meters
   floorNumber?: number;
   totalFloors?: number;
 
@@ -118,7 +118,7 @@ export interface PropertyInput {
   numBedrooms: number;
   numBathrooms: number;
   furnishing: FurnishingType;
-  area: number;
+  area?: number;
   floorNumber?: number;
   totalFloors?: number;
   price?: number;

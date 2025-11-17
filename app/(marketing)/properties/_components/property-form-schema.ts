@@ -32,7 +32,7 @@ const basePropertySchema = z.object({
   numBedrooms: z.number().int().min(0),
   numBathrooms: z.number().int().min(0),
   furnishing: z.enum(["furnished", "semi-furnished", "unfurnished"]),
-  area: z.number().positive("Area must be positive"),
+  area: z.number().positive("Area must be positive").optional(),
   floorNumber: z.number().int().min(0).optional(),
   totalFloors: z.number().int().min(0).optional(),
   address: z.string().min(1, "Address is required"),

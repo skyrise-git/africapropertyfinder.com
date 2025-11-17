@@ -140,7 +140,7 @@ export const PropertyForm = forwardRef<
         furnishing:
           (formData.furnishing as PropertyFormData["furnishing"]) ||
           "unfurnished",
-        area: formData.area || 0,
+        area: formData.area,
         floorNumber: formData.floorNumber,
         totalFloors: formData.totalFloors,
         price: (formData as any).price,
@@ -276,7 +276,7 @@ export const PropertyForm = forwardRef<
             "numBedrooms",
             "numBathrooms",
             "furnishing",
-            "area",
+            // area is optional, so not included in validation
             "floorNumber",
             "totalFloors",
           ];
@@ -905,17 +905,21 @@ function BasicInfoStep({
                 <FormItem>
                   <FormLabel className="flex items-center gap-2">
                     <Square className="h-4 w-4" />
-                    Area (sq ft) *
+                    Area (sq ft)
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       {...field}
+                      value={field.value ?? ""}
                       onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || 0)
+                        field.onChange(
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                        )
                       }
                       min={0}
                       className="transition-all focus:scale-[1.01]"
+                      placeholder="Optional"
                     />
                   </FormControl>
                   <FormMessage />
