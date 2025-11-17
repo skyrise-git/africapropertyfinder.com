@@ -89,14 +89,6 @@ export interface Property extends BaseEntity {
   garden?: boolean;
   dishwasher?: boolean;
   fireplace?: boolean;
-  wifi?: boolean;
-  gym?: boolean;
-  pool?: boolean;
-  elevator?: boolean;
-  security?: boolean;
-  garden?: boolean;
-  dishwasher?: boolean;
-  fireplace?: boolean;
   otherAmenities?: string;
 
   // Location
@@ -115,9 +107,6 @@ export interface Property extends BaseEntity {
   petsAllowed?: boolean;
   guestsAllowed?: boolean;
   sublettingAllowed?: boolean;
-  partiesAllowed?: boolean;
-  quietHours?: boolean;
-  maintenanceResponsibility?: boolean;
   partiesAllowed?: boolean;
   quietHours?: boolean;
   maintenanceResponsibility?: boolean;
@@ -244,4 +233,3 @@ export interface PropertyUpdateInput {
   images?: Image[];
   videoTourUrl?: string;
 }
-

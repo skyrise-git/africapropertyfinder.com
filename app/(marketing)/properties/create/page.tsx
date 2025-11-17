@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { PropertyFormSteps } from "../_components/property-form-steps";
@@ -8,13 +9,14 @@ import type { PropertyFormData } from "../_components/property-form-schema";
 
 export default function CreatePropertyPage() {
   const router = useRouter();
+  const [propertyId, setPropertyId] = useState<string | null>(null);
 
   const handleSubmit = async (data: PropertyFormData) => {
     try {
       // Clean up deleted images from UploadThing (handled in form component)
       // Here we just save the property
 
-      const propertyId = await propertyService.create({
+      const id = await propertyService.create({
         title: data.title,
         listingType: data.listingType,
         propertyType: data.propertyType,
@@ -93,11 +95,21 @@ export default function CreatePropertyPage() {
         videoTourUrl: data.videoTourUrl,
       });
 
-      toast.success("Property listed successfully!");
-      router.push(`/properties/${propertyId}`);
+      setPropertyId(id);
+      // Success dialog will be shown by PropertyFormSteps
     } catch (error) {
       console.error("Error creating property:", error);
       toast.error("Failed to create property listing. Please try again.");
+      throw error; // Re-throw to let PropertyFormSteps handle the error state
+    }
+  };
+
+  const handleSuccess = () => {
+    // Redirect after showing success dialog
+    if (propertyId) {
+      setTimeout(() => {
+        router.push(`/properties/${propertyId}`);
+      }, 2500);
     }
   };
 
@@ -113,7 +125,7 @@ export default function CreatePropertyPage() {
         </p>
       </div>
 
-      <PropertyFormSteps onSubmit={handleSubmit} />
+      <PropertyFormSteps onSubmit={handleSubmit} onSuccess={handleSuccess} />
     </div>
   );
 }

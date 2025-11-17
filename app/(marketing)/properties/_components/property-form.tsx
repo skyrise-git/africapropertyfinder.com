@@ -96,14 +96,15 @@ interface PropertyFormProps {
   onPrevious: () => void;
   canGoBack: boolean;
   isLastStep: boolean;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 export const PropertyForm = forwardRef<
-  { triggerSubmit: () => void },
+  { triggerSubmit: () => void; isUploading: boolean },
   PropertyFormProps
 >(
   (
-    { step, formData, onNext, onSubmit, onPrevious, canGoBack, isLastStep },
+    { step, formData, onNext, onSubmit, onPrevious, canGoBack, isLastStep, onLoadingChange },
     ref
   ) => {
     const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
@@ -319,6 +320,7 @@ export const PropertyForm = forwardRef<
         // Upload pending images first
         if (pendingImages.length > 0) {
           try {
+            onLoadingChange?.(true);
             toast.loading(`Uploading ${pendingImages.length} image(s)...`, {
               id: "uploading-images",
             });
@@ -369,11 +371,13 @@ export const PropertyForm = forwardRef<
             toast.error("Failed to upload images. Please try again.", {
               id: "uploading-images",
             });
+            onLoadingChange?.(false);
             return;
           }
         }
 
         await onSubmit(data);
+        onLoadingChange?.(false);
       } else {
         onNext(data);
       }
@@ -530,6 +534,7 @@ export const PropertyForm = forwardRef<
           }
         });
       },
+      isUploading: isUploading || pendingImages.length > 0,
     }));
 
     // Render step content
