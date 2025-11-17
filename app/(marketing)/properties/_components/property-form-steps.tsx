@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import type { PropertyFormData } from "./property-form-schema";
 import { PropertyForm } from "./property-form";
 
@@ -19,11 +20,19 @@ export function PropertyFormSteps({
   onSubmit,
   initialData,
 }: PropertyFormStepsProps) {
-  const [currentStep, setCurrentStep] = useState(1);
+  // URL-backed step so wizard position survives refresh
+  const [currentStep, setCurrentStep] = useQueryState(
+    "step",
+    parseAsInteger.withDefault(1),
+  );
   const [formData, setFormData] = useState<Partial<PropertyFormData>>(
     initialData || {},
   );
-  const formRef = useRef<{ triggerSubmit: () => void; getFormState: () => { errors: any } }>(null);
+  const formRef = useRef<{ triggerSubmit: () => void }>(null);
+
+  // Read location from URL so we can show footer hint without prop drilling
+  const [locLat] = useQueryState("locLat", parseAsString.withDefault("0"));
+  const [locLng] = useQueryState("locLng", parseAsString.withDefault("0"));
 
   const handleNext = (data: Partial<PropertyFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -83,12 +92,6 @@ export function PropertyFormSteps({
             onPrevious={handlePrevious}
             canGoBack={currentStep > 1}
             isLastStep={currentStep === TOTAL_STEPS}
-            onFormChange={(data) => {
-              // Update formData when location changes
-              if (data.location) {
-                setFormData((prev) => ({ ...prev, location: data.location }));
-              }
-            }}
           />
         </motion.div>
       </AnimatePresence>
@@ -106,11 +109,11 @@ export function PropertyFormSteps({
         </Button>
         <div className="text-sm text-muted-foreground">
           {currentStep === 1 &&
-            (formData.location &&
-            formData.location.latitude !== 0 &&
-            formData.location.longitude !== 0
-              ? ""
-              : "Location selection is required")}
+            !(
+              (locLat && locLat !== "0") ||
+              (locLng && locLng !== "0")
+            ) &&
+            "Location selection is required"}
         </div>
         {currentStep < TOTAL_STEPS ? (
           <Button type="button" onClick={handleNextClick}>

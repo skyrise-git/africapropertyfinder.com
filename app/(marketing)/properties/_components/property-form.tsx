@@ -5,6 +5,7 @@ import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { motion } from "motion/react";
+import { useQueryState, parseAsString } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -52,13 +53,12 @@ interface PropertyFormProps {
   onPrevious: () => void;
   canGoBack: boolean;
   isLastStep: boolean;
-  onFormChange?: (data: Partial<PropertyFormData>) => void;
 }
 
 export const PropertyForm = forwardRef<
-  { triggerSubmit: () => void; getFormState: () => ReturnType<typeof useForm<PropertyFormData>>["formState"] },
+  { triggerSubmit: () => void },
   PropertyFormProps
->(({ step, formData, onNext, onSubmit, onPrevious, canGoBack, isLastStep, onFormChange }, ref) => {
+>(({ step, formData, onNext, onSubmit, onPrevious, canGoBack, isLastStep }, ref) => {
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
   const { startUpload, isUploading } = useUploadThing("imageUploader", {
@@ -207,7 +207,6 @@ export const PropertyForm = forwardRef<
     triggerSubmit: () => {
       form.handleSubmit(handleFormSubmit)();
     },
-    getFormState: () => form.formState,
   }));
 
   // Render step content
@@ -263,13 +262,68 @@ export const PropertyForm = forwardRef<
 PropertyForm.displayName = "PropertyForm";
 
 // Step 1: Location Selection
-function LocationStep({ 
-  form, 
-  onFormChange 
-}: { 
+function LocationStep({
+  form,
+}: {
   form: ReturnType<typeof useForm<PropertyFormData>>;
-  onFormChange?: (data: Partial<PropertyFormData>) => void;
 }) {
+  // URL-backed state for location so it survives refresh and can be read from other components
+  const [locLat, setLocLat] = useQueryState(
+    "locLat",
+    parseAsString.withDefault("0"),
+  );
+  const [locLng, setLocLng] = useQueryState(
+    "locLng",
+    parseAsString.withDefault("0"),
+  );
+  const [locAddress, setLocAddress] = useQueryState(
+    "locAddress",
+    parseAsString.withDefault(""),
+  );
+  const [locCity, setLocCity] = useQueryState(
+    "locCity",
+    parseAsString.withDefault(""),
+  );
+  const [locState, setLocState] = useQueryState(
+    "locState",
+    parseAsString.withDefault(""),
+  );
+  const [locZip, setLocZip] = useQueryState(
+    "locZip",
+    parseAsString.withDefault(""),
+  );
+
+  // Seed form values from URL on first render if location is present
+  useEffect(() => {
+    if (locLat && locLng && (locLat !== "0" || locLng !== "0")) {
+      const latitude = Number(locLat);
+      const longitude = Number(locLng);
+
+      if (!Number.isNaN(latitude) && !Number.isNaN(longitude)) {
+        const currentLocation = form.getValues("location");
+        const isDefaultLocation =
+          !currentLocation ||
+          (currentLocation.latitude === 0 && currentLocation.longitude === 0);
+
+        if (isDefaultLocation) {
+          form.setValue("location", { latitude, longitude });
+        }
+      }
+    }
+
+    if (locAddress) {
+      form.setValue("address", locAddress);
+    }
+    if (locCity) {
+      form.setValue("city", locCity);
+    }
+    if (locState) {
+      form.setValue("state", locState);
+    }
+    if (locZip) {
+      form.setValue("zipCode", locZip);
+    }
+  }, [locLat, locLng, locAddress, locCity, locState, locZip, form]);
   return (
     <Card>
       <CardHeader>
@@ -311,17 +365,13 @@ function LocationStep({
                     form.setValue("zipCode", location.zipCode);
                     // Trigger validation for location field
                     form.trigger("location");
-                    // Update formData in parent component
-                    if (onFormChange) {
-                      onFormChange({
-                        ...form.getValues(),
-                        location: locationValue,
-                        address: location.address,
-                        city: location.city,
-                        state: location.state,
-                        zipCode: location.zipCode,
-                      });
-                    }
+                    // Persist location to URL using nuqs so it survives refresh and can be read elsewhere
+                    setLocLat(String(location.latitude));
+                    setLocLng(String(location.longitude));
+                    setLocAddress(location.address);
+                    setLocCity(location.city);
+                    setLocState(location.state);
+                    setLocZip(location.zipCode || "");
                   }}
                   error={form.formState.errors.location?.message}
                 />
