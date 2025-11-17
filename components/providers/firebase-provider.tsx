@@ -19,7 +19,7 @@ export function FirebaseProvider({ children }: FirebaseProviderProps) {
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Guard auth routes - redirect authenticated users away from these pages
-  useAuthGuard(["/signin"]);
+  useAuthGuard(["/signin", "/signup"]);
 
   useEffect(() => {
     try {
