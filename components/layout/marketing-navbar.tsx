@@ -14,7 +14,7 @@ import { MobileMenu } from "@/components/layout/mobile-menu";
 const marketingNavLinks = [
   { label: "Home", href: "/" },
   { label: "Blogs", href: "/blogs" },
-  { label: "Resources", href: "#resources" },
+  { label: "Services", href: "#services" },
 ] as const;
 
 export function MarketingNavbar() {
@@ -28,9 +28,9 @@ export function MarketingNavbar() {
     setTheme(current === "dark" ? "light" : "dark");
   };
 
-  const resourcesMenu = marketingSite.megaMenu[0];
+  const servicesMenu = marketingSite.megaMenu[0];
   const simpleNavLinks = marketingNavLinks.filter(
-    (link) => link.href !== "#resources",
+    (link) => link.href !== "#services",
   );
 
   return (
@@ -52,9 +52,9 @@ export function MarketingNavbar() {
               </Link>
             ))}
             <MegaMenu
-              label={resourcesMenu.label}
-              href={resourcesMenu.href}
-              items={resourcesMenu.items}
+              label={servicesMenu.label}
+              href={servicesMenu.href}
+              items={servicesMenu.items}
             />
           </nav>
 
@@ -110,7 +110,7 @@ export function MarketingNavbar() {
         open={open}
         onClose={() => setOpen(false)}
         navLinks={marketingNavLinks}
-        resourcesItems={resourcesMenu.items}
+        resourcesItems={servicesMenu.items}
         toggleTheme={toggleTheme}
       />
     </>
