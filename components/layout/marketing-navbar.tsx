@@ -7,10 +7,18 @@ import { useTheme } from "next-themes";
 import { marketingSite } from "@/lib/marketing-config";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/core/theme-toggle";
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X, ArrowRight, LogIn } from "lucide-react";
 import { MegaMenu } from "@/components/layout/mega-menu";
 import { MobileMenu } from "@/components/layout/mobile-menu";
+import { cn } from "@/lib/utils";
 
 const marketingNavLinks = [
   { label: "Home", href: "/" },
@@ -31,7 +39,7 @@ export function MarketingNavbar() {
 
   const servicesMenu = marketingSite.megaMenu[0];
   const simpleNavLinks = marketingNavLinks.filter(
-    (link) => link.href !== "#services",
+    (link) => link.href !== "#services"
   );
 
   return (
@@ -57,22 +65,32 @@ export function MarketingNavbar() {
             />
           </Link>
 
-          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            {simpleNavLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="transition-colors hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <MegaMenu
-              label={servicesMenu.label}
-              href={servicesMenu.href}
-              items={servicesMenu.items}
-            />
-          </nav>
+          <NavigationMenu className="hidden md:flex">
+            <NavigationMenuList className="gap-1">
+              {simpleNavLinks.map((item) => (
+                <NavigationMenuItem key={item.href}>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        "h-9 text-sm text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              ))}
+              <NavigationMenuItem>
+                <MegaMenu
+                  label={servicesMenu.label}
+                  href={servicesMenu.href}
+                  items={servicesMenu.items}
+                />
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
 
           <div className="hidden items-center gap-3 md:flex">
             <ThemeToggle />
