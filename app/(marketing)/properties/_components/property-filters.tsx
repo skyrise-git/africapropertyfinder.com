@@ -28,6 +28,13 @@ import {
   X,
   ChevronDown,
   ChevronUp,
+  DollarSign,
+  HomeIcon,
+  GraduationCap,
+  Building2,
+  Sofa,
+  Plus,
+  ChevronUp as ChevronUpIcon,
 } from "lucide-react";
 import type {
   Property,
@@ -243,6 +250,9 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(["listing", "location", "pricing"]),
   );
+  
+  // Property type expansion state
+  const [showAllPropertyTypes, setShowAllPropertyTypes] = useState(false);
 
   // Get unique values from properties
   const uniqueCities = useMemo(
@@ -424,64 +434,283 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
         </CardHeader>
 
         <CardContent className="space-y-4 pt-4">
-          {/* Listing Type */}
+          {/* Listing Type - Tabbed View */}
           <FilterSection title="Listing Type" sectionKey="listing">
-            <div className="space-y-2">
-              {listingTypes.map((type) => (
-                <div key={type} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`listing-${type}`}
-                    checked={selectedListingTypes.includes(type)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedListingTypes([...selectedListingTypes, type]);
-                      } else {
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                {
+                  value: "sale",
+                  label: "Sale",
+                  icon: DollarSign,
+                  color: "text-green-600 dark:text-green-400",
+                  bgColor: "bg-green-50 dark:bg-green-950/20",
+                  borderColor: "border-green-200 dark:border-green-800",
+                  activeBgColor: "bg-green-100 dark:bg-green-900/30",
+                },
+                {
+                  value: "rent",
+                  label: "Rent",
+                  icon: HomeIcon,
+                  color: "text-blue-600 dark:text-blue-400",
+                  bgColor: "bg-blue-50 dark:bg-blue-950/20",
+                  borderColor: "border-blue-200 dark:border-blue-800",
+                  activeBgColor: "bg-blue-100 dark:bg-blue-900/30",
+                },
+                {
+                  value: "student-housing",
+                  label: "Student",
+                  icon: GraduationCap,
+                  color: "text-purple-600 dark:text-purple-400",
+                  bgColor: "bg-purple-50 dark:bg-purple-950/20",
+                  borderColor: "border-purple-200 dark:border-purple-800",
+                  activeBgColor: "bg-purple-100 dark:bg-purple-900/30",
+                },
+              ].map((option) => {
+                const Icon = option.icon;
+                const isSelected = selectedListingTypes.includes(
+                  option.value as ListingType,
+                );
+                return (
+                  <motion.button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
                         setSelectedListingTypes(
-                          selectedListingTypes.filter((t) => t !== type),
+                          selectedListingTypes.filter((t) => t !== option.value),
                         );
+                      } else {
+                        setSelectedListingTypes([
+                          ...selectedListingTypes,
+                          option.value,
+                        ]);
                       }
                     }}
-                  />
-                  <Label
-                    htmlFor={`listing-${type}`}
-                    className="text-sm font-normal cursor-pointer capitalize"
+                    className={`relative flex flex-col items-center gap-1.5 rounded-lg border-2 p-2.5 transition-all ${
+                      isSelected
+                        ? `${option.borderColor} ${option.activeBgColor} border-2 shadow-sm`
+                        : "border-border bg-muted/30 hover:bg-muted/50"
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {type.replace("-", " ")}
-                  </Label>
-                </div>
-              ))}
+                    {isSelected && (
+                      <motion.div
+                        className={`absolute inset-0 rounded-lg ${option.activeBgColor}`}
+                        layoutId="listingTypeFilterBg"
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+                    <div className="relative z-10 flex flex-col items-center gap-1">
+                      <Icon
+                        className={`h-4 w-4 ${
+                          isSelected ? option.color : "text-muted-foreground"
+                        }`}
+                      />
+                      <span
+                        className={`text-xs font-medium ${
+                          isSelected
+                            ? "text-foreground"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {option.label}
+                      </span>
+                    </div>
+                  </motion.button>
+                );
+              })}
             </div>
           </FilterSection>
 
-          {/* Property Type */}
+          {/* Property Type - Tabbed View */}
           <FilterSection title="Property Type" sectionKey="property">
-            <div className="space-y-2">
-              {propertyTypes.map((type) => (
-                <div key={type} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`property-${type}`}
-                    checked={selectedPropertyTypes.includes(type)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedPropertyTypes([
-                          ...selectedPropertyTypes,
-                          type,
-                        ]);
-                      } else {
-                        setSelectedPropertyTypes(
-                          selectedPropertyTypes.filter((t) => t !== type),
-                        );
-                      }
-                    }}
-                  />
-                  <Label
-                    htmlFor={`property-${type}`}
-                    className="text-sm font-normal cursor-pointer capitalize"
+            <div className="grid grid-cols-2 gap-2">
+              <AnimatePresence mode="popLayout">
+                {[
+                  {
+                    value: "apartment",
+                    label: "Apartment",
+                    icon: Building2,
+                    color: "text-blue-600 dark:text-blue-400",
+                    bgColor: "bg-blue-50 dark:bg-blue-950/20",
+                    borderColor: "border-blue-200 dark:border-blue-800",
+                    activeBgColor: "bg-blue-100 dark:bg-blue-900/30",
+                  },
+                  {
+                    value: "house",
+                    label: "House",
+                    icon: HomeIcon,
+                    color: "text-green-600 dark:text-green-400",
+                    bgColor: "bg-green-50 dark:bg-green-950/20",
+                    borderColor: "border-green-200 dark:border-green-800",
+                    activeBgColor: "bg-green-100 dark:bg-green-900/30",
+                  },
+                  {
+                    value: "condo",
+                    label: "Condo",
+                    icon: Building2,
+                    color: "text-purple-600 dark:text-purple-400",
+                    bgColor: "bg-purple-50 dark:bg-purple-950/20",
+                    borderColor: "border-purple-200 dark:border-purple-800",
+                    activeBgColor: "bg-purple-100 dark:bg-purple-900/30",
+                  },
+                  {
+                    value: "townhouse",
+                    label: "Townhouse",
+                    icon: Building2,
+                    color: "text-orange-600 dark:text-orange-400",
+                    bgColor: "bg-orange-50 dark:bg-orange-950/20",
+                    borderColor: "border-orange-200 dark:border-orange-800",
+                    activeBgColor: "bg-orange-100 dark:bg-orange-900/30",
+                  },
+                  {
+                    value: "studio",
+                    label: "Studio",
+                    icon: Sofa,
+                    color: "text-pink-600 dark:text-pink-400",
+                    bgColor: "bg-pink-50 dark:bg-pink-950/20",
+                    borderColor: "border-pink-200 dark:border-pink-800",
+                    activeBgColor: "bg-pink-100 dark:bg-pink-900/30",
+                  },
+                  {
+                    value: "room",
+                    label: "Room",
+                    icon: HomeIcon,
+                    color: "text-cyan-600 dark:text-cyan-400",
+                    bgColor: "bg-cyan-50 dark:bg-cyan-950/20",
+                    borderColor: "border-cyan-200 dark:border-cyan-800",
+                    activeBgColor: "bg-cyan-100 dark:bg-cyan-900/30",
+                  },
+                  {
+                    value: "other",
+                    label: "Other",
+                    icon: Building2,
+                    color: "text-gray-600 dark:text-gray-400",
+                    bgColor: "bg-gray-50 dark:bg-gray-950/20",
+                    borderColor: "border-gray-200 dark:border-gray-800",
+                    activeBgColor: "bg-gray-100 dark:bg-gray-900/30",
+                  },
+                ]
+                  .slice(0, showAllPropertyTypes ? 7 : 3)
+                  .map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = selectedPropertyTypes.includes(
+                      option.value as PropertyType,
+                    );
+                    return (
+                      <motion.button
+                        key={option.value}
+                        type="button"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedPropertyTypes(
+                              selectedPropertyTypes.filter(
+                                (t) => t !== option.value,
+                              ),
+                            );
+                          } else {
+                            setSelectedPropertyTypes([
+                              ...selectedPropertyTypes,
+                              option.value,
+                            ]);
+                          }
+                        }}
+                        className={`relative flex flex-col items-center gap-1.5 rounded-lg border-2 p-2.5 transition-all ${
+                          isSelected
+                            ? `${option.borderColor} ${option.activeBgColor} border-2 shadow-sm`
+                            : "border-border bg-muted/30 hover:bg-muted/50"
+                        }`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        {isSelected && (
+                          <motion.div
+                            className={`absolute inset-0 rounded-lg ${option.activeBgColor}`}
+                            layoutId={`propertyTypeFilterBg-${option.value}`}
+                            transition={{
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 30,
+                            }}
+                          />
+                        )}
+                        <div className="relative z-10 flex flex-col items-center gap-1">
+                          <Icon
+                            className={`h-4 w-4 ${
+                              isSelected
+                                ? option.color
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                          <span
+                            className={`text-xs font-medium ${
+                              isSelected
+                                ? "text-foreground"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {option.label}
+                          </span>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+
+                {/* Show More/Less Button */}
+                {!showAllPropertyTypes && (
+                  <motion.button
+                    key="show-more"
+                    type="button"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() => setShowAllPropertyTypes(true)}
+                    className="relative flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border bg-muted/20 hover:bg-muted/40 p-2.5 transition-all"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {type}
-                  </Label>
-                </div>
-              ))}
+                    <div className="flex flex-col items-center gap-1">
+                      <Plus className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">
+                        +4 more
+                      </span>
+                    </div>
+                  </motion.button>
+                )}
+
+                {/* Show Less Button (when expanded) */}
+                {showAllPropertyTypes && (
+                  <motion.button
+                    key="show-less"
+                    type="button"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() => setShowAllPropertyTypes(false)}
+                    className="relative flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border bg-muted/20 hover:bg-muted/40 p-2.5 transition-all col-span-2"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <ChevronUpIcon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Show Less
+                      </span>
+                    </div>
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </div>
           </FilterSection>
 
