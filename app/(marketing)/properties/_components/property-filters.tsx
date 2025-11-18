@@ -28,15 +28,21 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import {
-  Filter,
-  RotateCcw,
-  MapPin,
   Building2,
-  Ruler,
+  DollarSign,
+  Filter,
+  GraduationCap,
+  HomeIcon,
   ListFilter,
-  Sparkles,
-  ShieldCheck,
+  MapPin,
+  Package,
   PhoneCall,
+  RotateCcw,
+  Ruler,
+  ShieldCheck,
+  Sofa,
+  Sparkles,
+  Square,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Property } from "@/lib/types/property.type";
@@ -94,6 +100,119 @@ const policyKeys = [
 
 type AmenityKey = (typeof amenityKeys)[number];
 type PolicyKey = (typeof policyKeys)[number];
+
+const listingTypeOptions = [
+  {
+    value: "sale",
+    label: "Sale",
+    icon: DollarSign,
+    color: "text-green-600",
+    bgColor: "bg-green-50 dark:bg-green-950/20",
+    borderColor: "border-green-200 dark:border-green-800",
+  },
+  {
+    value: "rent",
+    label: "Rent",
+    icon: HomeIcon,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50 dark:bg-blue-950/20",
+    borderColor: "border-blue-200 dark:border-blue-800",
+  },
+  {
+    value: "student-housing",
+    label: "Student Housing",
+    icon: GraduationCap,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50 dark:bg-purple-950/20",
+    borderColor: "border-purple-200 dark:border-purple-800",
+  },
+] as const;
+
+const propertyTypeOptions = [
+  {
+    value: "apartment",
+    label: "Apartment",
+    icon: Building2,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50 dark:bg-blue-950/20",
+    borderColor: "border-blue-200 dark:border-blue-800",
+  },
+  {
+    value: "house",
+    label: "House",
+    icon: HomeIcon,
+    color: "text-green-600",
+    bgColor: "bg-green-50 dark:bg-green-950/20",
+    borderColor: "border-green-200 dark:border-green-800",
+  },
+  {
+    value: "condo",
+    label: "Condo",
+    icon: Building2,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50 dark:bg-purple-950/20",
+    borderColor: "border-purple-200 dark:border-purple-800",
+  },
+  {
+    value: "townhouse",
+    label: "Townhouse",
+    icon: Building2,
+    color: "text-orange-600",
+    bgColor: "bg-orange-50 dark:bg-orange-950/20",
+    borderColor: "border-orange-200 dark:border-orange-800",
+  },
+  {
+    value: "studio",
+    label: "Studio",
+    icon: HomeIcon,
+    color: "text-pink-600",
+    bgColor: "bg-pink-50 dark:bg-pink-950/20",
+    borderColor: "border-pink-200 dark:border-pink-800",
+  },
+  {
+    value: "room",
+    label: "Room",
+    icon: HomeIcon,
+    color: "text-cyan-600",
+    bgColor: "bg-cyan-50 dark:bg-cyan-950/20",
+    borderColor: "border-cyan-200 dark:border-cyan-800",
+  },
+  {
+    value: "other",
+    label: "Other",
+    icon: Building2,
+    color: "text-gray-600",
+    bgColor: "bg-gray-50 dark:bg-gray-950/20",
+    borderColor: "border-gray-200 dark:border-gray-800",
+  },
+] as const;
+
+const furnishingOptions = [
+  {
+    value: "furnished",
+    label: "Furnished",
+    icon: Sofa,
+    color: "text-green-600",
+    bgColor: "bg-green-50 dark:bg-green-950/20",
+    borderColor: "border-green-200 dark:border-green-800",
+  },
+  {
+    value: "semi-furnished",
+    label: "Semi Furnished",
+    icon: Package,
+    color: "text-orange-600",
+    bgColor: "bg-orange-50 dark:bg-orange-950/20",
+    borderColor: "border-orange-200 dark:border-orange-800",
+  },
+  {
+    value: "unfurnished",
+    label: "Unfurnished",
+    icon: Square,
+    color: "text-gray-600",
+    bgColor: "bg-gray-50 dark:bg-gray-950/20",
+    borderColor: "border-gray-200 dark:border-gray-800",
+  },
+] as const;
 
 export function PropertyFilters({ properties }: PropertyFiltersProps) {
   const [listingType, setListingType] = useQueryState(
@@ -601,8 +720,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
               {/* Desktop: Tabs */}
               <div className="hidden md:block w-full">
                 <Tabs defaultValue="listing" className="w-full">
-                  <ScrollArea className="w-full" orientation="horizontal">
-                    <TabsList className="inline-flex h-auto w-full justify-start gap-1.5 overflow-x-auto bg-muted/40 p-1.5">
+                  <TabsList className="inline-flex h-auto w-full justify-start gap-1.5 overflow-x-auto bg-muted/40 p-1.5">
                       <TabsTrigger
                         value="listing"
                         className="flex min-w-fit items-center gap-1.5 rounded-md px-3 py-2 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
@@ -639,33 +757,68 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                         <span>Policies</span>
                       </TabsTrigger>
                     </TabsList>
-                  </ScrollArea>
 
                   <TabsContent value="listing" className="mt-5 w-full space-y-5">
                     <div className="space-y-3 w-full">
                       <Label className="text-sm font-medium text-foreground">
                         Listing Type
                       </Label>
-                      <div className="flex flex-wrap gap-2.5 w-full">
-                        {listingTypes.map((type) => (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() =>
-                              toggleArrayValue(listingType, type, setListingType)
-                            }
-                            className="shrink-0"
-                          >
-                            <Badge
-                              variant={
-                                listingType.includes(type) ? "default" : "outline"
+                      <div className="grid grid-cols-3 gap-3">
+                        {listingTypeOptions.map((option) => {
+                          const Icon = option.icon;
+                          const isSelected = listingType.includes(option.value);
+
+                          return (
+                            <motion.button
+                              key={option.value}
+                              type="button"
+                              onClick={() =>
+                                toggleArrayValue(
+                                  listingType,
+                                  option.value,
+                                  setListingType,
+                                )
                               }
-                              className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                              className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-xs transition-all ${
+                                isSelected
+                                  ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                                  : "border-border bg-muted/30 hover:bg-muted/50"
+                              }`}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                             >
-                              {type.replace("-", " ")}
-                            </Badge>
-                          </button>
-                        ))}
+                              {isSelected && (
+                                <motion.div
+                                  className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                                  layoutId="listingTypeFilterBg"
+                                  transition={{
+                                    type: "spring",
+                                    stiffness: 300,
+                                    damping: 30,
+                                  }}
+                                />
+                              )}
+                              <div className="relative z-10 flex flex-col items-center gap-1.5">
+                                <Icon
+                                  className={`h-5 w-5 ${
+                                    isSelected
+                                      ? option.color
+                                      : "text-muted-foreground"
+                                  }`}
+                                />
+                                <span
+                                  className={`font-medium ${
+                                    isSelected
+                                      ? "text-foreground"
+                                      : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {option.label}
+                                </span>
+                              </div>
+                            </motion.button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -673,31 +826,62 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                       <Label className="text-sm font-medium text-foreground">
                         Property Type
                       </Label>
-                      <div className="flex flex-wrap gap-2.5 w-full">
-                        {propertyTypes.map((type) => (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() =>
-                              toggleArrayValue(
-                                propertyType,
-                                type,
-                                setPropertyType,
-                              )
-                            }
-                            className="shrink-0"
-                          >
-                            <Badge
-                              variant={
-                                propertyType.includes(type) ? "default" : "outline"
+                      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                        {propertyTypeOptions.map((option) => {
+                          const Icon = option.icon;
+                          const isSelected = propertyType.includes(option.value);
+
+                          return (
+                            <motion.button
+                              key={option.value}
+                              type="button"
+                              onClick={() =>
+                                toggleArrayValue(
+                                  propertyType,
+                                  option.value,
+                                  setPropertyType,
+                                )
                               }
-                              className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                              className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-xs transition-all ${
+                                isSelected
+                                  ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                                  : "border-border bg-muted/30 hover:bg-muted/50"
+                              }`}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                             >
-                              <Building2 className="mr-1.5 inline h-3.5 w-3.5" />
-                              {type}
-                            </Badge>
-                          </button>
-                        ))}
+                              {isSelected && (
+                                <motion.div
+                                  className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                                  layoutId="propertyTypeFilterBg"
+                                  transition={{
+                                    type: "spring",
+                                    stiffness: 300,
+                                    damping: 30,
+                                  }}
+                                />
+                              )}
+                              <div className="relative z-10 flex flex-col items-center gap-1.5">
+                                <Icon
+                                  className={`h-5 w-5 ${
+                                    isSelected
+                                      ? option.color
+                                      : "text-muted-foreground"
+                                  }`}
+                                />
+                                <span
+                                  className={`font-medium ${
+                                    isSelected
+                                      ? "text-foreground"
+                                      : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {option.label}
+                                </span>
+                              </div>
+                            </motion.button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -705,26 +889,62 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                       <Label className="text-sm font-medium text-foreground">
                         Furnishing
                       </Label>
-                      <div className="flex flex-wrap gap-2.5 w-full">
-                        {furnishingTypes.map((type) => (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() =>
-                              toggleArrayValue(furnishing, type, setFurnishing)
-                            }
-                            className="shrink-0"
-                          >
-                            <Badge
-                              variant={
-                                furnishing.includes(type) ? "default" : "outline"
+                      <div className="grid grid-cols-3 gap-3">
+                        {furnishingOptions.map((option) => {
+                          const Icon = option.icon;
+                          const isSelected = furnishing.includes(option.value);
+
+                          return (
+                            <motion.button
+                              key={option.value}
+                              type="button"
+                              onClick={() =>
+                                toggleArrayValue(
+                                  furnishing,
+                                  option.value,
+                                  setFurnishing,
+                                )
                               }
-                              className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                              className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-3 text-xs transition-all ${
+                                isSelected
+                                  ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                                  : "border-border bg-muted/30 hover:bg-muted/50"
+                              }`}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                             >
-                              {type.replace("-", " ")}
-                            </Badge>
-                          </button>
-                        ))}
+                              {isSelected && (
+                                <motion.div
+                                  className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                                  layoutId="furnishingFilterBg"
+                                  transition={{
+                                    type: "spring",
+                                    stiffness: 300,
+                                    damping: 30,
+                                  }}
+                                />
+                              )}
+                              <div className="relative z-10 flex flex-col items-center gap-1.5">
+                                <Icon
+                                  className={`h-5 w-5 ${
+                                    isSelected
+                                      ? option.color
+                                      : "text-muted-foreground"
+                                  }`}
+                                />
+                                <span
+                                  className={`font-medium ${
+                                    isSelected
+                                      ? "text-foreground"
+                                      : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {option.label}
+                                </span>
+                              </div>
+                            </motion.button>
+                          );
+                        })}
                       </div>
                     </div>
                   </TabsContent>

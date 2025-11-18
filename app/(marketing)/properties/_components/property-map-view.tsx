@@ -20,7 +20,7 @@ const defaultCenter = {
   lng: 77.209,
 };
 
-const containerStyle: google.maps.MapOptions["mapId"] & {
+const containerStyle: {
   width: string;
   height: string;
 } = {

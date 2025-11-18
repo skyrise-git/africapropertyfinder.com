@@ -11,7 +11,7 @@ interface FilterPanelProps {
   isOpen: boolean;
   onClose: () => void;
   properties: Property[];
-  fabRef: React.RefObject<HTMLDivElement>;
+  fabRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function FilterPanel({

@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useQueryState, parseAsArrayOf, parseAsBoolean, parseAsString } from "nuqs";
+import {
+  useQueryState,
+  parseAsArrayOf,
+  parseAsBoolean,
+  parseAsString,
+} from "nuqs";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Home, AlertTriangle } from "lucide-react";
 
@@ -32,76 +37,58 @@ export default function PropertiesPage() {
   const fabRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
-  const [page, setPage] = useQueryState(
-    "page",
-    parseAsString.withDefault("1"),
-  );
-  const [viewMode] = useQueryState(
-    "view",
-    parseAsString.withDefault("cards"),
-  );
+  const [page, setPage] = useQueryState("page", parseAsString.withDefault("1"));
+  const [viewMode] = useQueryState("view", parseAsString.withDefault("cards"));
   const [sortOption] = useQueryState(
     "sort",
-    parseAsString.withDefault("new-first"),
+    parseAsString.withDefault("new-first")
   );
 
   const [listingType] = useQueryState(
     "listingType",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
   const [propertyType] = useQueryState(
     "propertyType",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
   const [furnishing] = useQueryState(
     "furnishing",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
   const [city] = useQueryState(
     "city",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
   const [state] = useQueryState(
     "state",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
-  const [minPrice] = useQueryState(
-    "minPrice",
-    parseAsString.withDefault(""),
-  );
-  const [maxPrice] = useQueryState(
-    "maxPrice",
-    parseAsString.withDefault(""),
-  );
+  const [minPrice] = useQueryState("minPrice", parseAsString.withDefault(""));
+  const [maxPrice] = useQueryState("maxPrice", parseAsString.withDefault(""));
   const [minBedrooms] = useQueryState(
     "minBedrooms",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
   const [minBathrooms] = useQueryState(
     "minBathrooms",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
-  const [minArea] = useQueryState(
-    "minArea",
-    parseAsString.withDefault(""),
-  );
-  const [maxArea] = useQueryState(
-    "maxArea",
-    parseAsString.withDefault(""),
-  );
+  const [minArea] = useQueryState("minArea", parseAsString.withDefault(""));
+  const [maxArea] = useQueryState("maxArea", parseAsString.withDefault(""));
   const [amenities] = useQueryState(
     "amenities",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
   const [policies] = useQueryState(
     "policies",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
   const [petsOnly] = useQueryState(
     "petsAllowed",
-    parseAsBoolean.withDefault(false),
+    parseAsBoolean.withDefault(false)
   );
 
   const properties = (data as Property[]) || [];
@@ -172,10 +159,7 @@ export default function PropertiesPage() {
         return false;
       }
 
-      if (
-        furnishing.length > 0 &&
-        !furnishing.includes(property.furnishing)
-      ) {
+      if (furnishing.length > 0 && !furnishing.includes(property.furnishing)) {
         return false;
       }
 
@@ -188,9 +172,7 @@ export default function PropertiesPage() {
       }
 
       const priceValue =
-        property.listingType === "sale"
-          ? property.price
-          : property.rent;
+        property.listingType === "sale" ? property.price : property.rent;
 
       if (minPriceNum != null && (priceValue ?? Infinity) < minPriceNum) {
         return false;
@@ -200,37 +182,25 @@ export default function PropertiesPage() {
         return false;
       }
 
-      if (
-        minBedsNum != null &&
-        (property.numBedrooms ?? 0) < minBedsNum
-      ) {
+      if (minBedsNum != null && (property.numBedrooms ?? 0) < minBedsNum) {
         return false;
       }
 
-      if (
-        minBathsNum != null &&
-        (property.numBathrooms ?? 0) < minBathsNum
-      ) {
+      if (minBathsNum != null && (property.numBathrooms ?? 0) < minBathsNum) {
         return false;
       }
 
-      if (
-        minAreaNum != null &&
-        (property.area ?? 0) < minAreaNum
-      ) {
+      if (minAreaNum != null && (property.area ?? 0) < minAreaNum) {
         return false;
       }
 
-      if (
-        maxAreaNum != null &&
-        (property.area ?? Infinity) > maxAreaNum
-      ) {
+      if (maxAreaNum != null && (property.area ?? Infinity) > maxAreaNum) {
         return false;
       }
 
       if (amenities.length > 0) {
         const hasAllAmenities = amenities.every((key) => {
-          const value = (property as Record<string, unknown>)[key];
+          const value = (property as unknown as Record<string, unknown>)[key];
           return value === true;
         });
         if (!hasAllAmenities) return false;
@@ -238,7 +208,7 @@ export default function PropertiesPage() {
 
       if (policies.length > 0) {
         const matchesPolicies = policies.every((key) => {
-          const value = (property as Record<string, unknown>)[key];
+          const value = (property as unknown as Record<string, unknown>)[key];
           return value === true;
         });
         if (!matchesPolicies) return false;
@@ -258,10 +228,7 @@ export default function PropertiesPage() {
         return sortOption === "new-first" ? bTime - aTime : aTime - bTime;
       }
 
-      if (
-        sortOption === "price-low-high" ||
-        sortOption === "price-high-low"
-      ) {
+      if (sortOption === "price-low-high" || sortOption === "price-high-low") {
         const aPrice =
           a.listingType === "sale" ? a.price ?? Infinity : a.rent ?? Infinity;
         const bPrice =
@@ -286,10 +253,7 @@ export default function PropertiesPage() {
     });
 
     const currentPage = Math.max(1, Number(page) || 1);
-    const totalPages = Math.max(
-      1,
-      Math.ceil(result.length / PAGE_SIZE) || 1,
-    );
+    const totalPages = Math.max(1, Math.ceil(result.length / PAGE_SIZE) || 1);
     const clampedPage = Math.min(currentPage, totalPages);
     const start = (clampedPage - 1) * PAGE_SIZE;
     const end = start + PAGE_SIZE;
@@ -417,8 +381,7 @@ export default function PropertiesPage() {
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              Showing {paginated.length} of {filteredSorted.length}{" "}
-              properties
+              Showing {paginated.length} of {filteredSorted.length} properties
             </span>
           </div>
         </motion.div>
@@ -435,9 +398,7 @@ export default function PropertiesPage() {
                 className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border/60 bg-muted/40 p-10 text-center"
               >
                 <Home className="h-10 w-10 text-muted-foreground" />
-                <h3 className="text-lg font-semibold">
-                  No properties found
-                </h3>
+                <h3 className="text-lg font-semibold">No properties found</h3>
                 <p className="max-w-md text-sm text-muted-foreground">
                   Try adjusting your filters or search term to widen the
                   results.
@@ -477,10 +438,7 @@ export default function PropertiesPage() {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  href={`?page=${Math.max(
-                    1,
-                    (Number(page) || 1) - 1,
-                  )}`}
+                  href={`?page=${Math.max(1, (Number(page) || 1) - 1)}`}
                   onClick={(e) => {
                     e.preventDefault();
                     handlePageChange(Math.max(1, (Number(page) || 1) - 1));
@@ -512,12 +470,12 @@ export default function PropertiesPage() {
                 <PaginationNext
                   href={`?page=${Math.min(
                     totalPages,
-                    (Number(page) || 1) + 1,
+                    (Number(page) || 1) + 1
                   )}`}
                   onClick={(e) => {
                     e.preventDefault();
                     handlePageChange(
-                      Math.min(totalPages, (Number(page) || 1) + 1),
+                      Math.min(totalPages, (Number(page) || 1) + 1)
                     );
                   }}
                 />
@@ -541,5 +499,3 @@ export default function PropertiesPage() {
     </motion.div>
   );
 }
-
-
