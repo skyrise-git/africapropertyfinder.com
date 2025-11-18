@@ -116,30 +116,28 @@ export function FilterPanel({
             right: `${position.right}px`,
             width: "calc(100vw - 2rem)",
             maxWidth: "420px",
-            maxHeight: "calc(100vh - 100px)",
+            height: "600px",
             zIndex: 50,
           }}
-          className="overflow-hidden rounded-3xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl ring-1 ring-border/20"
+          className="flex flex-col overflow-hidden rounded-3xl border border-border/50 bg-background/95 shadow-2xl backdrop-blur-xl ring-1 ring-border/20"
         >
-          <div className="flex h-full max-h-[600px] flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-border/30 bg-gradient-to-br from-background via-background/98 to-background/95 px-6 py-5 backdrop-blur-sm">
-              <h2 className="text-xl font-semibold tracking-tight">Filters</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="h-9 w-9 rounded-full hover:bg-muted/50"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close filters</span>
-              </Button>
-            </div>
+          {/* Header */}
+          <div className="flex shrink-0 items-center justify-between border-b border-border/30 bg-gradient-to-br from-background via-background/98 to-background/95 px-6 py-5 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold tracking-tight">Filters</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-9 w-9 rounded-full hover:bg-muted/50"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close filters</span>
+            </Button>
+          </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-hidden">
-              <PropertyFilters properties={properties} />
-            </div>
+          {/* Content - Scrollable */}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <PropertyFilters properties={properties} />
           </div>
         </motion.div>
       )}

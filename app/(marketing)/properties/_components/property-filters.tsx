@@ -221,9 +221,9 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
-        className="flex flex-col h-full"
+        className="flex h-full flex-col"
       >
-        <div className="flex flex-row items-center justify-between gap-2 border-b border-border/40 px-6 py-4">
+        <div className="flex shrink-0 flex-row items-center justify-between gap-2 border-b border-border/40 px-6 py-4">
           <AnimatePresence>
             {hasActiveFilters && (
               <motion.div
@@ -246,12 +246,12 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
           </AnimatePresence>
         </div>
 
-        <ScrollArea className="flex-1 pr-2">
+        <ScrollArea className="flex-1 min-h-0 pr-2">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            className="space-y-6 px-6 py-4"
+            className="space-y-6 px-6 py-4 w-full max-w-full"
           >
               {/* Mobile: Accordion */}
               <div className="md:hidden">
@@ -266,7 +266,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                     <AccordionContent className="pt-4 pb-4">
                       <div className="space-y-5">
                         <div className="space-y-3">
-                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <Label className="text-sm font-medium text-foreground">
                             Listing Type
                           </Label>
                           <div className="flex flex-wrap gap-2.5">
@@ -277,13 +277,13 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                                 onClick={() =>
                                   toggleArrayValue(listingType, type, setListingType)
                                 }
-                                className="min-h-[44px] min-w-[44px]"
+                                className="shrink-0 min-h-[44px] min-w-[44px]"
                               >
                                 <Badge
                                   variant={
                                     listingType.includes(type) ? "default" : "outline"
                                   }
-                                  className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                                  className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
                                 >
                                   {type.replace("-", " ")}
                                 </Badge>
@@ -293,7 +293,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                         </div>
 
                         <div className="space-y-3">
-                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <Label className="text-sm font-medium text-foreground">
                             Property Type
                           </Label>
                           <div className="flex flex-wrap gap-2.5">
@@ -308,13 +308,13 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                                     setPropertyType,
                                   )
                                 }
-                                className="min-h-[44px] min-w-[44px]"
+                                className="shrink-0 min-h-[44px] min-w-[44px]"
                               >
                                 <Badge
                                   variant={
                                     propertyType.includes(type) ? "default" : "outline"
                                   }
-                                  className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                                  className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
                                 >
                                   <Building2 className="mr-1.5 inline h-3.5 w-3.5" />
                                   {type}
@@ -325,7 +325,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                         </div>
 
                         <div className="space-y-3">
-                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <Label className="text-sm font-medium text-foreground">
                             Furnishing
                           </Label>
                           <div className="flex flex-wrap gap-2.5">
@@ -336,13 +336,13 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                                 onClick={() =>
                                   toggleArrayValue(furnishing, type, setFurnishing)
                                 }
-                                className="min-h-[44px] min-w-[44px]"
+                                className="shrink-0 min-h-[44px] min-w-[44px]"
                               >
                                 <Badge
                                   variant={
                                     furnishing.includes(type) ? "default" : "outline"
                                   }
-                                  className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                                  className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
                                 >
                                   {type.replace("-", " ")}
                                 </Badge>
@@ -364,7 +364,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                     <AccordionContent className="pt-4 pb-4">
                       <div className="space-y-5">
                         <div className="space-y-3">
-                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <Label className="text-sm font-medium text-foreground">
                             City
                           </Label>
                           <div className="flex flex-wrap gap-2.5">
@@ -373,11 +373,11 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                                 key={c}
                                 type="button"
                                 onClick={() => toggleArrayValue(city, c, setCity)}
-                                className="min-h-[44px] min-w-[44px]"
+                                className="shrink-0 min-h-[44px] min-w-[44px]"
                               >
                                 <Badge
                                   variant={city.includes(c) ? "default" : "outline"}
-                                  className="cursor-pointer px-4 py-2 text-xs transition-all hover:scale-105"
+                                  className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs transition-all hover:scale-105"
                                 >
                                   {c}
                                 </Badge>
@@ -387,7 +387,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                         </div>
 
                         <div className="space-y-3">
-                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <Label className="text-sm font-medium text-foreground">
                             State
                           </Label>
                           <div className="flex flex-wrap gap-2.5">
@@ -396,11 +396,11 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                                 key={s}
                                 type="button"
                                 onClick={() => toggleArrayValue(state, s, setState)}
-                                className="min-h-[44px] min-w-[44px]"
+                                className="shrink-0 min-h-[44px] min-w-[44px]"
                               >
                                 <Badge
                                   variant={state.includes(s) ? "default" : "outline"}
-                                  className="cursor-pointer px-4 py-2 text-xs transition-all hover:scale-105"
+                                  className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs transition-all hover:scale-105"
                                 >
                                   {s}
                                 </Badge>
@@ -411,7 +411,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            <Label className="text-sm font-medium text-foreground">
                               Min Price
                             </Label>
                             <Input
@@ -422,11 +422,11 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                               onChange={(e) =>
                                 setMinPrice(e.target.value || null)
                               }
-                              className="h-10"
+                              className="h-10 w-full"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            <Label className="text-sm font-medium text-foreground">
                               Max Price
                             </Label>
                             <Input
@@ -437,7 +437,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                               onChange={(e) =>
                                 setMaxPrice(e.target.value || null)
                               }
-                              className="h-10"
+                              className="h-10 w-full"
                             />
                           </div>
                         </div>
@@ -456,7 +456,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                       <div className="space-y-5">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            <Label className="text-sm font-medium text-foreground">
                               Min Bedrooms
                             </Label>
                             <Input
@@ -466,11 +466,11 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                               onChange={(e) =>
                                 setMinBedrooms(e.target.value || null)
                               }
-                              className="h-10"
+                              className="h-10 w-full"
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            <Label className="text-sm font-medium text-foreground">
                               Min Bathrooms
                             </Label>
                             <Input
@@ -480,14 +480,14 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                               onChange={(e) =>
                                 setMinBathrooms(e.target.value || null)
                               }
-                              className="h-10"
+                              className="h-10 w-full"
                             />
                           </div>
                         </div>
 
                         <div className="space-y-3">
                           <div className="flex items-center justify-between text-xs">
-                            <Label className="font-semibold uppercase tracking-wide text-muted-foreground">
+                            <Label className="text-sm font-medium text-foreground">
                               Area (sq ft)
                             </Label>
                             <span className="font-medium text-foreground">
@@ -599,7 +599,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
               </div>
 
               {/* Desktop: Tabs */}
-              <div className="hidden md:block">
+              <div className="hidden md:block w-full">
                 <Tabs defaultValue="listing" className="w-full">
                   <ScrollArea className="w-full" orientation="horizontal">
                     <TabsList className="inline-flex h-auto w-full justify-start gap-1.5 overflow-x-auto bg-muted/40 p-1.5">
@@ -641,12 +641,12 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                     </TabsList>
                   </ScrollArea>
 
-                  <TabsContent value="listing" className="mt-5 space-y-5">
-                    <div className="space-y-3">
-                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <TabsContent value="listing" className="mt-5 w-full space-y-5">
+                    <div className="space-y-3 w-full">
+                      <Label className="text-sm font-medium text-foreground">
                         Listing Type
                       </Label>
-                      <div className="flex flex-wrap gap-2.5">
+                      <div className="flex flex-wrap gap-2.5 w-full">
                         {listingTypes.map((type) => (
                           <button
                             key={type}
@@ -654,12 +654,13 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                             onClick={() =>
                               toggleArrayValue(listingType, type, setListingType)
                             }
+                            className="shrink-0"
                           >
                             <Badge
                               variant={
                                 listingType.includes(type) ? "default" : "outline"
                               }
-                              className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                              className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
                             >
                               {type.replace("-", " ")}
                             </Badge>
@@ -668,11 +669,11 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="space-y-3 w-full">
+                      <Label className="text-sm font-medium text-foreground">
                         Property Type
                       </Label>
-                      <div className="flex flex-wrap gap-2.5">
+                      <div className="flex flex-wrap gap-2.5 w-full">
                         {propertyTypes.map((type) => (
                           <button
                             key={type}
@@ -684,12 +685,13 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                                 setPropertyType,
                               )
                             }
+                            className="shrink-0"
                           >
                             <Badge
                               variant={
                                 propertyType.includes(type) ? "default" : "outline"
                               }
-                              className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                              className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
                             >
                               <Building2 className="mr-1.5 inline h-3.5 w-3.5" />
                               {type}
@@ -699,11 +701,11 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="space-y-3 w-full">
+                      <Label className="text-sm font-medium text-foreground">
                         Furnishing
                       </Label>
-                      <div className="flex flex-wrap gap-2.5">
+                      <div className="flex flex-wrap gap-2.5 w-full">
                         {furnishingTypes.map((type) => (
                           <button
                             key={type}
@@ -711,12 +713,13 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                             onClick={() =>
                               toggleArrayValue(furnishing, type, setFurnishing)
                             }
+                            className="shrink-0"
                           >
                             <Badge
                               variant={
                                 furnishing.includes(type) ? "default" : "outline"
                               }
-                              className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                              className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs capitalize transition-all hover:scale-105"
                             >
                               {type.replace("-", " ")}
                             </Badge>
@@ -726,21 +729,22 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="location" className="mt-5 space-y-5">
-                    <div className="space-y-3">
-                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <TabsContent value="location" className="mt-5 w-full space-y-5">
+                    <div className="space-y-3 w-full">
+                      <Label className="text-sm font-medium text-foreground">
                         City
                       </Label>
-                      <div className="flex flex-wrap gap-2.5">
+                      <div className="flex flex-wrap gap-2.5 w-full">
                         {allCities.map((c) => (
                           <button
                             key={c}
                             type="button"
                             onClick={() => toggleArrayValue(city, c, setCity)}
+                            className="shrink-0"
                           >
                             <Badge
                               variant={city.includes(c) ? "default" : "outline"}
-                              className="cursor-pointer px-4 py-2 text-xs transition-all hover:scale-105"
+                              className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs transition-all hover:scale-105"
                             >
                               {c}
                             </Badge>
@@ -749,20 +753,21 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="space-y-3 w-full">
+                      <Label className="text-sm font-medium text-foreground">
                         State
                       </Label>
-                      <div className="flex flex-wrap gap-2.5">
+                      <div className="flex flex-wrap gap-2.5 w-full">
                         {allStates.map((s) => (
                           <button
                             key={s}
                             type="button"
                             onClick={() => toggleArrayValue(state, s, setState)}
+                            className="shrink-0"
                           >
                             <Badge
                               variant={state.includes(s) ? "default" : "outline"}
-                              className="cursor-pointer px-4 py-2 text-xs transition-all hover:scale-105"
+                              className="cursor-pointer whitespace-nowrap px-4 py-2 text-xs transition-all hover:scale-105"
                             >
                               {s}
                             </Badge>
@@ -771,9 +776,9 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="grid grid-cols-2 gap-4 w-full">
+                      <div className="space-y-2 min-w-0">
+                        <Label className="text-sm font-medium text-foreground">
                           Min Price
                         </Label>
                         <Input
@@ -784,11 +789,11 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                           onChange={(e) =>
                             setMinPrice(e.target.value || null)
                           }
-                          className="h-10"
+                          className="h-10 w-full"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <div className="space-y-2 min-w-0">
+                        <Label className="text-sm font-medium text-foreground">
                           Max Price
                         </Label>
                         <Input
@@ -799,16 +804,16 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                           onChange={(e) =>
                             setMaxPrice(e.target.value || null)
                           }
-                          className="h-10"
+                          className="h-10 w-full"
                         />
                       </div>
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="size" className="mt-5 space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <TabsContent value="size" className="mt-5 w-full space-y-5">
+                    <div className="grid grid-cols-2 gap-4 w-full">
+                      <div className="space-y-2 min-w-0">
+                        <Label className="text-sm font-medium text-foreground">
                           Min Bedrooms
                         </Label>
                         <Input
@@ -818,11 +823,11 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                           onChange={(e) =>
                             setMinBedrooms(e.target.value || null)
                           }
-                          className="h-10"
+                          className="h-10 w-full"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <div className="space-y-2 min-w-0">
+                        <Label className="text-sm font-medium text-foreground">
                           Min Bathrooms
                         </Label>
                         <Input
@@ -832,14 +837,14 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                           onChange={(e) =>
                             setMinBathrooms(e.target.value || null)
                           }
-                          className="h-10"
+                          className="h-10 w-full"
                         />
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-xs">
-                        <Label className="font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="space-y-3 w-full">
+                      <div className="flex items-center justify-between text-xs w-full">
+                        <Label className="text-sm font-medium text-foreground">
                           Area (sq ft)
                         </Label>
                         <span className="font-medium text-foreground">
@@ -863,8 +868,8 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="amenities" className="mt-5 space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
+                  <TabsContent value="amenities" className="mt-5 w-full space-y-4">
+                    <div className="grid grid-cols-2 gap-3 w-full">
                       {amenityKeys.map((key) => (
                         <label
                           key={key}
@@ -888,8 +893,8 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="policies" className="mt-5 space-y-4">
-                    <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3">
+                  <TabsContent value="policies" className="mt-5 w-full space-y-4">
+                    <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3 w-full">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-semibold">
                           Pets allowed only
@@ -904,7 +909,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-3 w-full">
                       {policyKeys.map((key: PolicyKey) => (
                         <label
                           key={key}
@@ -938,7 +943,7 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
                 exit={{ opacity: 0, height: 0 }}
                 className="space-y-3 border-t border-border/40 pt-4"
               >
-                <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <Label className="flex items-center gap-1.5 text-sm font-medium text-foreground">
                   <Filter className="h-3.5 w-3.5" />
                   Active Filters
                 </Label>
