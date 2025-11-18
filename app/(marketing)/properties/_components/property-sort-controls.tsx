@@ -24,9 +24,9 @@ export function PropertySortControls() {
   );
 
   return (
-    <div className="flex w-full flex-wrap items-center justify-end gap-3">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
       <Select value={sortOption} onValueChange={setSortOption}>
-        <SelectTrigger className="w-[180px] md:w-[190px]">
+        <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent align="end">
@@ -47,7 +47,7 @@ export function PropertySortControls() {
         </SelectContent>
       </Select>
 
-      <div className="flex gap-1 rounded-full border border-border/60 bg-muted/40 p-0.5 text-xs">
+      <div className="flex gap-1 rounded-full border border-border/60 bg-muted/40 p-0.5 text-xs w-fit">
         <motion.button
           type="button"
           onClick={() => setViewMode("cards")}
@@ -67,7 +67,7 @@ export function PropertySortControls() {
               transition={{ type: "spring", stiffness: 260, damping: 24 }}
             />
           )}
-          <span className="relative z-10 inline-flex items-center gap-1">
+          <span className="relative z-10 inline-flex items-center gap-1.5">
             <Grid3x3 className="h-4 w-4" />
             Cards
           </span>
@@ -92,7 +92,7 @@ export function PropertySortControls() {
               transition={{ type: "spring", stiffness: 260, damping: 24 }}
             />
           )}
-          <span className="relative z-10 inline-flex items-center gap-1">
+          <span className="relative z-10 inline-flex items-center gap-1.5">
             <Map className="h-4 w-4" />
             Map
           </span>

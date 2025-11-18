@@ -190,33 +190,34 @@ export default function PropertiesPage() {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="space-y-3 rounded-xl border-2 border-border/60 bg-card/70 p-4 shadow-sm"
+          className="rounded-xl border-2 border-border/60 bg-card/70 p-4 sm:p-5 shadow-sm"
         >
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex w-full flex-col gap-2 md:max-w-2xl md:flex-row md:items-center md:gap-3">
-              <div className="relative w-full">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value || null)}
-                  placeholder="Search by title, address, city…"
-                  className="h-9 pl-9 text-sm"
-                />
-              </div>
-              <div className="w-full md:w-[260px]">
-                <PropertyLocationSearch />
-              </div>
+          {/* Search Inputs Row */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-4 sm:mb-5">
+            <div className="relative flex-1 min-w-0">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value || null)}
+                placeholder="Search by title, address, city…"
+                className="h-9 pl-9 text-sm w-full"
+              />
             </div>
-
-            <div className="w-full md:w-auto">
-              <PropertySortControls />
+            <div className="relative flex-1 min-w-0 sm:flex-shrink-0 sm:max-w-[280px]">
+              <PropertyLocationSearch />
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>
-              Showing {paginated.length} of {filteredSorted.length} properties
-            </span>
+          {/* Bottom Row: Results Count + Sort Controls */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2 border-t border-border/40">
+            <div className="text-xs text-muted-foreground">
+              <span>
+                Showing {paginated.length} of {filteredSorted.length} properties
+              </span>
+            </div>
+            <div className="flex-shrink-0">
+              <PropertySortControls />
+            </div>
           </div>
         </motion.div>
 

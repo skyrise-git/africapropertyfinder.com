@@ -59,8 +59,8 @@ function PropertyLocationSearchInner() {
         <Input
           value={value || locationLabel}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="Search area or city on map..."
-          className="h-9 pl-9 pr-8 text-sm"
+          placeholder="Search area or city…"
+          className="h-9 pl-9 pr-8 text-sm w-full"
           disabled={isLoading}
         />
         {isLoading && (
