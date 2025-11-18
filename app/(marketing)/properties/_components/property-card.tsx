@@ -3,6 +3,7 @@
 import { MapPin, BedDouble, Bath, Home, Maximize2, PawPrint } from "lucide-react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { formatCurrency } from "@ashirbad/js-core";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,14 +24,24 @@ interface PropertyCardProps {
 }
 
 const listingTypeLabel: Record<Property["listingType"], string> = {
-  sale: "For Sale",
-  rent: "For Rent",
-  "student-housing": "Student Housing",
+  sale: "FOR SALE",
+  rent: "FOR RENT",
+  "student-housing": "STUDENT HOUSING",
 };
 
 function formatPrice(property: Property) {
   if (property.listingType === "sale" && property.price != null) {
-    return `₹${property.price.toLocaleString("en-IN")}`;
+    try {
+      return formatCurrency(property.price, "USD");
+    } catch {
+      // Fallback if formatCurrency is not available
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(property.price);
+    }
   }
 
   if (
@@ -38,9 +49,23 @@ function formatPrice(property: Property) {
       property.listingType === "student-housing") &&
     property.rent != null
   ) {
-    return `₹${property.rent.toLocaleString("en-IN")}${
-      property.paymentFrequency ? ` / ${property.paymentFrequency}` : ""
-    }`;
+    try {
+      const formatted = formatCurrency(property.rent, "USD");
+      return `${formatted}${
+        property.paymentFrequency ? ` / ${property.paymentFrequency}` : " / monthly"
+      }`;
+    } catch {
+      // Fallback if formatCurrency is not available
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(property.rent);
+      return `${formatted}${
+        property.paymentFrequency ? ` / ${property.paymentFrequency}` : " / monthly"
+      }`;
+    }
   }
 
   return "Price on request";
@@ -70,120 +95,119 @@ export function PropertyCard({
           : "",
       )}
     >
-      <Card className="group h-full overflow-hidden border-border/70 bg-gradient-to-br from-card/90 via-card/70 to-card/60 shadow-sm transition-all duration-300 hover:shadow-xl">
+      <Card className="group h-full overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-lg">
         {imageUrl && (
-          <div className="relative h-56 w-full overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-80" />
+          <div className="relative h-48 sm:h-56 md:h-64 w-full overflow-hidden bg-muted">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 transition-opacity duration-500 group-hover:opacity-100 opacity-90" />
 
             <img
               src={imageUrl}
               alt={property.title}
-              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
               loading="lazy"
             />
 
-            <div className="pointer-events-none absolute inset-x-4 bottom-4 flex flex-wrap items-center justify-between gap-2 text-xs text-white">
+            <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 p-4">
               <Badge
-                variant="secondary"
-                className="bg-black/60 px-2 py-1 text-[11px] font-medium uppercase tracking-wide"
+                variant="destructive"
+                className="bg-destructive/90 backdrop-blur-sm px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide shadow-lg"
               >
                 {listingTypeLabel[property.listingType]}
               </Badge>
 
-              <span className="rounded-full bg-black/60 px-2 py-1 text-[11px] font-medium">
+              <span className="rounded-md bg-black/80 backdrop-blur-sm px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold text-white shadow-lg">
                 {formatPrice(property)}
               </span>
             </div>
           </div>
         )}
 
-        <CardHeader className="space-y-3">
-          <CardTitle className="line-clamp-2 text-lg font-semibold tracking-tight">
+        <CardHeader className="space-y-2.5 sm:space-y-3 px-4 sm:px-6 pt-4 sm:pt-6">
+          <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold tracking-tight leading-tight">
             {property.title}
           </CardTitle>
 
-          <CardDescription className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <Home className="h-3.5 w-3.5" />
+          <CardDescription className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <Home className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
             <span className="truncate">
-              {property.propertyType.replace("-", " ")} •{" "}
-              {property.furnishing.replace("-", " ")}
+              {property.propertyType.toUpperCase().replace("-", " ")} •{" "}
+              {property.furnishing.toUpperCase().replace("-", " ")}
             </span>
           </CardDescription>
 
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">
+          <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 mt-0.5 text-primary" />
+            <span className="line-clamp-2 leading-snug">
               {property.address}
-              {", "}
-              {property.city}
-              {property.state ? `, ${property.state}` : ""}
+              {property.city && `, ${property.city}`}
+              {property.state && `, ${property.state}`}
             </span>
           </div>
         </CardHeader>
 
-        <CardContent className="flex flex-1 flex-col gap-4 pb-5">
-          <div className="grid grid-cols-3 gap-3 text-xs sm:text-sm">
-            <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2">
-              <BedDouble className="h-4 w-4 text-primary" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-semibold">
+        <CardContent className="flex flex-1 flex-col gap-3 sm:gap-4 px-4 sm:px-6 pb-4 sm:pb-6">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-lg border border-border/50 bg-muted/30 px-2 sm:px-3 py-2 sm:py-2.5 transition-colors hover:bg-muted/50">
+              <BedDouble className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0 mx-auto sm:mx-0" />
+              <div className="flex flex-col items-center sm:items-start leading-tight">
+                <span className="text-xs sm:text-sm font-semibold">
                   {property.numBedrooms ?? "-"}
                 </span>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] text-muted-foreground">
                   Beds
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2">
-              <Bath className="h-4 w-4 text-primary" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-semibold">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-lg border border-border/50 bg-muted/30 px-2 sm:px-3 py-2 sm:py-2.5 transition-colors hover:bg-muted/50">
+              <Bath className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0 mx-auto sm:mx-0" />
+              <div className="flex flex-col items-center sm:items-start leading-tight">
+                <span className="text-xs sm:text-sm font-semibold">
                   {property.numBathrooms ?? "-"}
                 </span>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] text-muted-foreground">
                   Baths
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2">
-              <Maximize2 className="h-4 w-4 text-primary" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-semibold">
-                  {property.area ? `${property.area} sq ft` : "—"}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-lg border border-border/50 bg-muted/30 px-2 sm:px-3 py-2 sm:py-2.5 transition-colors hover:bg-muted/50">
+              <Maximize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0 mx-auto sm:mx-0" />
+              <div className="flex flex-col items-center sm:items-start leading-tight min-w-0">
+                <span className="text-xs sm:text-sm font-semibold truncate w-full text-center sm:text-left">
+                  {property.area ? `${property.area.toLocaleString("en-US")} sq ft` : "—"}
                 </span>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] text-muted-foreground">
                   Area
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {property.parkingAvailable && (
-              <Badge variant="secondary" className="text-[11px]">
+              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
                 Parking
               </Badge>
             )}
             {property.wifi && (
-              <Badge variant="secondary" className="text-[11px]">
+              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
                 Wi‑Fi
               </Badge>
             )}
             {property.petsAllowed && (
-              <Badge variant="secondary" className="text-[11px]">
-                <PawPrint className="mr-1 h-3 w-3" />
-                Pets allowed
+              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
+                <PawPrint className="mr-1 h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                Pets
               </Badge>
             )}
             {property.pool && (
-              <Badge variant="secondary" className="text-[11px]">
+              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
                 Pool
               </Badge>
             )}
             {property.gym && (
-              <Badge variant="secondary" className="text-[11px]">
+              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
                 Gym
               </Badge>
             )}
