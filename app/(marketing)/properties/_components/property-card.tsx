@@ -1,173 +1,207 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { Property } from "@/lib/types/property.type";
-import { MapPin, Bed, Bath, Square, ArrowRight } from "lucide-react";
+import { MapPin, BedDouble, Bath, Home, Maximize2, PawPrint } from "lucide-react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { cardVariants } from "@/lib/utils/motion-variants";
-import { format } from "date-fns";
+
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { Property } from "@/lib/types/property.type";
+import { cn } from "@/lib/utils";
 
 interface PropertyCardProps {
   property: Property;
+  href?: string;
+  onHoverChange?: (hovered: boolean) => void;
+  isHighlighted?: boolean;
 }
 
-const listingTypeLabels: Record<Property["listingType"], string> = {
+const listingTypeLabel: Record<Property["listingType"], string> = {
   sale: "For Sale",
   rent: "For Rent",
   "student-housing": "Student Housing",
 };
 
-const listingTypeColors: Record<Property["listingType"], string> = {
-  sale: "bg-green-500/20 text-green-700 dark:text-green-400",
-  rent: "bg-blue-500/20 text-blue-700 dark:text-blue-400",
-  "student-housing": "bg-purple-500/20 text-purple-700 dark:text-purple-400",
-};
+function formatPrice(property: Property) {
+  if (property.listingType === "sale" && property.price != null) {
+    return `₹${property.price.toLocaleString("en-IN")}`;
+  }
 
-export function PropertyCard({ property }: PropertyCardProps) {
-  const mainImage = property.images?.[0]?.url;
-  const priceDisplay =
-    property.listingType === "sale"
-      ? property.price
-        ? `$${property.price.toLocaleString()}`
-        : "Price on request"
-      : property.rent
-        ? `$${property.rent.toLocaleString()}/${
-            property.paymentFrequency === "weekly"
-              ? "week"
-              : property.paymentFrequency === "yearly"
-                ? "year"
-                : "month"
-          }`
-        : "Rent on request";
+  if (
+    (property.listingType === "rent" ||
+      property.listingType === "student-housing") &&
+    property.rent != null
+  ) {
+    return `₹${property.rent.toLocaleString("en-IN")}${
+      property.paymentFrequency ? ` / ${property.paymentFrequency}` : ""
+    }`;
+  }
 
-  return (
+  return "Price on request";
+}
+
+export function PropertyCard({
+  property,
+  href,
+  onHoverChange,
+  isHighlighted,
+}: PropertyCardProps) {
+  const imageUrl = property.images?.[0]?.url;
+
+  const content = (
     <motion.div
-      variants={cardVariants}
+      layout
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4 }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-      className="h-full"
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+      onHoverStart={() => onHoverChange?.(true)}
+      onHoverEnd={() => onHoverChange?.(false)}
+      className={cn(
+        "h-full",
+        isHighlighted
+          ? "ring-2 ring-primary/70 ring-offset-2 ring-offset-background"
+          : "",
+      )}
     >
-      <Link href={`/properties/${property.id}`}>
-        <Card className="group h-full cursor-pointer overflow-hidden border-2 border-border/50 bg-gradient-to-br from-card/80 via-card/50 to-card/30 backdrop-blur-sm hover:border-primary/50 hover:shadow-2xl transition-all duration-500 ease-out flex flex-col relative">
-          {/* Cover Image with Zoom Effect */}
-          {mainImage && (
-            <div className="relative h-56 w-full overflow-hidden">
-              {/* Gradient Overlay on Hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out z-10" />
+      <Card className="group h-full overflow-hidden border-border/70 bg-gradient-to-br from-card/90 via-card/70 to-card/60 shadow-sm transition-all duration-300 hover:shadow-xl">
+        {imageUrl && (
+          <div className="relative h-56 w-full overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-80" />
 
-              {/* Image with Scale on Hover */}
-              <img
-                src={mainImage}
-                alt={property.title}
-                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              />
+            <img
+              src={imageUrl}
+              alt={property.title}
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              loading="lazy"
+            />
 
-              {/* Listing Type Badge */}
-              <motion.div
-                className="absolute top-4 left-4 z-20"
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            <div className="pointer-events-none absolute inset-x-4 bottom-4 flex flex-wrap items-center justify-between gap-2 text-xs text-white">
+              <Badge
+                variant="secondary"
+                className="bg-black/60 px-2 py-1 text-[11px] font-medium uppercase tracking-wide"
               >
-                <Badge
-                  className={`${listingTypeColors[property.listingType]} shadow-lg`}
-                >
-                  {listingTypeLabels[property.listingType]}
-                </Badge>
-              </motion.div>
+                {listingTypeLabel[property.listingType]}
+              </Badge>
 
-              {/* Image Count Badge */}
-              {property.images && property.images.length > 1 && (
-                <motion.div
-                  className="absolute top-4 right-4 z-20"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <Badge variant="secondary" className="shadow-lg">
-                    {property.images.length} photos
-                  </Badge>
-                </motion.div>
-              )}
-            </div>
-          )}
-
-          {/* Content */}
-          <CardHeader className="flex-1 flex flex-col gap-2">
-            <div className="flex items-start justify-between gap-2">
-              <motion.h3
-                className="font-bold text-xl leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300"
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              >
-                {property.title}
-              </motion.h3>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4 shrink-0" />
-              <span className="line-clamp-1">
-                {property.address}, {property.city}, {property.state}
+              <span className="rounded-full bg-black/60 px-2 py-1 text-[11px] font-medium">
+                {formatPrice(property)}
               </span>
             </div>
-          </CardHeader>
+          </div>
+        )}
 
-          <CardContent className="flex-1 flex flex-col gap-4">
-            <div className="space-y-3">
-              {/* Price */}
-              <div className="text-2xl font-bold text-primary">
-                {priceDisplay}
-              </div>
+        <CardHeader className="space-y-3">
+          <CardTitle className="line-clamp-2 text-lg font-semibold tracking-tight">
+            {property.title}
+          </CardTitle>
 
-              {/* Property Details */}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                <div className="flex items-center gap-1">
-                  <Bed className="h-4 w-4" />
-                  <span>{property.numBedrooms} bed</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Bath className="h-4 w-4" />
-                  <span>{property.numBathrooms} bath</span>
-                </div>
-                {property.area && (
-                  <div className="flex items-center gap-1">
-                    <Square className="h-4 w-4" />
-                    <span>{property.area.toLocaleString()} sq ft</span>
-                  </div>
-                )}
-              </div>
+          <CardDescription className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <Home className="h-3.5 w-3.5" />
+            <span className="truncate">
+              {property.propertyType.replace("-", " ")} •{" "}
+              {property.furnishing.replace("-", " ")}
+            </span>
+          </CardDescription>
 
-              {/* Property Type & Furnishing */}
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="capitalize">
-                  {property.propertyType}
-                </Badge>
-                <Badge variant="secondary" className="capitalize text-xs">
-                  {property.furnishing.replace("-", " ")}
-                </Badge>
-                {property.availableFrom && (
-                  <Badge variant="secondary" className="text-xs">
-                    Available{" "}
-                    {format(new Date(property.availableFrom), "MMM d, yyyy")}
-                  </Badge>
-                )}
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">
+              {property.address}
+              {", "}
+              {property.city}
+              {property.state ? `, ${property.state}` : ""}
+            </span>
+          </div>
+        </CardHeader>
+
+        <CardContent className="flex flex-1 flex-col gap-4 pb-5">
+          <div className="grid grid-cols-3 gap-3 text-xs sm:text-sm">
+            <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2">
+              <BedDouble className="h-4 w-4 text-primary" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-semibold">
+                  {property.numBedrooms ?? "-"}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  Beds
+                </span>
               </div>
             </div>
 
-            {/* View Details Link */}
-            <motion.div
-              className="flex items-center gap-1 text-primary font-semibold text-sm mt-auto"
-              whileHover={{ gap: 6 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <span>View details</span>
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
-            </motion.div>
-          </CardContent>
-        </Card>
-      </Link>
+            <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2">
+              <Bath className="h-4 w-4 text-primary" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-semibold">
+                  {property.numBathrooms ?? "-"}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  Baths
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2">
+              <Maximize2 className="h-4 w-4 text-primary" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-semibold">
+                  {property.area ? `${property.area} sq ft` : "—"}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  Area
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {property.parkingAvailable && (
+              <Badge variant="secondary" className="text-[11px]">
+                Parking
+              </Badge>
+            )}
+            {property.wifi && (
+              <Badge variant="secondary" className="text-[11px]">
+                Wi‑Fi
+              </Badge>
+            )}
+            {property.petsAllowed && (
+              <Badge variant="secondary" className="text-[11px]">
+                <PawPrint className="mr-1 h-3 w-3" />
+                Pets allowed
+              </Badge>
+            )}
+            {property.pool && (
+              <Badge variant="secondary" className="text-[11px]">
+                Pool
+              </Badge>
+            )}
+            {property.gym && (
+              <Badge variant="secondary" className="text-[11px]">
+                Gym
+              </Badge>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block h-full">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
+
 

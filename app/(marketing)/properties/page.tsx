@@ -1,95 +1,80 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useQueryState, parseAsArrayOf, parseAsBoolean, parseAsString } from "nuqs";
+import { motion, AnimatePresence } from "motion/react";
+import { Search, Home, AlertTriangle } from "lucide-react";
+
 import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
 import type { Property } from "@/lib/types/property.type";
 import { PropertyCard } from "./_components/property-card";
-import { PropertyFilters } from "./_components/property-filters";
 import { PropertySortControls } from "./_components/property-sort-controls";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  useQueryState,
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsString,
-} from "nuqs";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  staggerContainer,
-  scaleIn,
-  staggerItem,
-} from "@/lib/utils/motion-variants";
-import { Home, Search } from "lucide-react";
+import { FilterFAB } from "./_components/filter-fab";
+import { FilterPanel } from "./_components/filter-panel";
+import { PropertyMapView } from "./_components/property-map-view";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { PropertyLocationSearch } from "./_components/property-location-search";
 
-const ITEMS_PER_PAGE = 24;
+const PAGE_SIZE = 24;
 
 export default function PropertiesPage() {
-  // Fetch properties from Firebase Realtime Database
-  const { data, loading, error } = useFirebaseRealtime<Property>(
-    "properties",
-    {
-      asArray: true,
-      nested: false,
-    },
-  );
-
-  const properties = (data as Property[]) || [];
-
-  // Search
-  const [searchTerm, setSearchTerm] = useQueryState(
+  const { data, loading, error } = useFirebaseRealtime<Property>("properties");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const fabRef = useRef<HTMLDivElement>(null);
+  const [search, setSearch] = useQueryState(
     "search",
     parseAsString.withDefault(""),
   );
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsString.withDefault("1"),
+  );
+  const [viewMode] = useQueryState(
+    "view",
+    parseAsString.withDefault("cards"),
+  );
+  const [sortOption] = useQueryState(
+    "sort",
+    parseAsString.withDefault("new-first"),
+  );
 
-  // Filters - Listing & Property Type
-  const [selectedListingTypes] = useQueryState(
+  const [listingType] = useQueryState(
     "listingType",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-  const [selectedPropertyTypes] = useQueryState(
+  const [propertyType] = useQueryState(
     "propertyType",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-
-  // Location
-  const [selectedCities] = useQueryState(
+  const [furnishing] = useQueryState(
+    "furnishing",
+    parseAsArrayOf(parseAsString).withDefault([]),
+  );
+  const [city] = useQueryState(
     "city",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-  const [selectedStates] = useQueryState(
+  const [state] = useQueryState(
     "state",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-  const [selectedZipCodes] = useQueryState(
-    "zipCode",
-    parseAsArrayOf(parseAsString).withDefault([]),
-  );
-
-  // Pricing
-  const [minPrice] = useQueryState("minPrice", parseAsString.withDefault(""));
-  const [maxPrice] = useQueryState("maxPrice", parseAsString.withDefault(""));
-  const [minRent] = useQueryState("minRent", parseAsString.withDefault(""));
-  const [maxRent] = useQueryState("maxRent", parseAsString.withDefault(""));
-  const [minSecurityDeposit] = useQueryState(
-    "minSecurityDeposit",
+  const [minPrice] = useQueryState(
+    "minPrice",
     parseAsString.withDefault(""),
   );
-  const [maxSecurityDeposit] = useQueryState(
-    "maxSecurityDeposit",
+  const [maxPrice] = useQueryState(
+    "maxPrice",
     parseAsString.withDefault(""),
   );
-
-  // Property Details
   const [minBedrooms] = useQueryState(
     "minBedrooms",
     parseAsString.withDefault(""),
@@ -98,704 +83,463 @@ export default function PropertiesPage() {
     "minBathrooms",
     parseAsString.withDefault(""),
   );
-  const [minArea] = useQueryState("minArea", parseAsString.withDefault(""));
-  const [maxArea] = useQueryState("maxArea", parseAsString.withDefault(""));
-  const [floorNumber] = useQueryState(
-    "floorNumber",
+  const [minArea] = useQueryState(
+    "minArea",
     parseAsString.withDefault(""),
   );
-  const [totalFloors] = useQueryState(
-    "totalFloors",
+  const [maxArea] = useQueryState(
+    "maxArea",
     parseAsString.withDefault(""),
   );
-
-  // Furnishing
-  const [selectedFurnishing] = useQueryState(
-    "furnishing",
-    parseAsArrayOf(parseAsString).withDefault([]),
-  );
-
-  // Amenities
-  const [selectedAmenities] = useQueryState(
+  const [amenities] = useQueryState(
     "amenities",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-
-  // Shared Property
-  const [isShared] = useQueryState("isShared", parseAsBoolean.withDefault(false));
-  const [selectedSharingTypes] = useQueryState(
-    "sharingType",
+  const [policies] = useQueryState(
+    "policies",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-  const [selectedPreferredTenantTypes] = useQueryState(
-    "preferredTenantType",
-    parseAsArrayOf(parseAsString).withDefault([]),
-  );
-
-  // Policies
-  const [smokingAllowed] = useQueryState(
-    "smokingAllowed",
-    parseAsBoolean.withDefault(false),
-  );
-  const [petsAllowed] = useQueryState(
+  const [petsOnly] = useQueryState(
     "petsAllowed",
     parseAsBoolean.withDefault(false),
   );
-  const [guestsAllowed] = useQueryState(
-    "guestsAllowed",
-    parseAsBoolean.withDefault(false),
-  );
-  const [sublettingAllowed] = useQueryState(
-    "sublettingAllowed",
-    parseAsBoolean.withDefault(false),
-  );
-  const [partiesAllowed] = useQueryState(
-    "partiesAllowed",
-    parseAsBoolean.withDefault(false),
-  );
-  const [quietHours] = useQueryState(
-    "quietHours",
-    parseAsBoolean.withDefault(false),
-  );
-  const [maintenanceResponsibility] = useQueryState(
-    "maintenanceResponsibility",
-    parseAsBoolean.withDefault(false),
-  );
 
-  // Availability
-  const [minLeaseLength] = useQueryState(
-    "minLeaseLength",
-    parseAsString.withDefault(""),
-  );
-  const [maxLeaseLength] = useQueryState(
-    "maxLeaseLength",
-    parseAsString.withDefault(""),
-  );
-  const [availableFrom] = useQueryState(
-    "availableFrom",
-    parseAsString.withDefault(""),
-  );
+  const properties = (data as Property[]) || [];
 
-  // Payment
-  const [selectedPaymentFrequencies] = useQueryState(
-    "paymentFrequency",
-    parseAsArrayOf(parseAsString).withDefault([]),
-  );
-  const [utilitiesIncluded] = useQueryState(
-    "utilitiesIncluded",
-    parseAsBoolean.withDefault(false),
-  );
+  // Reset page to 1 when filters or search / sort change
+  useEffect(() => {
+    setPage("1");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    search,
+    sortOption,
+    listingType,
+    propertyType,
+    furnishing,
+    city,
+    state,
+    minPrice,
+    maxPrice,
+    minBedrooms,
+    minBathrooms,
+    minArea,
+    maxArea,
+    amenities,
+    policies,
+    petsOnly,
+  ]);
 
-  // Sort & View
-  const [sortOption] = useQueryState("sort", parseAsString.withDefault("new-first"));
-  const [viewMode] = useQueryState("view", parseAsString.withDefault("grid"));
+  const { filteredSorted, paginated, totalPages } = useMemo(() => {
+    const searchTerm = search.trim().toLowerCase();
+    const minPriceNum = minPrice ? Number(minPrice) : undefined;
+    const maxPriceNum = maxPrice ? Number(maxPrice) : undefined;
+    const minBedsNum = minBedrooms ? Number(minBedrooms) : undefined;
+    const minBathsNum = minBathrooms ? Number(minBathrooms) : undefined;
+    const minAreaNum = minArea ? Number(minArea) : undefined;
+    const maxAreaNum = maxArea ? Number(maxArea) : undefined;
 
-  // Pagination
-  const [currentPageStr, setCurrentPageStr] = useQueryState(
-    "page",
-    parseAsString.withDefault("1"),
-  );
-  const currentPage = Number(currentPageStr) || 1;
-  const setCurrentPage = (page: number) => {
-    setCurrentPageStr(page.toString());
-  };
-
-  // Filter and sort properties
-  const filteredProperties = useMemo(() => {
-    let filtered = properties.filter((property) => {
-      // Search filter
+    let result = properties.filter((property) => {
       if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        const matchesSearch =
-          property.title?.toLowerCase().includes(searchLower) ||
-          property.address?.toLowerCase().includes(searchLower) ||
-          property.city?.toLowerCase().includes(searchLower) ||
-          property.state?.toLowerCase().includes(searchLower);
-        if (!matchesSearch) return false;
-      }
+        const haystack = [
+          property.title,
+          property.address,
+          property.city,
+          property.state,
+          property.otherAmenities,
+          property.propertyType,
+          property.listingType,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
 
-      // Listing Type filter
-      if (
-        selectedListingTypes.length > 0 &&
-        !selectedListingTypes.includes(property.listingType)
-      ) {
-        return false;
-      }
-
-      // Property Type filter
-      if (
-        selectedPropertyTypes.length > 0 &&
-        !selectedPropertyTypes.includes(property.propertyType)
-      ) {
-        return false;
-      }
-
-      // Location filters
-      if (selectedCities.length > 0 && !selectedCities.includes(property.city)) {
-        return false;
-      }
-      if (
-        selectedStates.length > 0 &&
-        !selectedStates.includes(property.state)
-      ) {
-        return false;
-      }
-      if (
-        selectedZipCodes.length > 0 &&
-        !selectedZipCodes.includes(property.zipCode)
-      ) {
-        return false;
-      }
-
-      // Pricing filters
-      if (minPrice && property.price && property.price < Number(minPrice)) {
-        return false;
-      }
-      if (maxPrice && property.price && property.price > Number(maxPrice)) {
-        return false;
-      }
-      if (minRent && property.rent && property.rent < Number(minRent)) {
-        return false;
-      }
-      if (maxRent && property.rent && property.rent > Number(maxRent)) {
-        return false;
-      }
-      if (
-        minSecurityDeposit &&
-        property.securityDeposit &&
-        property.securityDeposit < Number(minSecurityDeposit)
-      ) {
-        return false;
-      }
-      if (
-        maxSecurityDeposit &&
-        property.securityDeposit &&
-        property.securityDeposit > Number(maxSecurityDeposit)
-      ) {
-        return false;
-      }
-
-      // Property Details filters
-      if (minBedrooms && property.numBedrooms < Number(minBedrooms)) {
-        return false;
-      }
-      if (minBathrooms && property.numBathrooms < Number(minBathrooms)) {
-        return false;
-      }
-      if (minArea && property.area && property.area < Number(minArea)) {
-        return false;
-      }
-      if (maxArea && property.area && property.area > Number(maxArea)) {
-        return false;
-      }
-      if (floorNumber && property.floorNumber !== Number(floorNumber)) {
-        return false;
-      }
-      if (totalFloors && property.totalFloors !== Number(totalFloors)) {
-        return false;
-      }
-
-      // Furnishing filter
-      if (
-        selectedFurnishing.length > 0 &&
-        !selectedFurnishing.includes(property.furnishing)
-      ) {
-        return false;
-      }
-
-      // Amenities filters
-      for (const amenity of selectedAmenities) {
-        if (!property[amenity as keyof Property]) {
+        if (!haystack.includes(searchTerm)) {
           return false;
         }
       }
 
-      // Shared Property filters
-      if (isShared && !property.isShared) {
-        return false;
-      }
       if (
-        selectedSharingTypes.length > 0 &&
-        property.sharingDetails?.sharingType &&
-        !selectedSharingTypes.includes(property.sharingDetails.sharingType)
-      ) {
-        return false;
-      }
-      if (
-        selectedPreferredTenantTypes.length > 0 &&
-        property.sharingDetails?.preferredTenantType &&
-        !selectedPreferredTenantTypes.includes(
-          property.sharingDetails.preferredTenantType,
-        )
+        listingType.length > 0 &&
+        !listingType.includes(property.listingType)
       ) {
         return false;
       }
 
-      // Policy filters
-      if (smokingAllowed && !property.smokingAllowed) {
-        return false;
-      }
-      if (petsAllowed && !property.petsAllowed) {
-        return false;
-      }
-      if (guestsAllowed && !property.guestsAllowed) {
-        return false;
-      }
-      if (sublettingAllowed && !property.sublettingAllowed) {
-        return false;
-      }
-      if (partiesAllowed && !property.partiesAllowed) {
-        return false;
-      }
-      if (quietHours && !property.quietHours) {
-        return false;
-      }
       if (
-        maintenanceResponsibility &&
-        !property.maintenanceResponsibility
+        propertyType.length > 0 &&
+        !propertyType.includes(property.propertyType)
       ) {
         return false;
       }
 
-      // Availability filters
-      if (minLeaseLength && property.leaseLength) {
-        if (property.leaseLength < Number(minLeaseLength)) {
-          return false;
-        }
-      }
-      if (maxLeaseLength && property.leaseLength) {
-        if (property.leaseLength > Number(maxLeaseLength)) {
-          return false;
-        }
-      }
-      if (availableFrom && property.availableFrom) {
-        if (new Date(property.availableFrom) < new Date(availableFrom)) {
-          return false;
-        }
-      }
-
-      // Payment filters
       if (
-        selectedPaymentFrequencies.length > 0 &&
-        property.paymentFrequency &&
-        !selectedPaymentFrequencies.includes(property.paymentFrequency)
+        furnishing.length > 0 &&
+        !furnishing.includes(property.furnishing)
       ) {
         return false;
       }
-      if (utilitiesIncluded && !property.utilitiesIncluded) {
+
+      if (city.length > 0 && !city.includes(property.city)) {
+        return false;
+      }
+
+      if (state.length > 0 && !state.includes(property.state)) {
+        return false;
+      }
+
+      const priceValue =
+        property.listingType === "sale"
+          ? property.price
+          : property.rent;
+
+      if (minPriceNum != null && (priceValue ?? Infinity) < minPriceNum) {
+        return false;
+      }
+
+      if (maxPriceNum != null && (priceValue ?? 0) > maxPriceNum) {
+        return false;
+      }
+
+      if (
+        minBedsNum != null &&
+        (property.numBedrooms ?? 0) < minBedsNum
+      ) {
+        return false;
+      }
+
+      if (
+        minBathsNum != null &&
+        (property.numBathrooms ?? 0) < minBathsNum
+      ) {
+        return false;
+      }
+
+      if (
+        minAreaNum != null &&
+        (property.area ?? 0) < minAreaNum
+      ) {
+        return false;
+      }
+
+      if (
+        maxAreaNum != null &&
+        (property.area ?? Infinity) > maxAreaNum
+      ) {
+        return false;
+      }
+
+      if (amenities.length > 0) {
+        const hasAllAmenities = amenities.every((key) => {
+          const value = (property as Record<string, unknown>)[key];
+          return value === true;
+        });
+        if (!hasAllAmenities) return false;
+      }
+
+      if (policies.length > 0) {
+        const matchesPolicies = policies.every((key) => {
+          const value = (property as Record<string, unknown>)[key];
+          return value === true;
+        });
+        if (!matchesPolicies) return false;
+      }
+
+      if (petsOnly && !property.petsAllowed) {
         return false;
       }
 
       return true;
     });
 
-    // Sort properties
-    filtered = [...filtered].sort((a, b) => {
-      if (sortOption === "new-first") {
-        const aTime =
-          typeof a.createdAt === "string"
-            ? new Date(a.createdAt).getTime()
-            : 0;
-        const bTime =
-          typeof b.createdAt === "string"
-            ? new Date(b.createdAt).getTime()
-            : 0;
-        return bTime - aTime;
-      } else if (sortOption === "old-first") {
-        const aTime =
-          typeof a.createdAt === "string"
-            ? new Date(a.createdAt).getTime()
-            : 0;
-        const bTime =
-          typeof b.createdAt === "string"
-            ? new Date(b.createdAt).getTime()
-            : 0;
-        return aTime - bTime;
-      } else if (sortOption === "price-low-high") {
-        const aPrice = a.price || a.rent || 0;
-        const bPrice = b.price || b.rent || 0;
-        return aPrice - bPrice;
-      } else if (sortOption === "price-high-low") {
-        const aPrice = a.price || a.rent || 0;
-        const bPrice = b.price || b.rent || 0;
-        return bPrice - aPrice;
-      } else if (sortOption === "area-large-small") {
-        const aArea = a.area || 0;
-        const bArea = b.area || 0;
-        return bArea - aArea;
-      } else if (sortOption === "area-small-large") {
-        const aArea = a.area || 0;
-        const bArea = b.area || 0;
-        return aArea - bArea;
+    result = result.sort((a, b) => {
+      if (sortOption === "new-first" || sortOption === "old-first") {
+        const aTime = new Date(a.createdAt).getTime();
+        const bTime = new Date(b.createdAt).getTime();
+        return sortOption === "new-first" ? bTime - aTime : aTime - bTime;
       }
+
+      if (
+        sortOption === "price-low-high" ||
+        sortOption === "price-high-low"
+      ) {
+        const aPrice =
+          a.listingType === "sale" ? a.price ?? Infinity : a.rent ?? Infinity;
+        const bPrice =
+          b.listingType === "sale" ? b.price ?? Infinity : b.rent ?? Infinity;
+        return sortOption === "price-low-high"
+          ? aPrice - bPrice
+          : bPrice - aPrice;
+      }
+
+      if (
+        sortOption === "area-large-small" ||
+        sortOption === "area-small-large"
+      ) {
+        const aArea = a.area ?? 0;
+        const bArea = b.area ?? 0;
+        return sortOption === "area-large-small"
+          ? bArea - aArea
+          : aArea - bArea;
+      }
+
       return 0;
     });
 
-    return filtered;
+    const currentPage = Math.max(1, Number(page) || 1);
+    const totalPages = Math.max(
+      1,
+      Math.ceil(result.length / PAGE_SIZE) || 1,
+    );
+    const clampedPage = Math.min(currentPage, totalPages);
+    const start = (clampedPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+
+    return {
+      filteredSorted: result,
+      paginated: result.slice(start, end),
+      totalPages,
+    };
   }, [
-    properties,
-    searchTerm,
-    selectedListingTypes,
-    selectedPropertyTypes,
-    selectedCities,
-    selectedStates,
-    selectedZipCodes,
-    minPrice,
-    maxPrice,
-    minRent,
-    maxRent,
-    minSecurityDeposit,
-    maxSecurityDeposit,
-    minBedrooms,
-    minBathrooms,
-    minArea,
+    amenities,
+    city,
+    listingType,
     maxArea,
-    floorNumber,
-    totalFloors,
-    selectedFurnishing,
-    selectedAmenities,
-    isShared,
-    selectedSharingTypes,
-    selectedPreferredTenantTypes,
-    smokingAllowed,
-    petsAllowed,
-    guestsAllowed,
-    sublettingAllowed,
-    partiesAllowed,
-    quietHours,
-    maintenanceResponsibility,
-    minLeaseLength,
-    maxLeaseLength,
-    availableFrom,
-    selectedPaymentFrequencies,
-    utilitiesIncluded,
+    maxPrice,
+    minArea,
+    minBathrooms,
+    minBedrooms,
+    minPrice,
+    petsOnly,
+    policies,
+    properties,
+    propertyType,
+    search,
     sortOption,
+    state,
+    page,
   ]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedProperties = filteredProperties.slice(startIndex, endIndex);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
-  // Reset to page 1 when filters change
-  useMemo(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [totalPages, currentPage, setCurrentPage]);
+  const handlePageChange = (newPage: number) => {
+    setPage(String(newPage));
+  };
 
-  // Loading state
   if (loading) {
     return (
-      <div className="container mx-auto p-4 md:p-6 space-y-8">
-        {/* Header Skeletons */}
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-64 mx-auto" />
-          <Skeleton className="h-6 w-96 mx-auto" />
+      <div className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6">
+        <div className="space-y-4 text-center">
+          <Skeleton className="mx-auto h-10 w-64" />
+          <Skeleton className="mx-auto h-5 w-80" />
         </div>
-        {/* Content Skeletons */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <Skeleton className="h-64 lg:col-span-1" />
-          <div className="lg:col-span-3 space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-64" />
-              ))}
-            </div>
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <Skeleton key={idx} className="h-72" />
+            ))}
           </div>
         </div>
       </div>
     );
   }
 
-  // Error state
   if (error) {
     return (
-      <div className="container mx-auto p-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="rounded-2xl border-2 border-destructive/50 bg-destructive/10 p-8 text-center"
-        >
-          <h3 className="text-lg font-semibold text-destructive mb-2">
-            Error Loading Properties
-          </h3>
-          <p className="text-muted-foreground">{error.message}</p>
-        </motion.div>
+      <div className="container mx-auto max-w-4xl p-6">
+        <div className="rounded-2xl border-2 border-destructive/40 bg-destructive/10 p-8 text-center">
+          <div className="mb-3 flex items-center justify-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            <h2 className="text-lg font-semibold text-destructive">
+              Something went wrong
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {error.message || "Failed to load properties. Please try again."}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
-      className="container mx-auto p-4 md:p-6 space-y-8 max-w-7xl"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6"
     >
-      {/* Hero Header */}
-      <motion.div variants={scaleIn} className="text-center space-y-4">
-        <div className="relative inline-block">
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-transparent rounded-full blur-2xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.5, 0.8, 0.5],
-            }}
-            transition={{ duration: 3, repeat: Infinity }}
-          />
-          <motion.h1
-            className="relative text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            Properties
-          </motion.h1>
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="space-y-3 text-center"
+      >
+        <div className="inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
+          <Home className="h-3.5 w-3.5" />
+          Live properties from Realtime Database
         </div>
-        <motion.p
-          className="text-muted-foreground text-lg md:text-xl"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          Find your perfect property
-        </motion.p>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
+          Find your next home
+        </h1>
+        <p className="text-sm text-muted-foreground sm:text-base">
+          Browse all properties with realtime updates, smart filters and an
+          interactive map view.
+        </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Filters Sidebar */}
+      <div className="space-y-5">
         <motion.div
-          className="lg:col-span-1"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="space-y-3 rounded-xl border-2 border-border/60 bg-card/70 p-4 shadow-sm"
         >
-          <PropertyFilters properties={properties} />
-        </motion.div>
-
-        {/* Properties List */}
-        <motion.div
-          className="lg:col-span-3 space-y-4"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.25 }}
-        >
-          {/* Search, Sort, and View Controls */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 rounded-lg border-2 border-border/50 bg-card/50 backdrop-blur-sm shadow-sm"
-          >
-            {/* Search Bar */}
-            <div className="relative flex-1 min-w-0">
-              <div className="relative flex items-center">
-                <Search className="absolute left-3 h-4 w-4 text-muted-foreground z-10" />
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex w-full flex-col gap-2 md:max-w-2xl md:flex-row md:items-center md:gap-3">
+              <div className="relative w-full">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search properties..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value || null)}
-                  className="h-9 pl-9 pr-3 text-sm border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300 placeholder:text-muted-foreground"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value || null)}
+                  placeholder="Search by title, address, city…"
+                  className="h-9 pl-9 text-sm"
                 />
+              </div>
+              <div className="w-full md:w-[260px]">
+                <PropertyLocationSearch />
               </div>
             </div>
 
-            {/* Sort and View Controls */}
-            <PropertySortControls />
-          </motion.div>
+            <div className="w-full md:w-auto">
+              <PropertySortControls />
+            </div>
+          </div>
 
-          {/* Results Count */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.35 }}
-            className="text-sm text-muted-foreground"
-          >
-            {filteredProperties.length === 0 ? (
-              <span>No properties found</span>
-            ) : (
-              <span>
-                Showing {startIndex + 1}-
-                {Math.min(endIndex, filteredProperties.length)} of{" "}
-                {filteredProperties.length} properties
-              </span>
-            )}
-          </motion.div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              Showing {paginated.length} of {filteredSorted.length}{" "}
+              properties
+            </span>
+          </div>
+        </motion.div>
 
-          {/* Properties Grid/List */}
+        {viewMode === "map" ? (
+          <PropertyMapView properties={filteredSorted} />
+        ) : (
           <AnimatePresence mode="popLayout">
-            {paginatedProperties.length === 0 ? (
+            {filteredSorted.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative overflow-hidden rounded-2xl border-2 border-dashed border-border/50 bg-muted/30 p-12 text-center"
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border/60 bg-muted/40 p-10 text-center"
               >
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                  className="inline-block mb-4"
-                >
-                  <Home className="h-16 w-16 text-muted-foreground mx-auto" />
-                </motion.div>
-                <h3 className="text-xl font-semibold mb-2">
+                <Home className="h-10 w-10 text-muted-foreground" />
+                <h3 className="text-lg font-semibold">
                   No properties found
                 </h3>
-                <p className="text-muted-foreground">
-                  Try adjusting your search or filter terms.
+                <p className="max-w-md text-sm text-muted-foreground">
+                  Try adjusting your filters or search term to widen the
+                  results.
                 </p>
               </motion.div>
             ) : (
               <motion.div
-                className={
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                    : "space-y-6"
-                }
                 layout
+                className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
               >
-                {paginatedProperties.map((property, index) => (
+                {paginated.map((property) => (
                   <motion.div
                     key={property.id}
-                    variants={staggerItem}
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                    transition={{ delay: index * 0.05 }}
                     layout
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                   >
-                    <PropertyCard property={property} />
+                    <PropertyCard
+                      property={property}
+                      href={`/properties/${property.id}`}
+                      isHighlighted={highlightedId === property.id}
+                      onHoverChange={(hovered) =>
+                        setHighlightedId(hovered ? property.id : null)
+                      }
+                    />
                   </motion.div>
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
+        )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="pt-6"
-            >
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
+        {viewMode !== "map" && totalPages > 1 && (
+          <Pagination className="pt-2">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href={`?page=${Math.max(
+                    1,
+                    (Number(page) || 1) - 1,
+                  )}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(Math.max(1, (Number(page) || 1) - 1));
+                  }}
+                />
+              </PaginationItem>
+
+              {Array.from({ length: totalPages }).map((_, index) => {
+                const pageNumber = index + 1;
+                const isActive = pageNumber === (Number(page) || 1);
+
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href={`?page=${pageNumber}`}
+                      isActive={isActive}
                       onClick={(e) => {
                         e.preventDefault();
-                        if (currentPage > 1) {
-                          setCurrentPage(currentPage - 1);
-                        }
+                        handlePageChange(pageNumber);
                       }}
-                      className={
-                        currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                      }
-                    />
+                    >
+                      {pageNumber}
+                    </PaginationLink>
                   </PaginationItem>
+                );
+              })}
 
-                  {/* Page Numbers */}
-                  {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                    let pageNum: number;
-                    if (totalPages <= 7) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 4) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 3) {
-                      pageNum = totalPages - 6 + i;
-                    } else {
-                      pageNum = currentPage - 3 + i;
-                    }
-
-                    if (i === 0 && currentPage > 4 && totalPages > 7) {
-                      return (
-                        <>
-                          <PaginationItem key="first">
-                            <PaginationLink
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setCurrentPage(1);
-                              }}
-                            >
-                              1
-                            </PaginationLink>
-                          </PaginationItem>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                        </>
-                      );
-                    }
-
-                    if (
-                      i === 6 &&
-                      currentPage < totalPages - 3 &&
-                      totalPages > 7
-                    ) {
-                      return (
-                        <>
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                          <PaginationItem key="last">
-                            <PaginationLink
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setCurrentPage(totalPages);
-                              }}
-                            >
-                              {totalPages}
-                            </PaginationLink>
-                          </PaginationItem>
-                        </>
-                      );
-                    }
-
-                    return (
-                      <PaginationItem key={pageNum}>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCurrentPage(pageNum);
-                          }}
-                          isActive={currentPage === pageNum}
-                        >
-                          {pageNum}
-                        </PaginationLink>
-                      </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  href={`?page=${Math.min(
+                    totalPages,
+                    (Number(page) || 1) + 1,
+                  )}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(
+                      Math.min(totalPages, (Number(page) || 1) + 1),
                     );
-                  })}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages) {
-                          setCurrentPage(currentPage + 1);
-                        }
-                      }}
-                      className={
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </motion.div>
-          )}
-        </motion.div>
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
       </div>
+
+      <FilterFAB
+        ref={fabRef}
+        isOpen={isFilterOpen}
+        onToggle={() => setIsFilterOpen(!isFilterOpen)}
+      />
+      <FilterPanel
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        properties={properties}
+        fabRef={fabRef}
+      />
     </motion.div>
   );
 }
+
 

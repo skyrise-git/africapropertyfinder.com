@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   useQueryState,
@@ -8,50 +8,56 @@ import {
   parseAsBoolean,
   parseAsString,
 } from "nuqs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import {
   Filter,
   RotateCcw,
-  X,
-  ChevronDown,
-  ChevronUp,
-  DollarSign,
-  HomeIcon,
-  GraduationCap,
+  MapPin,
   Building2,
-  Sofa,
-  Plus,
-  ChevronUp as ChevronUpIcon,
+  Ruler,
+  ListFilter,
+  Sparkles,
+  ShieldCheck,
+  PhoneCall,
 } from "lucide-react";
-import type {
-  Property,
-  ListingType,
-  PropertyType,
-  FurnishingType,
-  SharingType,
-  PreferredTenantType,
-  PaymentFrequency,
-} from "@/lib/types/property.type";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Property } from "@/lib/types/property.type";
 
 interface PropertyFiltersProps {
   properties: Property[];
 }
 
-const listingTypes: ListingType[] = ["sale", "rent", "student-housing"];
-const propertyTypes: PropertyType[] = [
+const listingTypes: Property["listingType"][] = [
+  "sale",
+  "rent",
+  "student-housing",
+];
+
+const furnishingTypes: Property["furnishing"][] = [
+  "furnished",
+  "semi-furnished",
+  "unfurnished",
+];
+
+const propertyTypes: Property["propertyType"][] = [
   "apartment",
   "house",
   "condo",
@@ -60,61 +66,56 @@ const propertyTypes: PropertyType[] = [
   "room",
   "other",
 ];
-const furnishingTypes: FurnishingType[] = [
-  "furnished",
-  "semi-furnished",
-  "unfurnished",
-];
-const sharingTypes: SharingType[] = ["room", "apartment", "house"];
-const preferredTenantTypes: PreferredTenantType[] = [
-  "students",
-  "professionals",
-  "families",
-  "anyone",
-];
-const paymentFrequencies: PaymentFrequency[] = ["monthly", "weekly", "yearly"];
 
-const amenities = [
-  { key: "parkingAvailable", label: "Parking" },
-  { key: "laundry", label: "Laundry" },
-  { key: "heatingCooling", label: "Heating/Cooling" },
-  { key: "balcony", label: "Balcony" },
-  { key: "wifi", label: "WiFi" },
-  { key: "gym", label: "Gym" },
-  { key: "pool", label: "Pool" },
-  { key: "elevator", label: "Elevator" },
-  { key: "security", label: "Security" },
-  { key: "garden", label: "Garden" },
-  { key: "dishwasher", label: "Dishwasher" },
-  { key: "fireplace", label: "Fireplace" },
+const amenityKeys = [
+  "parkingAvailable",
+  "wifi",
+  "gym",
+  "pool",
+  "elevator",
+  "security",
+  "garden",
+  "dishwasher",
+  "fireplace",
+  "balcony",
+  "laundry",
+  "heatingCooling",
 ] as const;
 
+const policyKeys = [
+  "smokingAllowed",
+  "petsAllowed",
+  "guestsAllowed",
+  "sublettingAllowed",
+  "partiesAllowed",
+  "quietHours",
+  "maintenanceResponsibility",
+] as const;
+
+type AmenityKey = (typeof amenityKeys)[number];
+type PolicyKey = (typeof policyKeys)[number];
+
 export function PropertyFilters({ properties }: PropertyFiltersProps) {
-  // URL Query State - Listing & Property Type
-  const [selectedListingTypes, setSelectedListingTypes] = useQueryState(
+  const [listingType, setListingType] = useQueryState(
     "listingType",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-  const [selectedPropertyTypes, setSelectedPropertyTypes] = useQueryState(
+  const [propertyType, setPropertyType] = useQueryState(
     "propertyType",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-
-  // Location
-  const [selectedCities, setSelectedCities] = useQueryState(
+  const [furnishing, setFurnishing] = useQueryState(
+    "furnishing",
+    parseAsArrayOf(parseAsString).withDefault([]),
+  );
+  const [city, setCity] = useQueryState(
     "city",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-  const [selectedStates, setSelectedStates] = useQueryState(
+  const [state, setState] = useQueryState(
     "state",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-  const [selectedZipCodes, setSelectedZipCodes] = useQueryState(
-    "zipCode",
-    parseAsArrayOf(parseAsString).withDefault([]),
-  );
-
-  // Pricing
   const [minPrice, setMinPrice] = useQueryState(
     "minPrice",
     parseAsString.withDefault(""),
@@ -123,24 +124,6 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
     "maxPrice",
     parseAsString.withDefault(""),
   );
-  const [minRent, setMinRent] = useQueryState(
-    "minRent",
-    parseAsString.withDefault(""),
-  );
-  const [maxRent, setMaxRent] = useQueryState(
-    "maxRent",
-    parseAsString.withDefault(""),
-  );
-  const [minSecurityDeposit, setMinSecurityDeposit] = useQueryState(
-    "minSecurityDeposit",
-    parseAsString.withDefault(""),
-  );
-  const [maxSecurityDeposit, setMaxSecurityDeposit] = useQueryState(
-    "maxSecurityDeposit",
-    parseAsString.withDefault(""),
-  );
-
-  // Property Details
   const [minBedrooms, setMinBedrooms] = useQueryState(
     "minBedrooms",
     parseAsString.withDefault(""),
@@ -157,1186 +140,914 @@ export function PropertyFilters({ properties }: PropertyFiltersProps) {
     "maxArea",
     parseAsString.withDefault(""),
   );
-  const [floorNumber, setFloorNumber] = useQueryState(
-    "floorNumber",
-    parseAsString.withDefault(""),
-  );
-  const [totalFloors, setTotalFloors] = useQueryState(
-    "totalFloors",
-    parseAsString.withDefault(""),
-  );
-
-  // Furnishing
-  const [selectedFurnishing, setSelectedFurnishing] = useQueryState(
-    "furnishing",
-    parseAsArrayOf(parseAsString).withDefault([]),
-  );
-
-  // Amenities
-  const [selectedAmenities, setSelectedAmenities] = useQueryState(
+  const [amenities, setAmenities] = useQueryState(
     "amenities",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-
-  // Shared Property
-  const [isShared, setIsShared] = useQueryState(
-    "isShared",
-    parseAsBoolean.withDefault(false),
-  );
-  const [selectedSharingTypes, setSelectedSharingTypes] = useQueryState(
-    "sharingType",
+  const [policies, setPolicies] = useQueryState(
+    "policies",
     parseAsArrayOf(parseAsString).withDefault([]),
   );
-  const [selectedPreferredTenantTypes, setSelectedPreferredTenantTypes] =
-    useQueryState(
-      "preferredTenantType",
-      parseAsArrayOf(parseAsString).withDefault([]),
-    );
-
-  // Policies
-  const [smokingAllowed, setSmokingAllowed] = useQueryState(
-    "smokingAllowed",
-    parseAsBoolean.withDefault(false),
-  );
-  const [petsAllowed, setPetsAllowed] = useQueryState(
+  const [petsOnly, setPetsOnly] = useQueryState(
     "petsAllowed",
     parseAsBoolean.withDefault(false),
   );
-  const [guestsAllowed, setGuestsAllowed] = useQueryState(
-    "guestsAllowed",
-    parseAsBoolean.withDefault(false),
-  );
-  const [sublettingAllowed, setSublettingAllowed] = useQueryState(
-    "sublettingAllowed",
-    parseAsBoolean.withDefault(false),
-  );
-  const [partiesAllowed, setPartiesAllowed] = useQueryState(
-    "partiesAllowed",
-    parseAsBoolean.withDefault(false),
-  );
-  const [quietHours, setQuietHours] = useQueryState(
-    "quietHours",
-    parseAsBoolean.withDefault(false),
-  );
-  const [maintenanceResponsibility, setMaintenanceResponsibility] =
-    useQueryState("maintenanceResponsibility", parseAsBoolean.withDefault(false));
 
-  // Availability
-  const [minLeaseLength, setMinLeaseLength] = useQueryState(
-    "minLeaseLength",
-    parseAsString.withDefault(""),
-  );
-  const [maxLeaseLength, setMaxLeaseLength] = useQueryState(
-    "maxLeaseLength",
-    parseAsString.withDefault(""),
-  );
-  const [availableFrom, setAvailableFrom] = useQueryState(
-    "availableFrom",
-    parseAsString.withDefault(""),
-  );
-
-  // Payment
-  const [selectedPaymentFrequencies, setSelectedPaymentFrequencies] =
-    useQueryState(
-      "paymentFrequency",
-      parseAsArrayOf(parseAsString).withDefault([]),
-    );
-  const [utilitiesIncluded, setUtilitiesIncluded] = useQueryState(
-    "utilitiesIncluded",
-    parseAsBoolean.withDefault(false),
-  );
-
-  // Collapsible sections state
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["listing", "location", "pricing"]),
-  );
-  
-  // Property type expansion state
-  const [showAllPropertyTypes, setShowAllPropertyTypes] = useState(false);
-
-  // Get unique values from properties
-  const uniqueCities = useMemo(
-    () =>
-      Array.from(new Set(properties.map((p) => p.city).filter(Boolean))).sort(),
-    [properties],
-  );
-  const uniqueStates = useMemo(
-    () =>
-      Array.from(new Set(properties.map((p) => p.state).filter(Boolean))).sort(),
-    [properties],
-  );
-  const uniqueZipCodes = useMemo(
+  const allCities = useMemo(
     () =>
       Array.from(
-        new Set(properties.map((p) => p.zipCode).filter(Boolean)),
+        new Set(properties.map((p) => p.city).filter(Boolean)),
       ).sort(),
     [properties],
   );
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => {
-      const next = new Set(prev);
-      if (next.has(section)) {
-        next.delete(section);
-      } else {
-        next.add(section);
-      }
-      return next;
-    });
-  };
-
-  const handleResetFilters = () => {
-    setSelectedListingTypes([]);
-    setSelectedPropertyTypes([]);
-    setSelectedCities([]);
-    setSelectedStates([]);
-    setSelectedZipCodes([]);
-    setMinPrice("");
-    setMaxPrice("");
-    setMinRent("");
-    setMaxRent("");
-    setMinSecurityDeposit("");
-    setMaxSecurityDeposit("");
-    setMinBedrooms("");
-    setMinBathrooms("");
-    setMinArea("");
-    setMaxArea("");
-    setFloorNumber("");
-    setTotalFloors("");
-    setSelectedFurnishing([]);
-    setSelectedAmenities([]);
-    setIsShared(false);
-    setSelectedSharingTypes([]);
-    setSelectedPreferredTenantTypes([]);
-    setSmokingAllowed(false);
-    setPetsAllowed(false);
-    setGuestsAllowed(false);
-    setSublettingAllowed(false);
-    setPartiesAllowed(false);
-    setQuietHours(false);
-    setMaintenanceResponsibility(false);
-    setMinLeaseLength("");
-    setMaxLeaseLength("");
-    setAvailableFrom("");
-    setSelectedPaymentFrequencies([]);
-    setUtilitiesIncluded(false);
-  };
+  const allStates = useMemo(
+    () =>
+      Array.from(
+        new Set(properties.map((p) => p.state).filter(Boolean)),
+      ).sort(),
+    [properties],
+  );
 
   const hasActiveFilters =
-    selectedListingTypes.length > 0 ||
-    selectedPropertyTypes.length > 0 ||
-    selectedCities.length > 0 ||
-    selectedStates.length > 0 ||
-    selectedZipCodes.length > 0 ||
-    minPrice !== "" ||
-    maxPrice !== "" ||
-    minRent !== "" ||
-    maxRent !== "" ||
-    minSecurityDeposit !== "" ||
-    maxSecurityDeposit !== "" ||
-    minBedrooms !== "" ||
-    minBathrooms !== "" ||
-    minArea !== "" ||
-    maxArea !== "" ||
-    floorNumber !== "" ||
-    totalFloors !== "" ||
-    selectedFurnishing.length > 0 ||
-    selectedAmenities.length > 0 ||
-    isShared ||
-    selectedSharingTypes.length > 0 ||
-    selectedPreferredTenantTypes.length > 0 ||
-    smokingAllowed ||
-    petsAllowed ||
-    guestsAllowed ||
-    sublettingAllowed ||
-    partiesAllowed ||
-    quietHours ||
-    maintenanceResponsibility ||
-    minLeaseLength !== "" ||
-    maxLeaseLength !== "" ||
-    availableFrom !== "" ||
-    selectedPaymentFrequencies.length > 0 ||
-    utilitiesIncluded;
+    listingType.length > 0 ||
+    propertyType.length > 0 ||
+    furnishing.length > 0 ||
+    city.length > 0 ||
+    state.length > 0 ||
+    !!minPrice ||
+    !!maxPrice ||
+    !!minBedrooms ||
+    !!minBathrooms ||
+    !!minArea ||
+    !!maxArea ||
+    amenities.length > 0 ||
+    policies.length > 0 ||
+    petsOnly;
 
-  const FilterSection = ({
-    title,
-    sectionKey,
-    children,
-  }: {
-    title: string;
-    sectionKey: string;
-    children: React.ReactNode;
-  }) => {
-    const isExpanded = expandedSections.has(sectionKey);
-    return (
-      <div className="space-y-3 border-b border-border/50 pb-4 last:border-0">
-        <button
-          type="button"
-          onClick={() => toggleSection(sectionKey)}
-          className="flex w-full items-center justify-between text-sm font-semibold hover:text-primary transition-colors"
-        >
-          <span>{title}</span>
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </button>
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {children}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
+  const toggleArrayValue = (
+    current: string[],
+    value: string,
+    setter: (next: string[] | null) => void,
+  ) => {
+    if (current.includes(value)) {
+      const next = current.filter((v) => v !== value);
+      setter(next.length ? next : null);
+    } else {
+      setter([...current, value]);
+    }
+  };
+
+  const handleReset = () => {
+    setListingType(null);
+    setPropertyType(null);
+    setFurnishing(null);
+    setCity(null);
+    setState(null);
+    setMinPrice(null);
+    setMaxPrice(null);
+    setMinBedrooms(null);
+    setMinBathrooms(null);
+    setMinArea(null);
+    setMaxArea(null);
+    setAmenities(null);
+    setPolicies(null);
+    setPetsOnly(false);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.2 }}
-    >
-      <Card className="border-2 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
-        <CardHeader className="pb-4 sticky top-0 bg-card/95 backdrop-blur-sm z-10 border-b border-border/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">Filters</CardTitle>
-            </div>
-            <AnimatePresence>
-              {hasActiveFilters && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleResetFilters}
-                    className="h-8 text-xs hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <X className="h-3 w-3 mr-1" />
-                    Clear
-                  </Button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4 pt-4">
-          {/* Listing Type - Tabbed View */}
-          <FilterSection title="Listing Type" sectionKey="listing">
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                {
-                  value: "sale",
-                  label: "Sale",
-                  icon: DollarSign,
-                  color: "text-green-600 dark:text-green-400",
-                  bgColor: "bg-green-50 dark:bg-green-950/20",
-                  borderColor: "border-green-200 dark:border-green-800",
-                  activeBgColor: "bg-green-100 dark:bg-green-900/30",
-                },
-                {
-                  value: "rent",
-                  label: "Rent",
-                  icon: HomeIcon,
-                  color: "text-blue-600 dark:text-blue-400",
-                  bgColor: "bg-blue-50 dark:bg-blue-950/20",
-                  borderColor: "border-blue-200 dark:border-blue-800",
-                  activeBgColor: "bg-blue-100 dark:bg-blue-900/30",
-                },
-                {
-                  value: "student-housing",
-                  label: "Student",
-                  icon: GraduationCap,
-                  color: "text-purple-600 dark:text-purple-400",
-                  bgColor: "bg-purple-50 dark:bg-purple-950/20",
-                  borderColor: "border-purple-200 dark:border-purple-800",
-                  activeBgColor: "bg-purple-100 dark:bg-purple-900/30",
-                },
-              ].map((option) => {
-                const Icon = option.icon;
-                const isSelected = selectedListingTypes.includes(
-                  option.value as ListingType,
-                );
-                return (
-                  <motion.button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      if (isSelected) {
-                        setSelectedListingTypes(
-                          selectedListingTypes.filter((t) => t !== option.value),
-                        );
-                      } else {
-                        setSelectedListingTypes([
-                          ...selectedListingTypes,
-                          option.value,
-                        ]);
-                      }
-                    }}
-                    className={`relative flex flex-col items-center gap-1.5 rounded-lg border-2 p-2.5 transition-all ${
-                      isSelected
-                        ? `${option.borderColor} ${option.activeBgColor} border-2 shadow-sm`
-                        : "border-border bg-muted/30 hover:bg-muted/50"
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {isSelected && (
-                      <motion.div
-                        className={`absolute inset-0 rounded-lg ${option.activeBgColor}`}
-                        layoutId="listingTypeFilterBg"
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 30,
-                        }}
-                      />
-                    )}
-                    <div className="relative z-10 flex flex-col items-center gap-1">
-                      <Icon
-                        className={`h-4 w-4 ${
-                          isSelected ? option.color : "text-muted-foreground"
-                        }`}
-                      />
-                      <span
-                        className={`text-xs font-medium ${
-                          isSelected
-                            ? "text-foreground"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {option.label}
-                      </span>
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </FilterSection>
-
-          {/* Property Type - Tabbed View */}
-          <FilterSection title="Property Type" sectionKey="property">
-            <div className="grid grid-cols-2 gap-2">
-              <AnimatePresence mode="popLayout">
-                {[
-                  {
-                    value: "apartment",
-                    label: "Apartment",
-                    icon: Building2,
-                    color: "text-blue-600 dark:text-blue-400",
-                    bgColor: "bg-blue-50 dark:bg-blue-950/20",
-                    borderColor: "border-blue-200 dark:border-blue-800",
-                    activeBgColor: "bg-blue-100 dark:bg-blue-900/30",
-                  },
-                  {
-                    value: "house",
-                    label: "House",
-                    icon: HomeIcon,
-                    color: "text-green-600 dark:text-green-400",
-                    bgColor: "bg-green-50 dark:bg-green-950/20",
-                    borderColor: "border-green-200 dark:border-green-800",
-                    activeBgColor: "bg-green-100 dark:bg-green-900/30",
-                  },
-                  {
-                    value: "condo",
-                    label: "Condo",
-                    icon: Building2,
-                    color: "text-purple-600 dark:text-purple-400",
-                    bgColor: "bg-purple-50 dark:bg-purple-950/20",
-                    borderColor: "border-purple-200 dark:border-purple-800",
-                    activeBgColor: "bg-purple-100 dark:bg-purple-900/30",
-                  },
-                  {
-                    value: "townhouse",
-                    label: "Townhouse",
-                    icon: Building2,
-                    color: "text-orange-600 dark:text-orange-400",
-                    bgColor: "bg-orange-50 dark:bg-orange-950/20",
-                    borderColor: "border-orange-200 dark:border-orange-800",
-                    activeBgColor: "bg-orange-100 dark:bg-orange-900/30",
-                  },
-                  {
-                    value: "studio",
-                    label: "Studio",
-                    icon: Sofa,
-                    color: "text-pink-600 dark:text-pink-400",
-                    bgColor: "bg-pink-50 dark:bg-pink-950/20",
-                    borderColor: "border-pink-200 dark:border-pink-800",
-                    activeBgColor: "bg-pink-100 dark:bg-pink-900/30",
-                  },
-                  {
-                    value: "room",
-                    label: "Room",
-                    icon: HomeIcon,
-                    color: "text-cyan-600 dark:text-cyan-400",
-                    bgColor: "bg-cyan-50 dark:bg-cyan-950/20",
-                    borderColor: "border-cyan-200 dark:border-cyan-800",
-                    activeBgColor: "bg-cyan-100 dark:bg-cyan-900/30",
-                  },
-                  {
-                    value: "other",
-                    label: "Other",
-                    icon: Building2,
-                    color: "text-gray-600 dark:text-gray-400",
-                    bgColor: "bg-gray-50 dark:bg-gray-950/20",
-                    borderColor: "border-gray-200 dark:border-gray-800",
-                    activeBgColor: "bg-gray-100 dark:bg-gray-900/30",
-                  },
-                ]
-                  .slice(0, showAllPropertyTypes ? 7 : 3)
-                  .map((option) => {
-                    const Icon = option.icon;
-                    const isSelected = selectedPropertyTypes.includes(
-                      option.value as PropertyType,
-                    );
-                    return (
-                      <motion.button
-                        key={option.value}
-                        type="button"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.2 }}
-                        onClick={() => {
-                          if (isSelected) {
-                            setSelectedPropertyTypes(
-                              selectedPropertyTypes.filter(
-                                (t) => t !== option.value,
-                              ),
-                            );
-                          } else {
-                            setSelectedPropertyTypes([
-                              ...selectedPropertyTypes,
-                              option.value,
-                            ]);
-                          }
-                        }}
-                        className={`relative flex flex-col items-center gap-1.5 rounded-lg border-2 p-2.5 transition-all ${
-                          isSelected
-                            ? `${option.borderColor} ${option.activeBgColor} border-2 shadow-sm`
-                            : "border-border bg-muted/30 hover:bg-muted/50"
-                        }`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        {isSelected && (
-                          <motion.div
-                            className={`absolute inset-0 rounded-lg ${option.activeBgColor}`}
-                            layoutId={`propertyTypeFilterBg-${option.value}`}
-                            transition={{
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 30,
-                            }}
-                          />
-                        )}
-                        <div className="relative z-10 flex flex-col items-center gap-1">
-                          <Icon
-                            className={`h-4 w-4 ${
-                              isSelected
-                                ? option.color
-                                : "text-muted-foreground"
-                            }`}
-                          />
-                          <span
-                            className={`text-xs font-medium ${
-                              isSelected
-                                ? "text-foreground"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {option.label}
-                          </span>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-
-                {/* Show More/Less Button */}
-                {!showAllPropertyTypes && (
-                  <motion.button
-                    key="show-more"
-                    type="button"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={() => setShowAllPropertyTypes(true)}
-                    className="relative flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border bg-muted/20 hover:bg-muted/40 p-2.5 transition-all"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <Plus className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-xs font-medium text-muted-foreground">
-                        +4 more
-                      </span>
-                    </div>
-                  </motion.button>
-                )}
-
-                {/* Show Less Button (when expanded) */}
-                {showAllPropertyTypes && (
-                  <motion.button
-                    key="show-less"
-                    type="button"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={() => setShowAllPropertyTypes(false)}
-                    className="relative flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border bg-muted/20 hover:bg-muted/40 p-2.5 transition-all col-span-2"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <ChevronUpIcon className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-xs font-medium text-muted-foreground">
-                        Show Less
-                      </span>
-                    </div>
-                  </motion.button>
-                )}
-              </AnimatePresence>
-            </div>
-          </FilterSection>
-
-          {/* Location */}
-          <FilterSection title="Location" sectionKey="location">
-            <div className="space-y-3">
-              {uniqueCities.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    City
-                  </Label>
-                  <Select
-                    value={selectedCities[0] || ""}
-                    onValueChange={(value) => {
-                      if (value && !selectedCities.includes(value)) {
-                        setSelectedCities([...selectedCities, value]);
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Select city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {uniqueCities.map((city) => (
-                        <SelectItem key={city} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedCities.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {selectedCities.map((city) => (
-                        <Badge
-                          key={city}
-                          variant="secondary"
-                          className="text-xs cursor-pointer"
-                          onClick={() =>
-                            setSelectedCities(
-                              selectedCities.filter((c) => c !== city),
-                            )
-                          }
-                        >
-                          {city}
-                          <X className="h-3 w-3 ml-1" />
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {uniqueStates.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    State
-                  </Label>
-                  <Select
-                    value={selectedStates[0] || ""}
-                    onValueChange={(value) => {
-                      if (value && !selectedStates.includes(value)) {
-                        setSelectedStates([...selectedStates, value]);
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Select state" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {uniqueStates.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedStates.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {selectedStates.map((state) => (
-                        <Badge
-                          key={state}
-                          variant="secondary"
-                          className="text-xs cursor-pointer"
-                          onClick={() =>
-                            setSelectedStates(
-                              selectedStates.filter((s) => s !== state),
-                            )
-                          }
-                        >
-                          {state}
-                          <X className="h-3 w-3 ml-1" />
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {uniqueZipCodes.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    Zip Code
-                  </Label>
-                  <Select
-                    value={selectedZipCodes[0] || ""}
-                    onValueChange={(value) => {
-                      if (value && !selectedZipCodes.includes(value)) {
-                        setSelectedZipCodes([...selectedZipCodes, value]);
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Select zip code" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {uniqueZipCodes.map((zip) => (
-                        <SelectItem key={zip} value={zip}>
-                          {zip}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedZipCodes.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {selectedZipCodes.map((zip) => (
-                        <Badge
-                          key={zip}
-                          variant="secondary"
-                          className="text-xs cursor-pointer"
-                          onClick={() =>
-                            setSelectedZipCodes(
-                              selectedZipCodes.filter((z) => z !== zip),
-                            )
-                          }
-                        >
-                          {zip}
-                          <X className="h-3 w-3 ml-1" />
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </FilterSection>
-
-          {/* Pricing */}
-          <FilterSection title="Pricing" sectionKey="pricing">
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Sale Price Range
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value || null)}
-                    className="h-9"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value || null)}
-                    className="h-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Rent Range
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={minRent}
-                    onChange={(e) => setMinRent(e.target.value || null)}
-                    className="h-9"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={maxRent}
-                    onChange={(e) => setMaxRent(e.target.value || null)}
-                    className="h-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Security Deposit Range
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={minSecurityDeposit}
-                    onChange={(e) =>
-                      setMinSecurityDeposit(e.target.value || null)
-                    }
-                    className="h-9"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={maxSecurityDeposit}
-                    onChange={(e) =>
-                      setMaxSecurityDeposit(e.target.value || null)
-                    }
-                    className="h-9"
-                  />
-                </div>
-              </div>
-            </div>
-          </FilterSection>
-
-          {/* Property Details */}
-          <FilterSection title="Property Details" sectionKey="details">
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    Min Bedrooms
-                  </Label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={minBedrooms}
-                    onChange={(e) => setMinBedrooms(e.target.value || null)}
-                    className="h-9"
-                    min={0}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    Min Bathrooms
-                  </Label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={minBathrooms}
-                    onChange={(e) => setMinBathrooms(e.target.value || null)}
-                    className="h-9"
-                    min={0}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Area Range (sq ft)
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={minArea}
-                    onChange={(e) => setMinArea(e.target.value || null)}
-                    className="h-9"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={maxArea}
-                    onChange={(e) => setMaxArea(e.target.value || null)}
-                    className="h-9"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    Floor Number
-                  </Label>
-                  <Input
-                    type="number"
-                    placeholder="Any"
-                    value={floorNumber}
-                    onChange={(e) => setFloorNumber(e.target.value || null)}
-                    className="h-9"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    Total Floors
-                  </Label>
-                  <Input
-                    type="number"
-                    placeholder="Any"
-                    value={totalFloors}
-                    onChange={(e) => setTotalFloors(e.target.value || null)}
-                    className="h-9"
-                  />
-                </div>
-              </div>
-            </div>
-          </FilterSection>
-
-          {/* Furnishing */}
-          <FilterSection title="Furnishing" sectionKey="furnishing">
-            <div className="space-y-2">
-              {furnishingTypes.map((type) => (
-                <div key={type} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`furnishing-${type}`}
-                    checked={selectedFurnishing.includes(type)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedFurnishing([...selectedFurnishing, type]);
-                      } else {
-                        setSelectedFurnishing(
-                          selectedFurnishing.filter((t) => t !== type),
-                        );
-                      }
-                    }}
-                  />
-                  <Label
-                    htmlFor={`furnishing-${type}`}
-                    className="text-sm font-normal cursor-pointer capitalize"
-                  >
-                    {type.replace("-", " ")}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </FilterSection>
-
-          {/* Amenities */}
-          <FilterSection title="Amenities" sectionKey="amenities">
-            <div className="space-y-2">
-              {amenities.map((amenity) => (
-                <div key={amenity.key} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`amenity-${amenity.key}`}
-                    checked={selectedAmenities.includes(amenity.key)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedAmenities([
-                          ...selectedAmenities,
-                          amenity.key,
-                        ]);
-                      } else {
-                        setSelectedAmenities(
-                          selectedAmenities.filter((a) => a !== amenity.key),
-                        );
-                      }
-                    }}
-                  />
-                  <Label
-                    htmlFor={`amenity-${amenity.key}`}
-                    className="text-sm font-normal cursor-pointer"
-                  >
-                    {amenity.label}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </FilterSection>
-
-          {/* Shared Property */}
-          <FilterSection title="Shared Property" sectionKey="shared">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-                <Label htmlFor="isShared" className="text-sm cursor-pointer">
-                  Is Shared
-                </Label>
-                <Switch
-                  id="isShared"
-                  checked={isShared}
-                  onCheckedChange={setIsShared}
-                />
-              </div>
-
-              {isShared && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="space-y-3"
-                >
-                  <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground">
-                      Sharing Type
-                    </Label>
-                    {sharingTypes.map((type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`sharing-${type}`}
-                          checked={selectedSharingTypes.includes(type)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedSharingTypes([
-                                ...selectedSharingTypes,
-                                type,
-                              ]);
-                            } else {
-                              setSelectedSharingTypes(
-                                selectedSharingTypes.filter((t) => t !== type),
-                              );
-                            }
-                          }}
-                        />
-                        <Label
-                          htmlFor={`sharing-${type}`}
-                          className="text-sm font-normal cursor-pointer capitalize"
-                        >
-                          {type}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground">
-                      Preferred Tenant Type
-                    </Label>
-                    {preferredTenantTypes.map((type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`tenant-${type}`}
-                          checked={selectedPreferredTenantTypes.includes(type)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedPreferredTenantTypes([
-                                ...selectedPreferredTenantTypes,
-                                type,
-                              ]);
-                            } else {
-                              setSelectedPreferredTenantTypes(
-                                selectedPreferredTenantTypes.filter(
-                                  (t) => t !== type,
-                                ),
-                              );
-                            }
-                          }}
-                        />
-                        <Label
-                          htmlFor={`tenant-${type}`}
-                          className="text-sm font-normal cursor-pointer capitalize"
-                        >
-                          {type}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-          </FilterSection>
-
-          {/* Policies */}
-          <FilterSection title="Policies" sectionKey="policies">
-            <div className="space-y-2">
-              {[
-                { key: "smokingAllowed", label: "Smoking Allowed" },
-                { key: "petsAllowed", label: "Pets Allowed" },
-                { key: "guestsAllowed", label: "Guests Allowed" },
-                { key: "sublettingAllowed", label: "Subletting Allowed" },
-                { key: "partiesAllowed", label: "Parties Allowed" },
-                { key: "quietHours", label: "Quiet Hours" },
-                {
-                  key: "maintenanceResponsibility",
-                  label: "Maintenance Responsibility",
-                },
-              ].map((policy) => {
-                const stateMap: Record<string, boolean> = {
-                  smokingAllowed,
-                  petsAllowed,
-                  guestsAllowed,
-                  sublettingAllowed,
-                  partiesAllowed,
-                  quietHours,
-                  maintenanceResponsibility,
-                };
-                const setterMap: Record<string, (val: boolean) => void> = {
-                  smokingAllowed: setSmokingAllowed,
-                  petsAllowed: setPetsAllowed,
-                  guestsAllowed: setGuestsAllowed,
-                  sublettingAllowed: setSublettingAllowed,
-                  partiesAllowed: setPartiesAllowed,
-                  quietHours: setQuietHours,
-                  maintenanceResponsibility: setMaintenanceResponsibility,
-                };
-
-                return (
-                  <div
-                    key={policy.key}
-                    className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
-                  >
-                    <Label
-                      htmlFor={policy.key}
-                      className="text-sm cursor-pointer"
-                    >
-                      {policy.label}
-                    </Label>
-                    <Switch
-                      id={policy.key}
-                      checked={stateMap[policy.key] || false}
-                      onCheckedChange={setterMap[policy.key]}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </FilterSection>
-
-          {/* Availability */}
-          <FilterSection title="Availability" sectionKey="availability">
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Lease Length (months)
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={minLeaseLength}
-                    onChange={(e) =>
-                      setMinLeaseLength(e.target.value || null)
-                    }
-                    className="h-9"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={maxLeaseLength}
-                    onChange={(e) =>
-                      setMaxLeaseLength(e.target.value || null)
-                    }
-                    className="h-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Available From
-                </Label>
-                <Input
-                  type="date"
-                  value={availableFrom}
-                  onChange={(e) => setAvailableFrom(e.target.value || null)}
-                  className="h-9"
-                />
-              </div>
-            </div>
-          </FilterSection>
-
-          {/* Payment */}
-          <FilterSection title="Payment" sectionKey="payment">
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Payment Frequency
-                </Label>
-                {paymentFrequencies.map((freq) => (
-                  <div key={freq} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`payment-${freq}`}
-                      checked={selectedPaymentFrequencies.includes(freq)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedPaymentFrequencies([
-                            ...selectedPaymentFrequencies,
-                            freq,
-                          ]);
-                        } else {
-                          setSelectedPaymentFrequencies(
-                            selectedPaymentFrequencies.filter((f) => f !== freq),
-                          );
-                        }
-                      }}
-                    />
-                    <Label
-                      htmlFor={`payment-${freq}`}
-                      className="text-sm font-normal cursor-pointer capitalize"
-                    >
-                      {freq}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-                <Label
-                  htmlFor="utilitiesIncluded"
-                  className="text-sm cursor-pointer"
-                >
-                  Utilities Included
-                </Label>
-                <Switch
-                  id="utilitiesIncluded"
-                  checked={utilitiesIncluded}
-                  onCheckedChange={setUtilitiesIncluded}
-                />
-              </div>
-            </div>
-          </FilterSection>
-
-          {/* Reset Button */}
-          {hasActiveFilters && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="pt-4 border-t"
-            >
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleResetFilters}
-                className="w-full border-2 border-destructive/50 bg-destructive/10 hover:bg-destructive hover:text-destructive-foreground"
+    <div className="flex h-full flex-col">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-col h-full"
+      >
+        <div className="flex flex-row items-center justify-between gap-2 border-b border-border/40 px-6 py-4">
+          <AnimatePresence>
+            {hasActiveFilters && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
               >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset All Filters
-              </Button>
-            </motion.div>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleReset}
+                  className="h-8 gap-1 text-xs text-muted-foreground hover:text-destructive"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Clear Filters
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <ScrollArea className="flex-1 pr-2">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="space-y-6 px-6 py-4"
+          >
+              {/* Mobile: Accordion */}
+              <div className="md:hidden">
+                <Accordion type="single" collapsible defaultValue="listing" className="w-full">
+                  <AccordionItem value="listing" className="border-b border-border/40">
+                    <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <ListFilter className="h-4 w-4 text-primary" />
+                        <span>Listing</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4 pb-4">
+                      <div className="space-y-5">
+                        <div className="space-y-3">
+                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Listing Type
+                          </Label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {listingTypes.map((type) => (
+                              <button
+                                key={type}
+                                type="button"
+                                onClick={() =>
+                                  toggleArrayValue(listingType, type, setListingType)
+                                }
+                                className="min-h-[44px] min-w-[44px]"
+                              >
+                                <Badge
+                                  variant={
+                                    listingType.includes(type) ? "default" : "outline"
+                                  }
+                                  className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                                >
+                                  {type.replace("-", " ")}
+                                </Badge>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Property Type
+                          </Label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {propertyTypes.map((type) => (
+                              <button
+                                key={type}
+                                type="button"
+                                onClick={() =>
+                                  toggleArrayValue(
+                                    propertyType,
+                                    type,
+                                    setPropertyType,
+                                  )
+                                }
+                                className="min-h-[44px] min-w-[44px]"
+                              >
+                                <Badge
+                                  variant={
+                                    propertyType.includes(type) ? "default" : "outline"
+                                  }
+                                  className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                                >
+                                  <Building2 className="mr-1.5 inline h-3.5 w-3.5" />
+                                  {type}
+                                </Badge>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Furnishing
+                          </Label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {furnishingTypes.map((type) => (
+                              <button
+                                key={type}
+                                type="button"
+                                onClick={() =>
+                                  toggleArrayValue(furnishing, type, setFurnishing)
+                                }
+                                className="min-h-[44px] min-w-[44px]"
+                              >
+                                <Badge
+                                  variant={
+                                    furnishing.includes(type) ? "default" : "outline"
+                                  }
+                                  className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                                >
+                                  {type.replace("-", " ")}
+                                </Badge>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="location" className="border-b border-border/40">
+                    <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span>Location &amp; Price</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4 pb-4">
+                      <div className="space-y-5">
+                        <div className="space-y-3">
+                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            City
+                          </Label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {allCities.map((c) => (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={() => toggleArrayValue(city, c, setCity)}
+                                className="min-h-[44px] min-w-[44px]"
+                              >
+                                <Badge
+                                  variant={city.includes(c) ? "default" : "outline"}
+                                  className="cursor-pointer px-4 py-2 text-xs transition-all hover:scale-105"
+                                >
+                                  {c}
+                                </Badge>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            State
+                          </Label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {allStates.map((s) => (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() => toggleArrayValue(state, s, setState)}
+                                className="min-h-[44px] min-w-[44px]"
+                              >
+                                <Badge
+                                  variant={state.includes(s) ? "default" : "outline"}
+                                  className="cursor-pointer px-4 py-2 text-xs transition-all hover:scale-105"
+                                >
+                                  {s}
+                                </Badge>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              Min Price
+                            </Label>
+                            <Input
+                              type="number"
+                              inputMode="numeric"
+                              placeholder="₹ min"
+                              value={minPrice}
+                              onChange={(e) =>
+                                setMinPrice(e.target.value || null)
+                              }
+                              className="h-10"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              Max Price
+                            </Label>
+                            <Input
+                              type="number"
+                              inputMode="numeric"
+                              placeholder="₹ max"
+                              value={maxPrice}
+                              onChange={(e) =>
+                                setMaxPrice(e.target.value || null)
+                              }
+                              className="h-10"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="size" className="border-b border-border/40">
+                    <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <Ruler className="h-4 w-4 text-primary" />
+                        <span>Size &amp; Rooms</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4 pb-4">
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              Min Bedrooms
+                            </Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              value={minBedrooms}
+                              onChange={(e) =>
+                                setMinBedrooms(e.target.value || null)
+                              }
+                              className="h-10"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              Min Bathrooms
+                            </Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              value={minBathrooms}
+                              onChange={(e) =>
+                                setMinBathrooms(e.target.value || null)
+                              }
+                              className="h-10"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-xs">
+                            <Label className="font-semibold uppercase tracking-wide text-muted-foreground">
+                              Area (sq ft)
+                            </Label>
+                            <span className="font-medium text-foreground">
+                              {minArea || "0"} – {maxArea || "∞"}
+                            </span>
+                          </div>
+                          <Slider
+                            min={0}
+                            max={5000}
+                            step={100}
+                            value={[
+                              Number(minArea || 0),
+                              Number(maxArea || 5000),
+                            ]}
+                            onValueChange={([min, max]) => {
+                              setMinArea(min ? String(min) : null);
+                              setMaxArea(max && max < 5000 ? String(max) : null);
+                            }}
+                            className="py-2"
+                          />
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="amenities" className="border-b border-border/40">
+                    <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <span>Amenities</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4 pb-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        {amenityKeys.map((key) => (
+                          <label
+                            key={key}
+                            className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2.5 text-xs transition-all hover:bg-muted/50 hover:border-primary/30"
+                          >
+                            <Checkbox
+                              checked={amenities.includes(key)}
+                              onCheckedChange={() =>
+                                toggleArrayValue(
+                                  amenities,
+                                  key,
+                                  setAmenities,
+                                )
+                              }
+                            />
+                            <span className="capitalize leading-tight">
+                              {key.replace(/([A-Z])/g, " $1").toLowerCase()}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="policies" className="border-b border-border/40">
+                    <AccordionTrigger className="py-3 text-sm font-medium hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        <span>Policies</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4 pb-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3">
+                          <div className="space-y-0.5">
+                            <Label className="text-sm font-semibold">
+                              Pets allowed only
+                            </Label>
+                            <p className="text-xs text-muted-foreground">
+                              Show homes where pets are allowed
+                            </p>
+                          </div>
+                          <Switch
+                            checked={petsOnly}
+                            onCheckedChange={(value) => setPetsOnly(!!value)}
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          {policyKeys.map((key: PolicyKey) => (
+                            <label
+                              key={key}
+                              className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2.5 text-xs transition-all hover:bg-muted/50 hover:border-primary/30"
+                            >
+                              <Checkbox
+                                checked={policies.includes(key)}
+                                onCheckedChange={() =>
+                                  toggleArrayValue(
+                                    policies,
+                                    key,
+                                    setPolicies,
+                                  )
+                                }
+                              />
+                              <span className="capitalize leading-tight">
+                                {key.replace(/([A-Z])/g, " $1").toLowerCase()}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+
+              {/* Desktop: Tabs */}
+              <div className="hidden md:block">
+                <Tabs defaultValue="listing" className="w-full">
+                  <ScrollArea className="w-full" orientation="horizontal">
+                    <TabsList className="inline-flex h-auto w-full justify-start gap-1.5 overflow-x-auto bg-muted/40 p-1.5">
+                      <TabsTrigger
+                        value="listing"
+                        className="flex min-w-fit items-center gap-1.5 rounded-md px-3 py-2 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        <ListFilter className="h-3.5 w-3.5" />
+                        <span>Listing</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="location"
+                        className="flex min-w-fit items-center gap-1.5 rounded-md px-3 py-2 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        <MapPin className="h-3.5 w-3.5" />
+                        <span>Location &amp; Price</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="size"
+                        className="flex min-w-fit items-center gap-1.5 rounded-md px-3 py-2 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        <Ruler className="h-3.5 w-3.5" />
+                        <span>Size &amp; Rooms</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="amenities"
+                        className="flex min-w-fit items-center gap-1.5 rounded-md px-3 py-2 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        <span>Amenities</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="policies"
+                        className="flex min-w-fit items-center gap-1.5 rounded-md px-3 py-2 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        <span>Policies</span>
+                      </TabsTrigger>
+                    </TabsList>
+                  </ScrollArea>
+
+                  <TabsContent value="listing" className="mt-5 space-y-5">
+                    <div className="space-y-3">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Listing Type
+                      </Label>
+                      <div className="flex flex-wrap gap-2.5">
+                        {listingTypes.map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() =>
+                              toggleArrayValue(listingType, type, setListingType)
+                            }
+                          >
+                            <Badge
+                              variant={
+                                listingType.includes(type) ? "default" : "outline"
+                              }
+                              className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                            >
+                              {type.replace("-", " ")}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Property Type
+                      </Label>
+                      <div className="flex flex-wrap gap-2.5">
+                        {propertyTypes.map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() =>
+                              toggleArrayValue(
+                                propertyType,
+                                type,
+                                setPropertyType,
+                              )
+                            }
+                          >
+                            <Badge
+                              variant={
+                                propertyType.includes(type) ? "default" : "outline"
+                              }
+                              className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                            >
+                              <Building2 className="mr-1.5 inline h-3.5 w-3.5" />
+                              {type}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Furnishing
+                      </Label>
+                      <div className="flex flex-wrap gap-2.5">
+                        {furnishingTypes.map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() =>
+                              toggleArrayValue(furnishing, type, setFurnishing)
+                            }
+                          >
+                            <Badge
+                              variant={
+                                furnishing.includes(type) ? "default" : "outline"
+                              }
+                              className="cursor-pointer px-4 py-2 text-xs capitalize transition-all hover:scale-105"
+                            >
+                              {type.replace("-", " ")}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="location" className="mt-5 space-y-5">
+                    <div className="space-y-3">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        City
+                      </Label>
+                      <div className="flex flex-wrap gap-2.5">
+                        {allCities.map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => toggleArrayValue(city, c, setCity)}
+                          >
+                            <Badge
+                              variant={city.includes(c) ? "default" : "outline"}
+                              className="cursor-pointer px-4 py-2 text-xs transition-all hover:scale-105"
+                            >
+                              {c}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        State
+                      </Label>
+                      <div className="flex flex-wrap gap-2.5">
+                        {allStates.map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => toggleArrayValue(state, s, setState)}
+                          >
+                            <Badge
+                              variant={state.includes(s) ? "default" : "outline"}
+                              className="cursor-pointer px-4 py-2 text-xs transition-all hover:scale-105"
+                            >
+                              {s}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Min Price
+                        </Label>
+                        <Input
+                          type="number"
+                          inputMode="numeric"
+                          placeholder="₹ min"
+                          value={minPrice}
+                          onChange={(e) =>
+                            setMinPrice(e.target.value || null)
+                          }
+                          className="h-10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Max Price
+                        </Label>
+                        <Input
+                          type="number"
+                          inputMode="numeric"
+                          placeholder="₹ max"
+                          value={maxPrice}
+                          onChange={(e) =>
+                            setMaxPrice(e.target.value || null)
+                          }
+                          className="h-10"
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="size" className="mt-5 space-y-5">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Min Bedrooms
+                        </Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={minBedrooms}
+                          onChange={(e) =>
+                            setMinBedrooms(e.target.value || null)
+                          }
+                          className="h-10"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Min Bathrooms
+                        </Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={minBathrooms}
+                          onChange={(e) =>
+                            setMinBathrooms(e.target.value || null)
+                          }
+                          className="h-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-xs">
+                        <Label className="font-semibold uppercase tracking-wide text-muted-foreground">
+                          Area (sq ft)
+                        </Label>
+                        <span className="font-medium text-foreground">
+                          {minArea || "0"} – {maxArea || "∞"}
+                        </span>
+                      </div>
+                      <Slider
+                        min={0}
+                        max={5000}
+                        step={100}
+                        value={[
+                          Number(minArea || 0),
+                          Number(maxArea || 5000),
+                        ]}
+                        onValueChange={([min, max]) => {
+                          setMinArea(min ? String(min) : null);
+                          setMaxArea(max && max < 5000 ? String(max) : null);
+                        }}
+                        className="py-2"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="amenities" className="mt-5 space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      {amenityKeys.map((key) => (
+                        <label
+                          key={key}
+                          className="flex cursor-pointer items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2.5 text-xs transition-all hover:bg-muted/50 hover:border-primary/30"
+                        >
+                          <Checkbox
+                            checked={amenities.includes(key)}
+                            onCheckedChange={() =>
+                              toggleArrayValue(
+                                amenities,
+                                key,
+                                setAmenities,
+                              )
+                            }
+                          />
+                          <span className="capitalize leading-tight">
+                            {key.replace(/([A-Z])/g, " $1").toLowerCase()}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="policies" className="mt-5 space-y-4">
+                    <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-semibold">
+                          Pets allowed only
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Show homes where pets are allowed
+                        </p>
+                      </div>
+                      <Switch
+                        checked={petsOnly}
+                        onCheckedChange={(value) => setPetsOnly(!!value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {policyKeys.map((key: PolicyKey) => (
+                        <label
+                          key={key}
+                          className="flex cursor-pointer items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2.5 text-xs transition-all hover:bg-muted/50 hover:border-primary/30"
+                        >
+                          <Checkbox
+                            checked={policies.includes(key)}
+                            onCheckedChange={() =>
+                              toggleArrayValue(
+                                policies,
+                                key,
+                                setPolicies,
+                              )
+                            }
+                          />
+                          <span className="capitalize leading-tight">
+                            {key.replace(/([A-Z])/g, " $1").toLowerCase()}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+
+          <AnimatePresence>
+            {hasActiveFilters && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-3 border-t border-border/40 pt-4"
+              >
+                <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Filter className="h-3.5 w-3.5" />
+                  Active Filters
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {listingType.map((lt) => (
+                    <Badge
+                      key={`lt-${lt}`}
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs capitalize"
+                    >
+                      {lt.replace("-", " ")}
+                    </Badge>
+                  ))}
+                  {propertyType.map((pt) => (
+                    <Badge
+                      key={`pt-${pt}`}
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs capitalize"
+                    >
+                      {pt}
+                    </Badge>
+                  ))}
+                  {furnishing.map((f) => (
+                    <Badge
+                      key={`fur-${f}`}
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs capitalize"
+                    >
+                      {f.replace("-", " ")}
+                    </Badge>
+                  ))}
+                  {city.map((c) => (
+                    <Badge
+                      key={`city-${c}`}
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs"
+                    >
+                      {c}
+                    </Badge>
+                  ))}
+                  {state.map((s) => (
+                    <Badge
+                      key={`state-${s}`}
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs"
+                    >
+                      {s}
+                    </Badge>
+                  ))}
+                  {(minPrice || maxPrice) && (
+                    <Badge
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs"
+                    >
+                      ₹{minPrice || 0} – ₹{maxPrice || "∞"}
+                    </Badge>
+                  )}
+                  {(minBedrooms || minBathrooms) && (
+                    <Badge
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs"
+                    >
+                      {minBedrooms && `≥${minBedrooms} beds`}{" "}
+                      {minBathrooms && `≥${minBathrooms} baths`}
+                    </Badge>
+                  )}
+                  {(minArea || maxArea) && (
+                    <Badge
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs"
+                    >
+                      {minArea || 0}–{maxArea || "∞"} sq ft
+                    </Badge>
+                  )}
+                  {amenities.map((a) => (
+                    <Badge
+                      key={`amenity-${a}`}
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs capitalize"
+                    >
+                      {a.replace(/([A-Z])/g, " $1").toLowerCase()}
+                    </Badge>
+                  ))}
+                  {policies.map((p) => (
+                    <Badge
+                      key={`policy-${p}`}
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs capitalize"
+                    >
+                      {p.replace(/([A-Z])/g, " $1").toLowerCase()}
+                    </Badge>
+                  ))}
+                  {petsOnly && (
+                    <Badge
+                      variant="secondary"
+                      className="px-2.5 py-1 text-xs"
+                    >
+                      Pets allowed only
+                    </Badge>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          </motion.div>
+        </ScrollArea>
+      </motion.div>
+    </div>
   );
 }
+
 

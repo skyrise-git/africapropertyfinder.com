@@ -1,6 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useQueryState, parseAsString } from "nuqs";
+import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -8,86 +10,96 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Grid3x3, List } from "lucide-react";
-import { useQueryState, parseAsString } from "nuqs";
-import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
+import { Grid3x3, Map } from "lucide-react";
 
 export function PropertySortControls() {
   const [sortOption, setSortOption] = useQueryState(
     "sort",
     parseAsString.withDefault("new-first"),
   );
+
   const [viewMode, setViewMode] = useQueryState(
     "view",
-    parseAsString.withDefault("grid"),
+    parseAsString.withDefault("cards"),
   );
 
   return (
-    <div className="flex items-center gap-3 shrink-0 flex-wrap">
+    <div className="flex w-full flex-wrap items-center justify-end gap-3">
       <Select value={sortOption} onValueChange={setSortOption}>
-        <SelectTrigger className="w-[180px] sm:w-[200px]">
+        <SelectTrigger className="w-[180px] md:w-[190px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="new-first">Newest First</SelectItem>
-          <SelectItem value="old-first">Oldest First</SelectItem>
-          <SelectItem value="price-low-high">Price/Rent: Low to High</SelectItem>
-          <SelectItem value="price-high-low">Price/Rent: High to Low</SelectItem>
-          <SelectItem value="area-large-small">Area: Largest to Smallest</SelectItem>
-          <SelectItem value="area-small-large">Area: Smallest to Largest</SelectItem>
+        <SelectContent align="end">
+          <SelectItem value="new-first">Newest first</SelectItem>
+          <SelectItem value="old-first">Oldest first</SelectItem>
+          <SelectItem value="price-low-high">
+            Price / Rent: Low to high
+          </SelectItem>
+          <SelectItem value="price-high-low">
+            Price / Rent: High to low
+          </SelectItem>
+          <SelectItem value="area-large-small">
+            Area: Largest first
+          </SelectItem>
+          <SelectItem value="area-small-large">
+            Area: Smallest first
+          </SelectItem>
         </SelectContent>
       </Select>
 
-      <div className="flex gap-1 p-0.5 rounded-md bg-muted/30 border border-border/50">
+      <div className="flex gap-1 rounded-full border border-border/60 bg-muted/40 p-0.5 text-xs">
         <motion.button
-          onClick={() => setViewMode("grid")}
+          type="button"
+          onClick={() => setViewMode("cards")}
           className={cn(
-            "relative px-2 py-1 rounded-sm text-xs font-medium transition-all duration-300",
-            viewMode === "grid"
+            "relative rounded-full px-3 py-1 font-medium transition-all duration-300",
+            viewMode === "cards"
               ? "text-primary-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground",
           )}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
         >
-          {viewMode === "grid" && (
+          {viewMode === "cards" && (
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 rounded-sm"
-              layoutId="viewBg"
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-primary/80"
+              layoutId="propertiesViewToggle"
+              transition={{ type: "spring", stiffness: 260, damping: 24 }}
             />
           )}
-          <span className="relative z-10 flex items-center gap-1">
+          <span className="relative z-10 inline-flex items-center gap-1">
             <Grid3x3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Grid</span>
+            Cards
           </span>
         </motion.button>
+
         <motion.button
-          onClick={() => setViewMode("list")}
+          type="button"
+          onClick={() => setViewMode("map")}
           className={cn(
-            "relative px-2 py-1 rounded-sm text-xs font-medium transition-all duration-300",
-            viewMode === "list"
+            "relative rounded-full px-3 py-1 font-medium transition-all duration-300",
+            viewMode === "map"
               ? "text-primary-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground",
           )}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
         >
-          {viewMode === "list" && (
+          {viewMode === "map" && (
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 rounded-sm"
-              layoutId="viewBg"
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-primary/80"
+              layoutId="propertiesViewToggle"
+              transition={{ type: "spring", stiffness: 260, damping: 24 }}
             />
           )}
-          <span className="relative z-10 flex items-center gap-1">
-            <List className="h-4 w-4" />
-            <span className="hidden sm:inline">List</span>
+          <span className="relative z-10 inline-flex items-center gap-1">
+            <Map className="h-4 w-4" />
+            Map
           </span>
         </motion.button>
       </div>
     </div>
   );
 }
+
 
