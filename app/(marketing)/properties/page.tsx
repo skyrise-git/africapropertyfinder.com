@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useQueryState,
-  parseAsArrayOf,
-  parseAsBoolean,
   parseAsString,
 } from "nuqs";
 import { motion, AnimatePresence } from "motion/react";
@@ -14,8 +12,6 @@ import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
 import type { Property } from "@/lib/types/property.type";
 import { PropertyCard } from "./_components/property-card";
 import { PropertySortControls } from "./_components/property-sort-controls";
-import { FilterFAB } from "./_components/filter-fab";
-import { FilterPanel } from "./_components/filter-panel";
 import { PropertyMapView } from "./_components/property-map-view";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,8 +29,6 @@ const PAGE_SIZE = 24;
 
 export default function PropertiesPage() {
   const { data, loading, error } = useFirebaseRealtime<Property>("properties");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const fabRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useQueryState(
     "search",
     parseAsString.withDefault("")
@@ -46,84 +40,16 @@ export default function PropertiesPage() {
     parseAsString.withDefault("new-first")
   );
 
-  const [listingType] = useQueryState(
-    "listingType",
-    parseAsArrayOf(parseAsString).withDefault([])
-  );
-  const [propertyType] = useQueryState(
-    "propertyType",
-    parseAsArrayOf(parseAsString).withDefault([])
-  );
-  const [furnishing] = useQueryState(
-    "furnishing",
-    parseAsArrayOf(parseAsString).withDefault([])
-  );
-  const [city] = useQueryState(
-    "city",
-    parseAsArrayOf(parseAsString).withDefault([])
-  );
-  const [state] = useQueryState(
-    "state",
-    parseAsArrayOf(parseAsString).withDefault([])
-  );
-  const [minPrice] = useQueryState("minPrice", parseAsString.withDefault(""));
-  const [maxPrice] = useQueryState("maxPrice", parseAsString.withDefault(""));
-  const [minBedrooms] = useQueryState(
-    "minBedrooms",
-    parseAsString.withDefault("")
-  );
-  const [minBathrooms] = useQueryState(
-    "minBathrooms",
-    parseAsString.withDefault("")
-  );
-  const [minArea] = useQueryState("minArea", parseAsString.withDefault(""));
-  const [maxArea] = useQueryState("maxArea", parseAsString.withDefault(""));
-  const [amenities] = useQueryState(
-    "amenities",
-    parseAsArrayOf(parseAsString).withDefault([])
-  );
-  const [policies] = useQueryState(
-    "policies",
-    parseAsArrayOf(parseAsString).withDefault([])
-  );
-  const [petsOnly] = useQueryState(
-    "petsAllowed",
-    parseAsBoolean.withDefault(false)
-  );
-
   const properties = (data as Property[]) || [];
 
-  // Reset page to 1 when filters or search / sort change
+  // Reset page to 1 when search or sort change
   useEffect(() => {
     setPage("1");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    search,
-    sortOption,
-    listingType,
-    propertyType,
-    furnishing,
-    city,
-    state,
-    minPrice,
-    maxPrice,
-    minBedrooms,
-    minBathrooms,
-    minArea,
-    maxArea,
-    amenities,
-    policies,
-    petsOnly,
-  ]);
+  }, [search, sortOption]);
 
   const { filteredSorted, paginated, totalPages } = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
-    const minPriceNum = minPrice ? Number(minPrice) : undefined;
-    const maxPriceNum = maxPrice ? Number(maxPrice) : undefined;
-    const minBedsNum = minBedrooms ? Number(minBedrooms) : undefined;
-    const minBathsNum = minBathrooms ? Number(minBathrooms) : undefined;
-    const minAreaNum = minArea ? Number(minArea) : undefined;
-    const maxAreaNum = maxArea ? Number(maxArea) : undefined;
 
     let result = properties.filter((property) => {
       if (searchTerm) {
@@ -143,79 +69,6 @@ export default function PropertiesPage() {
         if (!haystack.includes(searchTerm)) {
           return false;
         }
-      }
-
-      if (
-        listingType.length > 0 &&
-        !listingType.includes(property.listingType)
-      ) {
-        return false;
-      }
-
-      if (
-        propertyType.length > 0 &&
-        !propertyType.includes(property.propertyType)
-      ) {
-        return false;
-      }
-
-      if (furnishing.length > 0 && !furnishing.includes(property.furnishing)) {
-        return false;
-      }
-
-      if (city.length > 0 && !city.includes(property.city)) {
-        return false;
-      }
-
-      if (state.length > 0 && !state.includes(property.state)) {
-        return false;
-      }
-
-      const priceValue =
-        property.listingType === "sale" ? property.price : property.rent;
-
-      if (minPriceNum != null && (priceValue ?? Infinity) < minPriceNum) {
-        return false;
-      }
-
-      if (maxPriceNum != null && (priceValue ?? 0) > maxPriceNum) {
-        return false;
-      }
-
-      if (minBedsNum != null && (property.numBedrooms ?? 0) < minBedsNum) {
-        return false;
-      }
-
-      if (minBathsNum != null && (property.numBathrooms ?? 0) < minBathsNum) {
-        return false;
-      }
-
-      if (minAreaNum != null && (property.area ?? 0) < minAreaNum) {
-        return false;
-      }
-
-      if (maxAreaNum != null && (property.area ?? Infinity) > maxAreaNum) {
-        return false;
-      }
-
-      if (amenities.length > 0) {
-        const hasAllAmenities = amenities.every((key) => {
-          const value = (property as unknown as Record<string, unknown>)[key];
-          return value === true;
-        });
-        if (!hasAllAmenities) return false;
-      }
-
-      if (policies.length > 0) {
-        const matchesPolicies = policies.every((key) => {
-          const value = (property as unknown as Record<string, unknown>)[key];
-          return value === true;
-        });
-        if (!matchesPolicies) return false;
-      }
-
-      if (petsOnly && !property.petsAllowed) {
-        return false;
       }
 
       return true;
@@ -263,25 +116,7 @@ export default function PropertiesPage() {
       paginated: result.slice(start, end),
       totalPages,
     };
-  }, [
-    amenities,
-    city,
-    listingType,
-    maxArea,
-    maxPrice,
-    minArea,
-    minBathrooms,
-    minBedrooms,
-    minPrice,
-    petsOnly,
-    policies,
-    properties,
-    propertyType,
-    search,
-    sortOption,
-    state,
-    page,
-  ]);
+  }, [properties, search, sortOption, page]);
 
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
@@ -346,8 +181,7 @@ export default function PropertiesPage() {
           Find your next home
         </h1>
         <p className="text-sm text-muted-foreground sm:text-base">
-          Browse all properties with realtime updates, smart filters and an
-          interactive map view.
+          Browse all properties with realtime updates and an interactive map view.
         </p>
       </motion.div>
 
@@ -400,8 +234,7 @@ export default function PropertiesPage() {
                 <Home className="h-10 w-10 text-muted-foreground" />
                 <h3 className="text-lg font-semibold">No properties found</h3>
                 <p className="max-w-md text-sm text-muted-foreground">
-                  Try adjusting your filters or search term to widen the
-                  results.
+                  Try adjusting your search term to widen the results.
                 </p>
               </motion.div>
             ) : (
@@ -484,18 +317,6 @@ export default function PropertiesPage() {
           </Pagination>
         )}
       </div>
-
-      <FilterFAB
-        ref={fabRef}
-        isOpen={isFilterOpen}
-        onToggle={() => setIsFilterOpen(!isFilterOpen)}
-      />
-      <FilterPanel
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        properties={properties}
-        fabRef={fabRef}
-      />
     </motion.div>
   );
 }
