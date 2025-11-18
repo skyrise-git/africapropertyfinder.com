@@ -28,6 +28,142 @@ const containerStyle: {
   height: "100%",
 };
 
+// Create custom SVG marker icon
+function createCustomMarkerIcon(
+  property: Property,
+  isActive: boolean = false
+): google.maps.Icon {
+  const size = isActive ? 48 : 40;
+  const iconSize = isActive ? 24 : 20;
+  const strokeWidth = isActive ? 3 : 2;
+  
+  // Color based on listing type
+  const getColors = () => {
+    switch (property.listingType) {
+      case "sale":
+        return {
+          fill: "#22c55e", // green
+          stroke: "#ffffff",
+          shadow: "rgba(34, 197, 94, 0.4)",
+        };
+      case "rent":
+        return {
+          fill: "#3b82f6", // blue
+          stroke: "#ffffff",
+          shadow: "rgba(59, 130, 246, 0.4)",
+        };
+      case "student-housing":
+        return {
+          fill: "#a855f7", // purple
+          stroke: "#ffffff",
+          shadow: "rgba(168, 85, 247, 0.4)",
+        };
+      default:
+        return {
+          fill: "#64748b", // gray
+          stroke: "#ffffff",
+          shadow: "rgba(100, 116, 139, 0.4)",
+        };
+    }
+  };
+
+  const colors = getColors();
+  
+  // Icon paths based on property type (24x24 viewBox)
+  const getIconPaths = () => {
+    switch (property.propertyType) {
+      case "house":
+        // House icon with roof
+        return `
+          <path d="M3 12L12 3L21 12V20C21 20.5523 20.5523 21 20 21H15V15C15 14.4477 14.5523 14 14 14H10C9.44772 14 9 14.4477 9 15V21H4C3.44772 21 3 20.5523 3 20V12Z" fill="${colors.stroke}" stroke="${colors.stroke}" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M9 21V15H15V21" stroke="${colors.fill}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        `;
+      case "apartment":
+      case "condo":
+        // Building/apartment icon
+        return `
+          <path d="M4 21V9L12 3L20 9V21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M9 21V13H15V21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M4 13H20" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M4 17H20" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        `;
+      case "townhouse":
+        // Townhouse icon (multiple units)
+        return `
+          <path d="M3 21V9L12 3L21 9V21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M9 21V13H15V21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M3 13H9" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M15 13H21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M3 17H9" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M15 17H21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        `;
+      case "studio":
+        // Small building icon
+        return `
+          <rect x="6" y="10" width="12" height="11" rx="1" stroke="${colors.stroke}" stroke-width="1.5" fill="none"/>
+          <path d="M12 10V6L9 4L6 6V10" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M9 14H15" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M9 18H15" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        `;
+      case "room":
+        // Room icon
+        return `
+          <rect x="4" y="6" width="16" height="15" rx="1" stroke="${colors.stroke}" stroke-width="1.5" fill="none"/>
+          <path d="M4 10H20" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M8 14H16" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M8 18H16" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        `;
+      default:
+        // Default location pin icon
+        return `
+          <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="${colors.stroke}" stroke="${colors.stroke}" stroke-width="1.5"/>
+          <circle cx="12" cy="9" r="2.5" fill="${colors.fill}"/>
+        `;
+    }
+  };
+
+  const iconPaths = getIconPaths();
+
+  // Create complete SVG string with marker pin shape
+  const svg = `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="shadow-${property.id}" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+          <feOffset dx="0" dy="2" result="offsetblur"/>
+          <feComponentTransfer>
+            <feFuncA type="linear" slope="0.3"/>
+          </feComponentTransfer>
+          <feMerge>
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <!-- Pin background circle -->
+      <circle 
+        cx="${size / 2}" 
+        cy="${size / 2}" 
+        r="${size / 2 - strokeWidth}" 
+        fill="${colors.fill}" 
+        stroke="${colors.stroke}" 
+        stroke-width="${strokeWidth}"
+        filter="url(#shadow-${property.id})"
+      />
+      <!-- Property type icon -->
+      <g transform="translate(${(size - iconSize) / 2}, ${(size - iconSize) / 2}) scale(${iconSize / 24})">
+        ${iconPaths}
+      </g>
+    </svg>
+  `;
+
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new google.maps.Size(size, size),
+    anchor: new google.maps.Point(size / 2, size),
+  };
+}
+
 export function PropertyMapView({ properties }: PropertyMapViewProps) {
   const [lat] = useQueryState("lat", parseAsString.withDefault(""));
   const [lng] = useQueryState("lng", parseAsString.withDefault(""));
@@ -125,15 +261,9 @@ export function PropertyMapView({ properties }: PropertyMapViewProps) {
                 lat: loc.latitude,
                 lng: loc.longitude,
               }}
-              icon={{
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: isActive ? 9 : 7,
-                fillColor: isActive ? "#0f766e" : "#2563eb",
-                fillOpacity: 0.9,
-                strokeColor: "#ffffff",
-                strokeWeight: 2,
-              }}
+              icon={createCustomMarkerIcon(property, isActive)}
               onClick={() => handleMarkerClick(property.id)}
+              animation={isActive ? google.maps.Animation.BOUNCE : undefined}
             />
           );
         })}
