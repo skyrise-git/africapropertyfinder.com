@@ -5,11 +5,12 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from "use-places-autocomplete";
 import { useQueryState, parseAsString } from "nuqs";
-import { MapPin, Loader2 } from "lucide-react";
-import { useCallback } from "react";
+import { MapPin, Loader2, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { env } from "@/lib/env";
 
 const libraries: ("places" | "geometry")[] = ["places", "geometry"];
@@ -21,6 +22,8 @@ function PropertyLocationSearchInner() {
     "loc",
     parseAsString.withDefault(""),
   );
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const {
     ready,
@@ -30,13 +33,39 @@ function PropertyLocationSearchInner() {
     clearSuggestions,
   } = usePlacesAutocomplete({
     debounce: 300,
+    requestOptions: {
+      types: ["geocode"],
+    },
   });
 
-  const isLoading = !ready;
+  // Sync input value with locationLabel when it changes externally
+  useEffect(() => {
+    if (locationLabel && !value) {
+      setValue(locationLabel, false);
+    }
+  }, [locationLabel, value, setValue]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        clearSuggestions();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [clearSuggestions]);
 
   const handleSelect = useCallback(
     async (placeId: string, description: string) => {
       clearSuggestions();
+      setIsGeocoding(true);
       try {
         const results = await getGeocode({ placeId });
         const { lat: latNum, lng: lngNum } = await getLatLng(results[0]);
@@ -47,42 +76,92 @@ function PropertyLocationSearchInner() {
         setValue(description, false);
       } catch (error) {
         console.error("Error selecting place:", error);
+        setValue("", false);
+      } finally {
+        setIsGeocoding(false);
       }
     },
     [clearSuggestions, setLat, setLng, setLocationLabel, setValue],
   );
 
+  const handleClear = useCallback(() => {
+    setValue("", false);
+    setLat(null);
+    setLng(null);
+    setLocationLabel(null);
+    clearSuggestions();
+  }, [setValue, setLat, setLng, setLocationLabel, clearSuggestions]);
+
+  const hasValue = Boolean(value || locationLabel);
+  const showSuggestions = status === "OK" && data.length > 0 && !isGeocoding;
+  const isLoading = !ready || isGeocoding;
+
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative w-full">
       <div className="relative">
-        <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
         <Input
-          value={value || locationLabel}
-          onChange={(e) => setValue(e.target.value)}
+          value={value || locationLabel || ""}
+          onChange={(e) => {
+            setValue(e.target.value);
+            // Clear location if user starts typing
+            if (locationLabel && e.target.value !== locationLabel) {
+              setLat(null);
+              setLng(null);
+              setLocationLabel(null);
+            }
+          }}
+          onFocus={() => {
+            // Show suggestions again if there's a value
+            if (value && data.length === 0) {
+              setValue(value, true);
+            }
+          }}
           placeholder="Search area or city…"
-          className="h-9 pl-9 pr-8 text-sm w-full"
+          className={`h-9 pl-9 text-sm w-full ${
+            hasValue && !isLoading ? "pr-8" : isLoading ? "pr-8" : "pr-3"
+          }`}
           disabled={isLoading}
         />
         {isLoading && (
-          <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          <Loader2 className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground z-10" />
+        )}
+        {hasValue && !isLoading && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={handleClear}
+            className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 hover:bg-muted rounded-full z-10"
+          >
+            <X className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="sr-only">Clear location</span>
+          </Button>
         )}
       </div>
 
-      {status === "OK" && data.length > 0 && (
-        <div className="absolute z-40 mt-2 w-full max-h-64 overflow-y-auto rounded-md border bg-background shadow-lg">
+      {showSuggestions && (
+        <div className="absolute z-50 mt-2 w-full max-h-64 overflow-y-auto rounded-md border border-border bg-background shadow-lg">
           {data.map(({ place_id, description }) => (
             <button
               key={place_id}
               type="button"
               onClick={() => handleSelect(place_id, description)}
-              className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
+              className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors first:rounded-t-md last:rounded-b-md"
+              disabled={isGeocoding}
             >
               <div className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-3.5 w-3.5 text-muted-foreground" />
-                <span>{description}</span>
+                <MapPin className="mt-0.5 h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="text-sm">{description}</span>
               </div>
             </button>
           ))}
+        </div>
+      )}
+
+      {status === "ZERO_RESULTS" && value && !isGeocoding && (
+        <div className="absolute z-50 mt-2 w-full rounded-md border border-border bg-background p-3 text-sm text-muted-foreground shadow-lg">
+          No locations found. Try a different search term.
         </div>
       )}
     </div>

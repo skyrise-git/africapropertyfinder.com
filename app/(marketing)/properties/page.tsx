@@ -27,6 +27,29 @@ import { PropertyLocationSearch } from "./_components/property-location-search";
 
 const PAGE_SIZE = 24;
 
+// Calculate distance between two coordinates using Haversine formula
+// Returns distance in kilometers
+function calculateDistance(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+const SEARCH_RADIUS_KM = 50; // Default search radius in kilometers
+
 export default function PropertiesPage() {
   const { data, loading, error } = useFirebaseRealtime<Property>("properties");
   const [search, setSearch] = useQueryState(
@@ -39,19 +62,27 @@ export default function PropertiesPage() {
     "sort",
     parseAsString.withDefault("new-first")
   );
+  const [lat] = useQueryState("lat", parseAsString.withDefault(""));
+  const [lng] = useQueryState("lng", parseAsString.withDefault(""));
+  const [locationLabel] = useQueryState("loc", parseAsString.withDefault(""));
 
   const properties = (data as Property[]) || [];
 
-  // Reset page to 1 when search or sort change
+  // Reset page to 1 when search, sort, or location change
   useEffect(() => {
     setPage("1");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, sortOption]);
+  }, [search, sortOption, lat, lng]);
 
   const { filteredSorted, paginated, totalPages } = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
+    const selectedLat = lat ? Number(lat) : null;
+    const selectedLng = lng ? Number(lng) : null;
+    const hasLocationFilter = selectedLat !== null && selectedLng !== null && 
+      !Number.isNaN(selectedLat) && !Number.isNaN(selectedLng);
 
     let result = properties.filter((property) => {
+      // Filter by search term
       if (searchTerm) {
         const haystack = [
           property.title,
@@ -67,6 +98,34 @@ export default function PropertiesPage() {
           .toLowerCase();
 
         if (!haystack.includes(searchTerm)) {
+          return false;
+        }
+      }
+
+      // Filter by location if a location is selected
+      if (hasLocationFilter && property.location) {
+        const propertyLat = property.location.latitude;
+        const propertyLng = property.location.longitude;
+
+        if (
+          typeof propertyLat === "number" &&
+          typeof propertyLng === "number" &&
+          !Number.isNaN(propertyLat) &&
+          !Number.isNaN(propertyLng)
+        ) {
+          const distance = calculateDistance(
+            selectedLat!,
+            selectedLng!,
+            propertyLat,
+            propertyLng
+          );
+
+          // Only include properties within the search radius
+          if (distance > SEARCH_RADIUS_KM) {
+            return false;
+          }
+        } else {
+          // If property doesn't have valid coordinates, exclude it when location filter is active
           return false;
         }
       }
@@ -116,7 +175,7 @@ export default function PropertiesPage() {
       paginated: result.slice(start, end),
       totalPages,
     };
-  }, [properties, search, sortOption, page]);
+  }, [properties, search, sortOption, page, lat, lng]);
 
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
@@ -235,7 +294,9 @@ export default function PropertiesPage() {
                 <Home className="h-10 w-10 text-muted-foreground" />
                 <h3 className="text-lg font-semibold">No properties found</h3>
                 <p className="max-w-md text-sm text-muted-foreground">
-                  Try adjusting your search term to widen the results.
+                  {locationLabel
+                    ? `No properties found near ${locationLabel}. Try adjusting your search term or location.`
+                    : "Try adjusting your search term to widen the results."}
                 </p>
               </motion.div>
             ) : (
