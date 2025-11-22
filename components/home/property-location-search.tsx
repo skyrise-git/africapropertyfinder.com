@@ -31,7 +31,9 @@ function PropertyLocationSearchInner({
   placeholder = "Search area or city…",
   className,
 }: PropertyLocationSearchProps) {
-  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
+    null,
+  );
   const [isGeocoding, setIsGeocoding] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -111,14 +113,15 @@ function PropertyLocationSearchInner({
   };
 
   const displayValue = selectedLocation?.label || value || "";
-  const showSuggestions = status === "OK" && data.length > 0 && !isGeocoding && !selectedLocation;
+  const showSuggestions =
+    status === "OK" && data.length > 0 && !isGeocoding && !selectedLocation;
   const isLoading = !ready || isGeocoding;
   const hasValue = Boolean(displayValue);
 
   return (
     <div ref={containerRef} className={`relative w-full ${className || ""}`}>
       <div className="relative">
-        <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 z-10" />
+        <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/60 z-10" />
         <Input
           value={displayValue}
           onChange={handleInputChange}
@@ -135,7 +138,7 @@ function PropertyLocationSearchInner({
           disabled={isLoading}
         />
         {isLoading && (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400 z-10" />
+          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-primary/60 z-10" />
         )}
         {hasValue && !isLoading && (
           <Button
@@ -145,7 +148,7 @@ function PropertyLocationSearchInner({
             onClick={handleClear}
             className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 hover:bg-white/20 rounded-full z-10"
           >
-            <X className="h-3.5 w-3.5 text-gray-400" />
+            <X className="h-3.5 w-3.5 text-primary/60" />
             <span className="sr-only">Clear location</span>
           </Button>
         )}
@@ -162,19 +165,24 @@ function PropertyLocationSearchInner({
               disabled={isGeocoding}
             >
               <div className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 text-gray-400 shrink-0" />
-                <span className="text-gray-700 dark:text-gray-300">{description}</span>
+                <MapPin className="mt-0.5 h-4 w-4 text-primary/60 shrink-0" />
+                <span className="text-gray-700 dark:text-gray-300">
+                  {description}
+                </span>
               </div>
             </button>
           ))}
         </div>
       )}
 
-      {status === "ZERO_RESULTS" && value && !isGeocoding && !selectedLocation && (
-        <div className="absolute z-50 mt-2 w-full rounded-lg border border-white/30 bg-white/95 backdrop-blur-lg p-4 text-sm text-gray-500 shadow-xl">
-          No locations found. Try a different search term.
-        </div>
-      )}
+      {status === "ZERO_RESULTS" &&
+        value &&
+        !isGeocoding &&
+        !selectedLocation && (
+          <div className="absolute z-50 mt-2 w-full rounded-lg border border-white/30 bg-white/95 backdrop-blur-lg p-4 text-sm text-gray-500 shadow-xl">
+            No locations found. Try a different search term.
+          </div>
+        )}
     </div>
   );
 }
@@ -190,7 +198,7 @@ export function PropertyLocationSearch(props: PropertyLocationSearchProps) {
     return (
       <div className={`relative ${props.className || ""}`}>
         <div className="relative">
-          <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/60" />
           <Input
             placeholder="Map search unavailable"
             className="h-9 pl-10 pr-3 text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300"
@@ -205,13 +213,13 @@ export function PropertyLocationSearch(props: PropertyLocationSearchProps) {
     return (
       <div className={`relative ${props.className || ""}`}>
         <div className="relative">
-          <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/60" />
           <Input
             placeholder="Loading map search..."
             className="h-9 pl-10 pr-10 text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300"
             disabled
           />
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" />
+          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-primary/60" />
         </div>
       </div>
     );

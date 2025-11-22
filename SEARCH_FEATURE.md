@@ -164,6 +164,17 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
 ### Theme Customization
 ```css
+/* Primary color is configured in globals.css */
+:root {
+  --primary: oklch(0.35 0.18 20);
+  --primary-foreground: oklch(0.985 0 0);
+}
+
+.dark {
+  --primary: oklch(0.65 0.18 20);
+  --primary-foreground: oklch(0.145 0 0);
+}
+
 /* Glassmorphism variables */
 --glass-bg: rgba(255, 255, 255, 0.2);
 --glass-border: rgba(255, 255, 255, 0.3);
@@ -188,6 +199,12 @@ const customVariants = {
 - [ ] Recent searches history
 - [ ] Voice search capability
 - [ ] Map view integration in hero
+
+### Design System Integration
+- ✅ Uses your custom primary color: `oklch(0.35 0.18 20)`
+- ✅ Proper dark mode support with adjusted primary: `oklch(0.65 0.18 20)`
+- ✅ Consistent with existing Tailwind CSS variables
+- ✅ Glassmorphism effects that adapt to theme changes
 
 ### Performance Improvements
 - [ ] Service worker caching for search results
@@ -240,6 +257,24 @@ When contributing to the search feature:
 - `@radix-ui/react-select`: Dropdown components
 - `@radix-ui/react-button`: Button components
 - `tailwindcss`: Styling framework
+
+## Color Usage
+
+The glassmorphism search feature uses your project's primary color `oklch(0.35 0.18 20)` consistently:
+
+### Primary Color Implementation
+- **Light Mode**: `oklch(0.35 0.18 20)` - Rich brown-orange tone
+- **Dark Mode**: `oklch(0.65 0.18 20)` - Lighter variant for better contrast
+- **Usage**: All interactive elements, gradients, and accent colors derive from this base
+
+### Component Color Mapping
+- Search button gradients: `bg-gradient-to-r from-primary to-primary/90`
+- Active listing type tabs: `bg-primary/20 text-primary border-primary/40`
+- Filter chips: `bg-primary/10 text-primary border-primary/20`
+- Floating background elements: Various `bg-primary/[5-25]` opacity levels
+- Icons and accents: `text-primary/60` for subtle emphasis
+
+This ensures consistent branding throughout the search interface while maintaining excellent accessibility and visual hierarchy.
 
 ---
 

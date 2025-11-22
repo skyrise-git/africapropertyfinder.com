@@ -110,16 +110,16 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
+    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 dark:from-background dark:via-primary/10 dark:to-primary/15">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8b5cf6_1px,transparent_1px),linear-gradient(to_bottom,#8b5cf6_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-10" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.primary)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.primary)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-10" />
 
       {/* Floating Elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-10 left-4 md:top-20 md:left-10 w-16 h-16 md:w-32 md:h-32 bg-purple-400/20 rounded-full blur-xl animate-pulse" />
-        <div className="absolute top-32 right-4 md:top-40 md:right-20 w-12 h-12 md:w-24 md:h-24 bg-blue-400/20 rounded-full blur-xl animate-pulse delay-1000" />
-        <div className="absolute bottom-32 left-8 md:left-1/4 w-10 h-10 md:w-20 md:h-20 bg-indigo-400/20 rounded-full blur-xl animate-pulse delay-2000" />
-        <div className="absolute bottom-20 right-8 md:right-1/3 w-14 h-14 md:w-28 md:h-28 bg-pink-400/20 rounded-full blur-xl animate-pulse delay-3000" />
+        <div className="absolute top-10 left-4 md:top-20 md:left-10 w-16 h-16 md:w-32 md:h-32 bg-primary/20 rounded-full blur-xl animate-pulse" />
+        <div className="absolute top-32 right-4 md:top-40 md:right-20 w-12 h-12 md:w-24 md:h-24 bg-primary/15 rounded-full blur-xl animate-pulse delay-1000" />
+        <div className="absolute bottom-32 left-8 md:left-1/4 w-10 h-10 md:w-20 md:h-20 bg-primary/10 rounded-full blur-xl animate-pulse delay-2000" />
+        <div className="absolute bottom-20 right-8 md:right-1/3 w-14 h-14 md:w-28 md:h-28 bg-primary/25 rounded-full blur-xl animate-pulse delay-3000" />
       </div>
 
       {/* Main Content */}
@@ -146,7 +146,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent leading-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-gray-900 via-primary to-primary/80 dark:from-white dark:via-primary dark:to-primary/90 bg-clip-text text-transparent leading-tight"
             >
               SkyRise
               <br />
@@ -181,7 +181,7 @@ export function HeroSection() {
                     onClick={() => setSelectedListingType(type.value)}
                     className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 rounded-full text-xs sm:text-sm md:text-base font-medium transition-all duration-300 ${
                       selectedListingType === type.value
-                        ? "bg-white/40 backdrop-blur-md text-gray-800 dark:text-white shadow-lg border border-white/50"
+                        ? "bg-primary/20 backdrop-blur-md text-primary dark:text-primary shadow-lg border border-primary/40"
                         : "bg-white/10 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:bg-white/20 border border-white/20"
                     }`}
                   >
@@ -251,7 +251,7 @@ export function HeroSection() {
                   <Button
                     onClick={handleSearch}
                     disabled={isSearching}
-                    className="w-full h-9 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
+                    className="w-full h-9 text-xs sm:text-sm bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
                   >
                     {isSearching ? (
                       <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ export function HeroSection() {
 
               {/* Error Message */}
               {searchError && (
-                <div className="mt-4 p-3 bg-red-100/50 backdrop-blur-sm border border-red-200/50 rounded-lg text-red-700 text-sm">
+                <div className="mt-4 p-3 bg-destructive/10 backdrop-blur-sm border border-destructive/20 rounded-lg text-destructive text-sm">
                   {searchError}
                 </div>
               )}
@@ -279,15 +279,15 @@ export function HeroSection() {
               <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-white/20">
                 <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-xs md:text-sm text-gray-600 dark:text-gray-300">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
                     <span>10,000+ Properties</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary/80 rounded-full"></div>
                     <span>Real-time Updates</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary/60 rounded-full"></div>
                     <span>Expert Verified</span>
                   </div>
                 </div>

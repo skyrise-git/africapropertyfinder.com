@@ -17,12 +17,18 @@ interface FilterChipsProps {
   className?: string;
 }
 
-export function FilterChips({ filters, onClearAll, className }: FilterChipsProps) {
+export function FilterChips({
+  filters,
+  onClearAll,
+  className,
+}: FilterChipsProps) {
   if (filters.length === 0) return null;
 
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
-      <span className="text-xs text-muted-foreground font-medium">Active filters:</span>
+      <span className="text-xs text-muted-foreground font-medium">
+        Active filters:
+      </span>
 
       {filters.map((filter) => (
         <div
