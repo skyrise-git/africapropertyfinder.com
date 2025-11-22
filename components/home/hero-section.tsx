@@ -123,7 +123,7 @@ export function HeroSection() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full px-4 py-6 md:py-8">
+      <div className="relative z-10 w-full px-4 py-2">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -190,9 +190,9 @@ export function HeroSection() {
               </div>
 
               {/* Search Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 items-end">
                 {/* Location Search */}
-                <div className="sm:col-span-2 lg:col-span-4 space-y-1.5 md:space-y-2">
+                <div className="sm:col-span-2 lg:col-span-2 space-y-1.5 md:space-y-2">
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                     Location
                   </label>
@@ -204,31 +204,33 @@ export function HeroSection() {
                 </div>
 
                 {/* Property Type */}
-                <div className="sm:col-span-1 lg:col-span-3 space-y-1.5 md:space-y-2">
+                <div className="sm:col-span-1 lg:col-span-1 space-y-1.5 md:space-y-2 w-full">
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                     Property Type
                   </label>
-                  <Select
-                    value={selectedPropertyType}
-                    onValueChange={(value) =>
-                      setSelectedPropertyType(value as PropertyType | "all")
-                    }
-                  >
-                    <SelectTrigger className="h-9 text-xs sm:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white/95 backdrop-blur-lg border-white/30">
-                      {propertyTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="w-full">
+                    <Select
+                      value={selectedPropertyType}
+                      onValueChange={(value) =>
+                        setSelectedPropertyType(value as PropertyType | "all")
+                      }
+                    >
+                      <SelectTrigger className="w-full h-9 text-xs sm:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 min-w-0 flex-1">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white/95 backdrop-blur-lg border-white/30 min-w-[var(--radix-select-trigger-width)]">
+                        {propertyTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Search Term */}
-                <div className="sm:col-span-1 lg:col-span-3 space-y-1.5 md:space-y-2">
+                <div className="sm:col-span-1 lg:col-span-1 space-y-1.5 md:space-y-2">
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
                     Keywords
                   </label>
@@ -245,7 +247,7 @@ export function HeroSection() {
                 </div>
 
                 {/* Search Button */}
-                <div className="sm:col-span-2 lg:col-span-2">
+                <div className="sm:col-span-2 lg:col-span-1">
                   <Button
                     onClick={handleSearch}
                     disabled={isSearching}
