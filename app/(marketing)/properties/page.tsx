@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  useQueryState,
-  parseAsString,
-} from "nuqs";
+import { useQueryState, parseAsString } from "nuqs";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Home, AlertTriangle } from "lucide-react";
 
 import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
-import type { Property } from "@/lib/types/property.type";
+import type {
+  Property,
+  ListingType,
+  PropertyType,
+} from "@/lib/types/property.type";
 import { PropertyCard } from "./_components/property-card";
 import { PropertySortControls } from "./_components/property-sort-controls";
 import { PropertyMapView } from "./_components/property-map-view";
@@ -24,6 +25,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { PropertyLocationSearch } from "./_components/property-location-search";
+import { FilterChips } from "@/components/ui/filter-chips";
 
 const PAGE_SIZE = 24;
 
@@ -33,7 +35,7 @@ function calculateDistance(
   lat1: number,
   lng1: number,
   lat2: number,
-  lng2: number
+  lng2: number,
 ): number {
   const R = 6371; // Earth's radius in kilometers
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -54,17 +56,28 @@ export default function PropertiesPage() {
   const { data, loading, error } = useFirebaseRealtime<Property>("properties");
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault("")
+    parseAsString.withDefault(""),
   );
   const [page, setPage] = useQueryState("page", parseAsString.withDefault("1"));
   const [viewMode] = useQueryState("view", parseAsString.withDefault("cards"));
   const [sortOption] = useQueryState(
     "sort",
-    parseAsString.withDefault("new-first")
+    parseAsString.withDefault("new-first"),
   );
-  const [lat] = useQueryState("lat", parseAsString.withDefault(""));
-  const [lng] = useQueryState("lng", parseAsString.withDefault(""));
-  const [locationLabel] = useQueryState("loc", parseAsString.withDefault(""));
+  const [lat, setLat] = useQueryState("lat", parseAsString.withDefault(""));
+  const [lng, setLng] = useQueryState("lng", parseAsString.withDefault(""));
+  const [locationLabel, setLocationLabel] = useQueryState(
+    "loc",
+    parseAsString.withDefault(""),
+  );
+  const [listingType, setListingType] = useQueryState(
+    "listingType",
+    parseAsString.withDefault(""),
+  );
+  const [propertyType, setPropertyType] = useQueryState(
+    "propertyType",
+    parseAsString.withDefault(""),
+  );
 
   const properties = (data as Property[]) || [];
 
@@ -72,14 +85,17 @@ export default function PropertiesPage() {
   useEffect(() => {
     setPage("1");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, sortOption, lat, lng]);
+  }, [search, sortOption, lat, lng, listingType, propertyType]);
 
   const { filteredSorted, paginated, totalPages } = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
     const selectedLat = lat ? Number(lat) : null;
     const selectedLng = lng ? Number(lng) : null;
-    const hasLocationFilter = selectedLat !== null && selectedLng !== null && 
-      !Number.isNaN(selectedLat) && !Number.isNaN(selectedLng);
+    const hasLocationFilter =
+      selectedLat !== null &&
+      selectedLng !== null &&
+      !Number.isNaN(selectedLat) &&
+      !Number.isNaN(selectedLng);
 
     let result = properties.filter((property) => {
       // Filter by search term
@@ -102,6 +118,16 @@ export default function PropertiesPage() {
         }
       }
 
+      // Filter by listing type if specified
+      if (listingType && property.listingType !== listingType) {
+        return false;
+      }
+
+      // Filter by property type if specified
+      if (propertyType && property.propertyType !== propertyType) {
+        return false;
+      }
+
       // Filter by location if a location is selected
       if (hasLocationFilter && property.location) {
         const propertyLat = property.location.latitude;
@@ -117,7 +143,7 @@ export default function PropertiesPage() {
             selectedLat!,
             selectedLng!,
             propertyLat,
-            propertyLng
+            propertyLng,
           );
 
           // Only include properties within the search radius
@@ -142,9 +168,13 @@ export default function PropertiesPage() {
 
       if (sortOption === "price-low-high" || sortOption === "price-high-low") {
         const aPrice =
-          a.listingType === "sale" ? a.price ?? Infinity : a.rent ?? Infinity;
+          a.listingType === "sale"
+            ? (a.price ?? Infinity)
+            : (a.rent ?? Infinity);
         const bPrice =
-          b.listingType === "sale" ? b.price ?? Infinity : b.rent ?? Infinity;
+          b.listingType === "sale"
+            ? (b.price ?? Infinity)
+            : (b.rent ?? Infinity);
         return sortOption === "price-low-high"
           ? aPrice - bPrice
           : bPrice - aPrice;
@@ -175,12 +205,72 @@ export default function PropertiesPage() {
       paginated: result.slice(start, end),
       totalPages,
     };
-  }, [properties, search, sortOption, page, lat, lng]);
+  }, [
+    properties,
+    search,
+    sortOption,
+    page,
+    lat,
+    lng,
+    listingType,
+    propertyType,
+  ]);
 
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   const handlePageChange = (newPage: number) => {
     setPage(String(newPage));
+  };
+
+  // Create filter chips data
+  const activeFilters = [
+    ...(locationLabel
+      ? [
+          {
+            id: "location",
+            label: "Location",
+            value: locationLabel,
+            onRemove: () => {
+              setLat(null);
+              setLng(null);
+              setLocationLabel(null);
+            },
+          },
+        ]
+      : []),
+    ...(listingType
+      ? [
+          {
+            id: "listingType",
+            label: "Type",
+            value:
+              listingType === "sale"
+                ? "For Sale"
+                : listingType === "rent"
+                  ? "For Rent"
+                  : "Student Housing",
+            onRemove: () => setListingType(null),
+          },
+        ]
+      : []),
+    ...(propertyType
+      ? [
+          {
+            id: "propertyType",
+            label: "Property",
+            value: propertyType.charAt(0).toUpperCase() + propertyType.slice(1),
+            onRemove: () => setPropertyType(null),
+          },
+        ]
+      : []),
+  ];
+
+  const handleClearAllFilters = () => {
+    setLat(null);
+    setLng(null);
+    setLocationLabel(null);
+    setListingType(null);
+    setPropertyType(null);
   };
 
   if (loading) {
@@ -240,7 +330,8 @@ export default function PropertiesPage() {
           Find your next home
         </h1>
         <p className="text-sm text-muted-foreground sm:text-base">
-          Browse all properties with realtime updates and an interactive map view.
+          Browse all properties with realtime updates and an interactive map
+          view.
         </p>
       </motion.div>
 
@@ -267,8 +358,18 @@ export default function PropertiesPage() {
             </div>
           </div>
 
+          {/* Active Filters */}
+          {activeFilters.length > 0 && (
+            <div className="pt-2 border-t border-border/40">
+              <FilterChips
+                filters={activeFilters}
+                onClearAll={handleClearAllFilters}
+              />
+            </div>
+          )}
+
           {/* Bottom Row: Results Count + Sort Controls */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2 border-t border-border/40">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-3 border-t border-border/40">
             <div className="text-xs text-muted-foreground">
               <span>
                 Showing {paginated.length} of {filteredSorted.length} properties
@@ -294,8 +395,8 @@ export default function PropertiesPage() {
                 <Home className="h-10 w-10 text-muted-foreground" />
                 <h3 className="text-lg font-semibold">No properties found</h3>
                 <p className="max-w-md text-sm text-muted-foreground">
-                  {locationLabel
-                    ? `No properties found near ${locationLabel}. Try adjusting your search term or location.`
+                  {locationLabel || listingType || propertyType
+                    ? `No properties found with your current filters${locationLabel ? ` near ${locationLabel}` : ""}. Try adjusting your search criteria.`
                     : "Try adjusting your search term to widen the results."}
                 </p>
               </motion.div>
@@ -365,12 +466,12 @@ export default function PropertiesPage() {
                 <PaginationNext
                   href={`?page=${Math.min(
                     totalPages,
-                    (Number(page) || 1) + 1
+                    (Number(page) || 1) + 1,
                   )}`}
                   onClick={(e) => {
                     e.preventDefault();
                     handlePageChange(
-                      Math.min(totalPages, (Number(page) || 1) + 1)
+                      Math.min(totalPages, (Number(page) || 1) + 1),
                     );
                   }}
                 />

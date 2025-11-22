@@ -1,0 +1,315 @@
+"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { Search, MapPin, Home, Building, GraduationCap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PropertyLocationSearch } from "@/components/home/property-location-search";
+import type { ListingType, PropertyType } from "@/lib/types/property.type";
+
+interface LocationData {
+  lat: string;
+  lng: string;
+  label: string;
+}
+
+const listingTypes: {
+  value: ListingType;
+  label: string;
+  icon: React.ReactNode;
+}[] = [
+  { value: "sale", label: "Buy", icon: <Home className="h-4 w-4" /> },
+  { value: "rent", label: "Rent", icon: <Building className="h-4 w-4" /> },
+  {
+    value: "student-housing",
+    label: "Student Housing",
+    icon: <GraduationCap className="h-4 w-4" />,
+  },
+];
+
+const propertyTypes: { value: PropertyType | "all"; label: string }[] = [
+  { value: "all", label: "All Types" },
+  { value: "apartment", label: "Apartment" },
+  { value: "house", label: "House" },
+  { value: "condo", label: "Condo" },
+  { value: "townhouse", label: "Townhouse" },
+  { value: "studio", label: "Studio" },
+  { value: "room", label: "Room" },
+  { value: "other", label: "Other" },
+];
+
+export function HeroSection() {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedListingType, setSelectedListingType] =
+    useState<ListingType>("rent");
+  const [selectedPropertyType, setSelectedPropertyType] = useState<
+    PropertyType | "all"
+  >("all");
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
+    null,
+  );
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+
+  const handleSearch = async () => {
+    setIsSearching(true);
+    setSearchError(null);
+
+    try {
+      // Build search params
+      const params = new URLSearchParams();
+
+      // Add search term if provided
+      if (searchTerm.trim()) {
+        params.set("search", searchTerm.trim());
+      }
+
+      // Add listing type filter
+      if (selectedListingType) {
+        params.set("listingType", selectedListingType);
+      }
+
+      // Add property type filter if not "all"
+      if (selectedPropertyType && selectedPropertyType !== "all") {
+        params.set("propertyType", selectedPropertyType);
+      }
+
+      // Add location data if selected
+      if (selectedLocation) {
+        params.set("lat", selectedLocation.lat);
+        params.set("lng", selectedLocation.lng);
+        params.set("loc", selectedLocation.label);
+      }
+
+      // Navigate to properties page with filters
+      const queryString = params.toString();
+      router.push(`/properties${queryString ? `?${queryString}` : ""}`);
+
+      setTimeout(() => setIsSearching(false), 1000);
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchError(
+        "Something went wrong with your search. Please try again.",
+      );
+      setIsSearching(false);
+    }
+  };
+
+  const handleLocationSelect = (location: LocationData | null) => {
+    setSelectedLocation(location);
+  };
+
+  return (
+    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8b5cf6_1px,transparent_1px),linear-gradient(to_bottom,#8b5cf6_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-10" />
+
+      {/* Floating Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-10 left-4 md:top-20 md:left-10 w-16 h-16 md:w-32 md:h-32 bg-purple-400/20 rounded-full blur-xl animate-pulse" />
+        <div className="absolute top-32 right-4 md:top-40 md:right-20 w-12 h-12 md:w-24 md:h-24 bg-blue-400/20 rounded-full blur-xl animate-pulse delay-1000" />
+        <div className="absolute bottom-32 left-8 md:left-1/4 w-10 h-10 md:w-20 md:h-20 bg-indigo-400/20 rounded-full blur-xl animate-pulse delay-2000" />
+        <div className="absolute bottom-20 right-8 md:right-1/3 w-14 h-14 md:w-28 md:h-28 bg-pink-400/20 rounded-full blur-xl animate-pulse delay-3000" />
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 container mx-auto px-4 py-8 md:py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center space-y-8"
+        >
+          {/* Hero Text */}
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              <Home className="h-4 w-4" />
+              Find Your Dream Property
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent leading-tight"
+            >
+              SkyRise
+              <br />
+              Real Estate
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed px-4"
+            >
+              Discover your perfect home with our advanced search technology.
+              From luxury apartments to cozy studios, find exactly what you're
+              looking for.
+            </motion.p>
+          </div>
+
+          {/* Glassmorphism Search Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="max-w-5xl mx-auto"
+          >
+            <div className="p-6 md:p-8 rounded-3xl bg-white/20 backdrop-blur-lg border border-white/30 shadow-2xl">
+              {/* Listing Type Tabs */}
+              <div className="flex flex-wrap gap-2 md:gap-3 mb-4 md:mb-6 justify-center">
+                {listingTypes.map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setSelectedListingType(type.value)}
+                    className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 rounded-full text-xs sm:text-sm md:text-base font-medium transition-all duration-300 ${
+                      selectedListingType === type.value
+                        ? "bg-white/40 backdrop-blur-md text-gray-800 dark:text-white shadow-lg border border-white/50"
+                        : "bg-white/10 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:bg-white/20 border border-white/20"
+                    }`}
+                  >
+                    {type.icon}
+                    <span className="hidden sm:inline">{type.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Search Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4 items-end">
+                {/* Location Search */}
+                <div className="sm:col-span-2 lg:col-span-4 space-y-1.5 md:space-y-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Location
+                  </label>
+                  <div className="relative">
+                    <PropertyLocationSearch
+                      onLocationSelect={handleLocationSelect}
+                    />
+                  </div>
+                </div>
+
+                {/* Property Type */}
+                <div className="sm:col-span-1 lg:col-span-3 space-y-1.5 md:space-y-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Property Type
+                  </label>
+                  <Select
+                    value={selectedPropertyType}
+                    onValueChange={(value) =>
+                      setSelectedPropertyType(value as PropertyType | "all")
+                    }
+                  >
+                    <SelectTrigger className="h-9 text-xs sm:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/95 backdrop-blur-lg border-white/30">
+                      {propertyTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Search Term */}
+                <div className="sm:col-span-1 lg:col-span-3 space-y-1.5 md:space-y-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Keywords
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="City, neighborhood, or features..."
+                      className="h-9 pl-10 text-xs sm:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 placeholder:text-gray-500"
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    />
+                  </div>
+                </div>
+
+                {/* Search Button */}
+                <div className="sm:col-span-2 lg:col-span-2">
+                  <Button
+                    onClick={handleSearch}
+                    disabled={isSearching}
+                    className="w-full h-9 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
+                  >
+                    {isSearching ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Searching...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Search className="h-4 w-4" />
+                        Search
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {searchError && (
+                <div className="mt-4 p-3 bg-red-100/50 backdrop-blur-sm border border-red-200/50 rounded-lg text-red-700 text-sm">
+                  {searchError}
+                </div>
+              )}
+
+              {/* Quick Stats */}
+              <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-white/20">
+                <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-xs md:text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>10,000+ Properties</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>Real-time Updates</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+                    <span>Expert Verified</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* CTA Text */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="text-gray-600 dark:text-gray-400 text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4"
+          >
+            Join thousands of satisfied customers who found their dream homes
+            with us
+          </motion.p>
+        </motion.div>
+      </div>
+
+      {/* Bottom Gradient */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/50 to-transparent dark:from-gray-900/50 backdrop-blur-sm" />
+    </section>
+  );
+}
