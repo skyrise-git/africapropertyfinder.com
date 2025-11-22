@@ -43,7 +43,7 @@ const iconMap = {
 
 export const FAQSection = ({ questions }: FAQSectionProps) => {
   return (
-    <section className="bg-background">
+    <section className="bg-background py-12 md:py-16">
       <div className="mx-auto max-w-6xl px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold mb-4 text-primary">

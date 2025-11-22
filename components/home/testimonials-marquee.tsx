@@ -16,7 +16,7 @@ export function Highlight({
     <span
       className={cn(
         "bg-primary/10 p-1 py-0.5 font-bold text-primary",
-        className
+        className,
       )}
     >
       {children}
@@ -49,7 +49,7 @@ export function TestimonialCard({
         "border-border bg-card/50 border shadow-sm",
         // hover effect
         "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md",
-        className
+        className,
       )}
       {...props}
     >
@@ -230,7 +230,7 @@ const testimonials = [
 
 export function TestimonialsMarquee() {
   return (
-    <section className="relative container py-10">
+    <section className="relative mx-auto max-w-6xl px-4 py-12 md:py-16">
       {/* Decorative elements */}
       <div className="absolute top-20 -left-20 z-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute -right-20 bottom-20 z-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
