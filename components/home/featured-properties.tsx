@@ -225,12 +225,12 @@ const PropertyCard = ({
 const FullWidthMarquee = ({
   properties,
   speed = 50,
-  isPaused = false,
 }: {
   properties: Property[];
   speed?: number;
-  isPaused?: boolean;
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   // Duplicate properties multiple times for seamless infinite scroll
   const duplicatedProperties = useMemo(
     () => [...properties, ...properties, ...properties],
@@ -243,7 +243,11 @@ const FullWidthMarquee = ({
   const oneSetWidth = properties.length * (cardWidth + gap * 2);
 
   return (
-    <div className="relative w-full overflow-hidden h-[520px]">
+    <div
+      className="relative w-full overflow-hidden h-[520px]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Left fade gradient */}
       <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background via-background/80 to-transparent z-20 pointer-events-none" />
       
@@ -264,7 +268,7 @@ const FullWidthMarquee = ({
           },
         }}
         style={{
-          animationPlayState: isPaused ? "paused" : "running",
+          animationPlayState: isHovered ? "paused" : "running",
         }}
       >
         {duplicatedProperties.map((property, index) => (
@@ -283,7 +287,6 @@ const FullWidthMarquee = ({
 
 export function FeaturedProperties() {
   const { data, loading, error } = useFirebaseRealtime<Property>("properties");
-  const [isPaused, setIsPaused] = useState(false);
 
   const properties = (data as Property[]) || [];
 
@@ -318,11 +321,7 @@ export function FeaturedProperties() {
   }
 
   return (
-    <section
-      className="relative py-20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/15 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 overflow-hidden"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
+    <section className="relative py-20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/15 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.primary)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.primary)_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-5" />
 
@@ -357,16 +356,10 @@ export function FeaturedProperties() {
 
       {/* Full Width Marquee */}
       <div className="relative z-10 w-full">
-        <motion.div
-          animate={{ opacity: isPaused ? 0.8 : 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <FullWidthMarquee
-            properties={featuredProperties}
-            speed={60}
-            isPaused={isPaused}
-          />
-        </motion.div>
+        <FullWidthMarquee
+          properties={featuredProperties}
+          speed={60}
+        />
       </div>
 
       {/* Call to Action */}
