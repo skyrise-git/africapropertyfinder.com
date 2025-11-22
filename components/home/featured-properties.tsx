@@ -50,90 +50,98 @@ const PropertyCard = ({
 
   return (
     <div
-      className="group relative w-80 flex-shrink-0 mx-4"
+      className="group relative w-80 h-[520px] flex-shrink-0 mx-4"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Card className="overflow-hidden bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-700 hover:bg-white/20 group-hover:border-primary/30">
-        {/* Image Section */}
-        <div className="relative h-64 overflow-hidden">
-          {property.images && property.images[0] && (
+      <Card className="overflow-hidden h-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:border-primary/50 flex flex-col">
+        {/* Image Section - Fixed Height */}
+        <div className="relative h-64 overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+          {property.images && property.images[0] ? (
             <>
               <img
                 src={property.images[0].url}
                 alt={property.title}
-                className={`w-full h-full object-cover transition-all duration-1000 ${
+                className={`w-full h-full object-cover transition-all duration-500 ${
                   imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"
                 } group-hover:scale-110`}
                 onLoad={() => setImageLoaded(true)}
                 loading="lazy"
               />
               {!imageLoaded && (
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 animate-pulse" />
+                <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
               )}
             </>
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+              <Square className="h-16 w-16 text-gray-400 dark:text-gray-600" />
+            </div>
           )}
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          {/* Dark overlay for better text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-          {/* Enhanced Hover Overlay */}
+          {/* Hover Overlay */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/20 to-transparent"
+            className="absolute inset-0 bg-primary/20"
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
             transition={{ duration: 0.3 }}
           />
 
-          {/* Top badges with blur background */}
-          <div className="absolute top-4 left-4 flex gap-2">
-            <Badge className="bg-primary/90 backdrop-blur-sm text-primary-foreground font-semibold border-0 shadow-lg">
+          {/* Top badges */}
+          <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+            <Badge className="bg-primary text-white font-semibold border-0 shadow-md">
               {property.listingType === "sale"
                 ? "For Sale"
                 : property.listingType === "rent"
                   ? "For Rent"
                   : "Student"}
             </Badge>
-            <Badge className="bg-black/50 backdrop-blur-sm text-white border border-white/20 shadow-lg">
+            <Badge className="bg-white/95 dark:bg-gray-800/95 text-gray-900 dark:text-gray-100 border-0 shadow-md backdrop-blur-sm">
               {property.propertyType?.charAt(0).toUpperCase() +
                 property.propertyType?.slice(1)}
             </Badge>
           </div>
 
-          {/* Enhanced Action Buttons */}
-          <div className="absolute top-4 right-4 flex gap-2">
+          {/* Heart Button */}
+          <div className="absolute top-3 right-3">
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
                 size="icon"
                 variant="ghost"
-                className="bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/40 text-white shadow-lg"
+                className="bg-white/95 dark:bg-gray-800/95 hover:bg-white dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-md"
                 onClick={(e) => {
                   e.preventDefault();
                   setIsLiked(!isLiked);
                 }}
               >
                 <Heart
-                  className={`h-4 w-4 transition-colors ${isLiked ? "fill-red-500 text-red-500" : "text-white"}`}
+                  className={`h-4 w-4 transition-colors ${
+                    isLiked
+                      ? "fill-red-500 text-red-500"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
                 />
               </Button>
             </motion.div>
           </div>
 
-          {/* Enhanced Rating Badge */}
-          <div className="absolute bottom-4 right-4">
-            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 text-white shadow-lg">
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-medium">4.8</span>
-              <Eye className="h-3 w-3 ml-1" />
-              <span className="text-xs">24</span>
+          {/* Price Badge */}
+          <div className="absolute bottom-3 left-3">
+            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-lg border border-white/20">
+              <span className="text-lg font-bold text-gray-900 dark:text-white">
+                {displayPrice}
+              </span>
             </div>
           </div>
 
-          {/* Price Badge */}
-          <div className="absolute bottom-4 left-4">
-            <div className="bg-white/20 backdrop-blur-md rounded-full px-4 py-2 border border-white/30 shadow-lg">
-              <span className="text-xl font-bold text-white">
-                {displayPrice}
+          {/* Rating Badge */}
+          <div className="absolute bottom-3 right-3">
+            <div className="flex items-center gap-1.5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg px-2.5 py-1.5 shadow-lg border border-white/20">
+              <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                4.8
               </span>
             </div>
           </div>
@@ -141,58 +149,72 @@ const PropertyCard = ({
           {/* View Property Button - appears on hover */}
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: isHovered ? 1 : 0, scale: isHovered ? 1 : 0.8 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: isHovered ? 1 : 0, scale: isHovered ? 1 : 0.9 }}
+            transition={{ duration: 0.2 }}
           >
-            <Button className="bg-primary/90 backdrop-blur-md text-primary-foreground hover:bg-primary shadow-2xl">
+            <Button className="bg-primary text-white hover:bg-primary/90 shadow-xl">
               <Eye className="h-4 w-4 mr-2" />
               View Property
             </Button>
           </motion.div>
         </div>
 
-        <CardContent className="p-6 space-y-4 bg-white/10 backdrop-blur-md">
-          {/* Title */}
-          <div>
-            <h3 className="font-bold text-lg text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300">
-              {property.title}
+        {/* Content Section - Fixed Height with Flex */}
+        <CardContent className="p-5 bg-white dark:bg-gray-900 flex flex-col flex-1 min-h-0">
+          {/* Title - Fixed Height */}
+          <div className="h-14 mb-3 flex-shrink-0">
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300">
+              {property.title || "Property Listing"}
             </h3>
           </div>
 
-          {/* Location */}
-          <div className="flex items-center gap-2 text-white/80 text-sm">
-            <MapPin className="h-4 w-4 text-primary/80" />
-            <span className="line-clamp-1">
-              {property.address}, {property.city}
+          {/* Location - Fixed Height */}
+          <div className="flex items-start gap-2 text-gray-600 dark:text-gray-400 text-sm mb-4 flex-shrink-0 min-h-[20px]">
+            <MapPin className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+            <span className="line-clamp-2">
+              {property.address && property.city
+                ? `${property.address}, ${property.city}`
+                : "Location not specified"}
             </span>
           </div>
 
-          {/* Property Details */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/20">
+          {/* Property Details - Fixed Height */}
+          <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-200 dark:border-gray-800 flex-shrink-0">
             <div className="flex items-center gap-4">
-              {property.numBedrooms > 0 && (
-                <div className="flex items-center gap-1 text-sm text-white/80">
-                  <Bed className="h-4 w-4 text-primary/80" />
-                  <span>{property.numBedrooms}</span>
+              {property.numBedrooms > 0 ? (
+                <div className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
+                  <Bed className="h-4 w-4 text-primary" />
+                  <span className="font-medium">{property.numBedrooms}</span>
                 </div>
+              ) : (
+                <div className="w-12" />
               )}
-              {property.numBathrooms > 0 && (
-                <div className="flex items-center gap-1 text-sm text-white/80">
-                  <Bath className="h-4 w-4 text-primary/80" />
-                  <span>{property.numBathrooms}</span>
+              {property.numBathrooms > 0 ? (
+                <div className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
+                  <Bath className="h-4 w-4 text-primary" />
+                  <span className="font-medium">{property.numBathrooms}</span>
                 </div>
+              ) : (
+                <div className="w-12" />
               )}
-              {property.area && (
-                <div className="flex items-center gap-1 text-sm text-white/80">
-                  <Square className="h-4 w-4 text-primary/80" />
-                  <span>{property.area}</span>
+              {property.area ? (
+                <div className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
+                  <Square className="h-4 w-4 text-primary" />
+                  <span className="font-medium">{property.area}</span>
                 </div>
+              ) : (
+                <div className="w-12" />
               )}
             </div>
 
-            {/* Quick stats */}
-            <div className="text-xs text-white/60">New</div>
+            {/* Status Badge */}
+            <Badge
+              variant="secondary"
+              className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+            >
+              New
+            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -221,7 +243,7 @@ const FullWidthMarquee = ({
   const oneSetWidth = properties.length * (cardWidth + gap * 2);
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative w-full overflow-hidden h-[520px]">
       {/* Left fade gradient */}
       <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background via-background/80 to-transparent z-20 pointer-events-none" />
       
@@ -229,7 +251,7 @@ const FullWidthMarquee = ({
       <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background via-background/80 to-transparent z-20 pointer-events-none" />
 
       <motion.div
-        className="flex will-change-transform"
+        className="flex will-change-transform h-full"
         animate={{
           x: [0, -oneSetWidth],
         }}
@@ -249,7 +271,7 @@ const FullWidthMarquee = ({
           <Link
             key={`${property.id}-${index}`}
             href={`/properties/${property.id}`}
-            className="block"
+            className="block h-full"
           >
             <PropertyCard property={property} index={index} />
           </Link>
@@ -272,17 +294,17 @@ export function FeaturedProperties() {
 
   if (loading) {
     return (
-      <section className="relative py-20 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 overflow-hidden">
+      <section className="relative py-20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/15 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 space-y-12">
           <div className="text-center space-y-4">
-            <div className="h-12 bg-white/20 animate-pulse rounded w-80 mx-auto" />
-            <div className="h-6 bg-white/20 animate-pulse rounded w-96 mx-auto" />
+            <div className="h-12 bg-gray-200 dark:bg-gray-800 animate-pulse rounded w-80 mx-auto" />
+            <div className="h-6 bg-gray-200 dark:bg-gray-800 animate-pulse rounded w-96 mx-auto" />
           </div>
-          <div className="flex gap-6 overflow-hidden">
+          <div className="flex gap-4 overflow-hidden">
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="w-80 h-96 bg-white/20 animate-pulse rounded-3xl flex-shrink-0"
+                className="w-80 h-[520px] bg-gray-200 dark:bg-gray-800 animate-pulse rounded-lg flex-shrink-0"
               />
             ))}
           </div>
