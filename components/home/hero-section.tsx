@@ -123,15 +123,15 @@ export function HeroSection() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full px-4 py-8 md:py-12">
+      <div className="relative z-10 w-full px-4 py-6 md:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center space-y-8"
+          className="text-center space-y-6"
         >
           {/* Hero Text */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -146,18 +146,16 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-gray-900 via-primary to-primary/80 dark:from-white dark:via-primary dark:to-primary/90 bg-clip-text text-transparent leading-tight"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-gray-900 via-primary to-primary/80 dark:from-white dark:via-primary dark:to-primary/90 bg-clip-text text-transparent leading-tight"
             >
-              SkyRise
-              <br />
-              Real Estate
+              SkyRise Real Estate
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed px-4"
+              className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed px-4"
             >
               Discover your perfect home with our advanced search technology.
               From luxury apartments to cozy studios, find exactly what you're
@@ -170,11 +168,11 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="max-w-5xl mx-auto"
+            className="max-w-4xl mx-auto"
           >
-            <div className="p-6 md:p-8 rounded-3xl bg-white/20 backdrop-blur-lg border border-white/30 shadow-2xl">
+            <div className="p-4 md:p-6 rounded-3xl bg-white/20 backdrop-blur-lg border border-white/30 shadow-2xl">
               {/* Listing Type Tabs */}
-              <div className="flex flex-wrap gap-2 md:gap-3 mb-4 md:mb-6 justify-center">
+              <div className="flex flex-wrap gap-2 md:gap-3 mb-3 md:mb-4 justify-center">
                 {listingTypes.map((type) => (
                   <button
                     key={type.value}
@@ -276,8 +274,8 @@ export function HeroSection() {
               )}
 
               {/* Quick Stats */}
-              <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-white/20">
-                <div className="flex flex-wrap justify-center gap-4 md:gap-8 text-xs md:text-sm text-gray-600 dark:text-gray-300">
+              <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-white/20">
+                <div className="flex flex-wrap justify-center gap-3 md:gap-6 text-xs text-gray-600 dark:text-gray-300">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
                     <span>10,000+ Properties</span>
@@ -300,7 +298,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-gray-600 dark:text-gray-400 text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4"
+            className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-xl mx-auto px-4"
           >
             Join thousands of satisfied customers who found their dream homes
             with us
