@@ -197,7 +197,7 @@ export default function UsersPage() {
   return (
     <div className="container mx-auto max-w-7xl space-y-4 p-4 sm:space-y-6 sm:p-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
         <Card className="flex h-24 flex-col justify-between rounded-2xl border-border/60 bg-muted/40 px-3 py-2 sm:h-28 sm:px-4 sm:py-3">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0">
             <CardTitle className="text-xs font-medium sm:text-sm">
