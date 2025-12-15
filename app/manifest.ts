@@ -11,25 +11,15 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#667eea",
+    theme_color: "#7b2d2d",
     icons: [
-      {
-        src: "/favicon.ico",
-        sizes: "any",
-        type: "image/x-icon",
-      },
-      {
-        src: "/apple-icon.png",
-        sizes: "180x180",
-        type: "image/png",
-      },
       {
         src: "/icon-16x16.png",
         sizes: "16x16",
         type: "image/png",
       },
       {
-        src: "/icon-32x32.png",
+        src: "/icon-16x16.png",
         sizes: "32x32",
         type: "image/png",
       },
@@ -42,6 +32,12 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
+      },
+      {
+        src: "/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any maskable",
       },
     ],
     categories: ["productivity", "business"],
