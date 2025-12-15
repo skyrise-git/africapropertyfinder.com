@@ -55,15 +55,7 @@ export function MarketingNavbar() {
               alt={marketingSite.title}
               width={120}
               height={40}
-              className="h-8 w-auto dark:hidden"
-              priority
-            />
-            <Image
-              src="/logo.png"
-              alt={marketingSite.title}
-              width={120}
-              height={40}
-              className="hidden h-8 w-auto dark:block"
+              className="h-8 w-auto transition dark:invert dark:brightness-0"
               priority
             />
           </Link>
