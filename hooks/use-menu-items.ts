@@ -23,6 +23,12 @@ export function useMenuItems() {
       roles: ["admin"],
     },
     {
+      title: "Users",
+      url: "/users",
+      icon: Users2Icon,
+      roles: ["admin"],
+    },
+    {
       title: "Attendance",
       url: "/attendance",
       icon: Clock,
