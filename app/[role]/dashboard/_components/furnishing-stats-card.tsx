@@ -17,15 +17,15 @@ export function FurnishingStatsCard({
   const chartConfig: ChartConfig = {
     furnished: {
       label: "Furnished",
-      color: "hsl(var(--chart-1))",
+      color: "#22c55e",
     },
     "semi-furnished": {
       label: "Semi-Furnished",
-      color: "hsl(var(--chart-2))",
+      color: "#0ea5e9",
     },
     unfurnished: {
       label: "Unfurnished",
-      color: "hsl(var(--chart-3))",
+      color: "#f97316",
     },
   };
 
@@ -66,12 +66,20 @@ export function FurnishingStatsCard({
                     paddingAngle={4}
                     strokeWidth={0}
                   >
-                    {stats.map((entry) => (
-                      <Cell
-                        key={entry.label}
-                        fill={`var(--color-${entry.label})`}
-                      />
-                    ))}
+                    {stats.map((entry, index) => {
+                      const cfg =
+                        chartConfig[entry.label as keyof typeof chartConfig] ??
+                        chartConfig.furnished;
+                      return (
+                        <Cell
+                          key={entry.label}
+                          fill={
+                            cfg.color ??
+                            ["#22c55e", "#0ea5e9", "#f97316"][index % 3]
+                          }
+                        />
+                      );
+                    })}
                   </Pie>
                   <Tooltip
                     formatter={(value: number, name: string) => [
@@ -92,7 +100,9 @@ export function FurnishingStatsCard({
                       <span
                         className="size-2 rounded-sm"
                         style={{
-                          backgroundColor: `var(--color-${item.label})`,
+                          backgroundColor:
+                            chartConfig[item.label as keyof typeof chartConfig]
+                              ?.color ?? "#22c55e",
                         }}
                       />
                       <span className="capitalize">

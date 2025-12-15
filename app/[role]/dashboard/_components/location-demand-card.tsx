@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import {
   Bar,
   BarChart,
+  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -16,6 +17,8 @@ interface LocationDemandCardProps {
 }
 
 export function LocationDemandCard({ topLocations }: LocationDemandCardProps) {
+  const barColors = ["#0ea5e9", "#22c55e", "#f97316", "#a855f7", "#eab308"];
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -50,14 +53,17 @@ export function LocationDemandCard({ topLocations }: LocationDemandCardProps) {
                   tick={{ fontSize: 10 }}
                 />
                 <Tooltip
-                  cursor={{ fill: "rgba(148, 163, 184, 0.16)" }}
+                  cursor={{ fill: "rgba(148, 163, 184, 0.08)" }}
                   formatter={(value: number) => [value, "Properties"]}
                 />
-                <Bar
-                  dataKey="value"
-                  radius={[4, 4, 0, 0]}
-                  fill="hsl(var(--chart-1))"
-                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {topLocations.map((entry, index) => (
+                    <Cell
+                      key={entry.label}
+                      fill={barColors[index % barColors.length]}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
