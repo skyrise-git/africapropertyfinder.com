@@ -1,21 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
-import { marketingSite } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { marketingSite } from "@/lib/config";
 import {
-  Twitter,
-  Linkedin,
+  Building2,
   Facebook,
   Instagram,
-  Phone,
+  Linkedin,
   Mail,
   MapPin,
-  Building2,
+  Phone,
+  Twitter,
 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 export function MarketingFooter() {
   const year = new Date().getFullYear();
@@ -53,7 +52,10 @@ export function MarketingFooter() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="min-w-[200px]"
               />
-              <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button
+                type="submit"
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
                 Subscribe Now
               </Button>
             </form>
@@ -79,7 +81,10 @@ export function MarketingFooter() {
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 shrink-0" />
                   <Link
-                    href={`tel:${marketingSite.contactPhone.replace(/[^\d+]/g, "")}`}
+                    href={`tel:${marketingSite.contactPhone.replace(
+                      /[^\d+]/g,
+                      ""
+                    )}`}
                     className="hover:text-foreground transition-colors"
                   >
                     {marketingSite.contactPhone}

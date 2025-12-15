@@ -59,7 +59,7 @@ export function MarketingNavbar() {
               priority
             />
             <Image
-              src="/white_logo_transparent_background.png"
+              src="/logo.png"
               alt={marketingSite.title}
               width={120}
               height={40}
@@ -100,7 +100,10 @@ export function MarketingNavbar() {
             {user ? (
               <>
                 <Button size="sm" asChild>
-                  <Link href="/properties/create" className="flex items-center gap-1">
+                  <Link
+                    href="/properties/create"
+                    className="flex items-center gap-1"
+                  >
                     <Home className="size-4" />
                     List Property
                   </Link>
