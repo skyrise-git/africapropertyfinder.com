@@ -1,13 +1,13 @@
 export const marketingSite = {
-  name: "SkyRise Real Estate",
-  title: "SkyRise Real Estate",
+  name: "Africa Property Finder",
+  title: "Africa Property Finder",
   description:
-    "Your trusted partner for buying, selling, renting, and listing properties. Find your dream home or investment property with SkyRise Real Estate.",
+    "Your trusted partner for buying, selling, renting, and listing properties. Find your dream home or investment property with Africa Property Finder.",
   tagline:
     "Premium real estate services for buying, selling, renting, and listing properties. Your dream home awaits.",
-  url: "https://skyriserealestate.com",
-  domain: "skyriserealestate.com",
-  contactEmail: "info@skyriserealestate.com",
+  url: "https://www.africapropertyfinder.com",
+  domain: "africapropertyfinder.com",
+  contactEmail: "info@africapropertyfinder.com",
   contactPhone: "+15857332632",
   social: {
     twitter: "https://twitter.com/skyriserealestate",

@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SkyRise Real Estate",
+  title: "Africa Property Finder",
   description:
-    "Your trusted partner for buying, selling, renting, and listing properties. Find your dream home or investment property with SkyRise Real Estate.",
+    "Your trusted partner for buying, selling, renting, and listing properties across Africa. Find your dream home or investment property with Africa Property Finder.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

@@ -17,7 +17,7 @@ export default function SignInLayout({
       <Link href="/" className="mb-8 flex items-center gap-2">
         <Image
           src="/logo.png"
-          alt="SkyRise Real Estate"
+          alt="Africa Property Finder"
           width={140}
           height={46}
           className="h-10 w-auto dark:hidden"
@@ -25,7 +25,7 @@ export default function SignInLayout({
         />
         <Image
           src="/white_logo_transparent_background.png"
-          alt="SkyRise Real Estate"
+          alt="Africa Property Finder"
           width={140}
           height={46}
           className="hidden h-10 w-auto dark:block"

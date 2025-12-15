@@ -6,7 +6,7 @@ export interface FAQItem {
 
 export const faqData: readonly FAQItem[] = [
   {
-    question: "How do I list my property with SkyRise Real Estate?",
+    question: "How do I list my property with Africa Property Finder?",
     answer:
       "You can list your property by clicking the 'List Property' button in our navigation menu or contacting us directly. Our team will guide you through the process, including property valuation, photography, and marketing strategy.",
     iconName: "Home",
@@ -32,7 +32,7 @@ export const faqData: readonly FAQItem[] = [
   {
     question: "What areas do you serve?",
     answer:
-      "SkyRise Real Estate serves clients across multiple regions. Use our property search feature to explore available listings in your desired area, or contact us to learn more about our service coverage.",
+      "Africa Property Finder serves clients across multiple regions. Use our property search feature to explore available listings in your desired area, or contact us to learn more about our service coverage.",
     iconName: "MapPin",
   },
   {

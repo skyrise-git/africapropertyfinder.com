@@ -88,7 +88,7 @@ const testimonials = [
     img: "https://randomuser.me/api/portraits/women/22.jpg",
     description: (
       <p>
-        SkyRise Real Estate made finding our dream home effortless.
+        Africa Property Finder made finding our dream home effortless.
         <Highlight>
           Their team found us the perfect property within our budget in just two
           weeks.
@@ -250,7 +250,7 @@ export function TestimonialsMarquee() {
           </span>{" "}
           are saying about{" "}
           <span className="font-semibold text-primary">
-            SkyRise Real Estate
+            Africa Property Finder
           </span>
         </h3>
       </motion.div>

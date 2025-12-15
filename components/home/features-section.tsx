@@ -135,7 +135,7 @@ export function FeaturesSection() {
         className="mb-12 text-center"
       >
         <h2 className="text-foreground mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-          Why Choose SkyRise Real Estate?
+          Why Choose Africa Property Finder?
         </h2>
         <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
           Comprehensive real estate services designed to meet all your property
