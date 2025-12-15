@@ -32,7 +32,7 @@ export function RecentSalesTable({
   properties,
 }: RecentSalesTableProps) {
   return (
-    <Card className="col-span-1">
+    <Card className="col-span-1 border-border/70 bg-gradient-to-br from-background to-muted/60">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">
           Recent Sale Properties
@@ -84,7 +84,7 @@ interface RecentUsersTableProps {
 
 export function RecentUsersTable({ loading, users }: RecentUsersTableProps) {
   return (
-    <Card className="col-span-1">
+    <Card className="col-span-1 border-border/70 bg-gradient-to-br from-background to-muted/60">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Recent Users</CardTitle>
         <User2 className="size-5 text-muted-foreground" />
@@ -135,7 +135,7 @@ export function BookedPropertiesTable({
   properties,
 }: BookedPropertiesTableProps) {
   return (
-    <Card className="col-span-1">
+    <Card className="col-span-1 border-border/70 bg-gradient-to-br from-background to-muted/60">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">
           Already Booked Properties

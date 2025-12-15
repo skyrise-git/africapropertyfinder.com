@@ -1,6 +1,14 @@
 "use client";
 
 import { MapPin } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface LocationDemandCardProps {
@@ -23,28 +31,35 @@ export function LocationDemandCard({ topLocations }: LocationDemandCardProps) {
             will show the hottest locations.
           </p>
         ) : (
-          <div className="space-y-2">
-            {topLocations.map((loc) => (
-              <div
-                key={loc.label}
-                className="flex items-center justify-between gap-4 text-sm"
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={topLocations}
+                margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
               >
-                <span className="truncate">{loc.label}</span>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full bg-primary"
-                      style={{
-                        width: `${Math.min(loc.value * 15, 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {loc.value}
-                  </span>
-                </div>
-              </div>
-            ))}
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 10 }}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 10 }}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(148, 163, 184, 0.16)" }}
+                  formatter={(value: number) => [value, "Properties"]}
+                />
+                <Bar
+                  dataKey="value"
+                  radius={[4, 4, 0, 0]}
+                  fill="hsl(var(--chart-1))"
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         )}
       </CardContent>

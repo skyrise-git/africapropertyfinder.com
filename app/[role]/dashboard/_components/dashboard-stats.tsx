@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import { Building2, UserCheck, CalendarCheck2, Home } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +12,25 @@ interface DashboardStatsProps {
   totalBookedProperties: number;
   totalProperties: number;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 10, scale: 0.97 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] as const },
+  },
+};
 
 export function DashboardStats({
   loading,
@@ -24,57 +44,93 @@ export function DashboardStats({
       label: "Active Properties",
       value: totalActiveProperties,
       icon: Building2,
+      accent: "bg-emerald-500/10 text-emerald-500",
     },
     {
       label: "Active Users",
       value: totalActiveUsers,
       icon: UserCheck,
+      accent: "bg-sky-500/10 text-sky-500",
     },
     {
       label: "Booked Properties",
       value: totalBookedProperties,
       icon: CalendarCheck2,
+      accent: "bg-amber-500/10 text-amber-500",
     },
     {
       label: "Total Properties",
       value: totalProperties,
       icon: Home,
+      accent: "bg-purple-500/10 text-purple-500",
     },
   ];
 
+  const Wrapper = motion.div;
+
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Wrapper
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {cards.map((card) => (
-          <Card key={card.label}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {card.label}
-              </CardTitle>
-              <Skeleton className="size-5 rounded-full" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-20" />
-            </CardContent>
-          </Card>
+          <motion.div key={card.label} variants={cardVariants}>
+            <Card className="relative overflow-hidden border-border/70 bg-gradient-to-br from-background to-muted/60">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {card.label}
+                </CardTitle>
+                <div
+                  className={`flex size-8 items-center justify-center rounded-xl ${card.accent}`}
+                >
+                  <card.icon className="size-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-20" />
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
-      </div>
+      </Wrapper>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <Wrapper
+      className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {cards.map((card) => (
-        <Card key={card.label}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{card.label}</CardTitle>
-            <card.icon className="size-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{card.value}</div>
-          </CardContent>
-        </Card>
+        <motion.div
+          key={card.label}
+          variants={cardVariants}
+          whileHover={{ y: -4, scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Card className="relative overflow-hidden border-border/70 bg-gradient-to-br from-background to-muted/60">
+            <div className="pointer-events-none absolute -right-8 -top-8 size-24 rounded-full bg-primary/5" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {card.label}
+              </CardTitle>
+              <div
+                className={`flex size-8 items-center justify-center rounded-xl ${card.accent}`}
+              >
+                <card.icon className="size-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{card.value}</div>
+            </CardContent>
+          </Card>
+        </motion.div>
       ))}
-    </div>
+    </Wrapper>
   );
 }
