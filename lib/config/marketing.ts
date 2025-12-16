@@ -60,14 +60,14 @@ export const marketingSite = {
         },
         {
           label: "Buy",
-          href: "/buy",
+          href: "/properties?listingType=sale",
           icon: "ShoppingCart",
           description: "Browse our extensive collection of properties for sale",
           featured: true,
         },
         {
           label: "Rent",
-          href: "/rent",
+          href: "/properties?listingType=rent",
           icon: "Key",
           description:
             "Find the perfect rental property that fits your needs and budget",
@@ -75,7 +75,7 @@ export const marketingSite = {
         },
         {
           label: "Sell",
-          href: "/sell",
+          href: "/properties?listingType=sale",
           icon: "TrendingUp",
           description:
             "Get the best price for your property with our expert selling services",
@@ -96,9 +96,9 @@ export const marketingSite = {
     },
     links: {
       properties: [
-        { label: "Buy Property", href: "/buy" },
-        { label: "Rent Property", href: "/rent" },
-        { label: "Sell Property", href: "/sell" },
+        { label: "Buy Property", href: "/properties?listingType=sale" },
+        { label: "Rent Property", href: "/properties?listingType=rent" },
+        { label: "Sell Property", href: "/properties?listingType=sale" },
         { label: "List Property", href: "/properties/create" },
         { label: "Featured Listings", href: "/blogs" },
         { label: "New Developments", href: "/developments" },
