@@ -51,20 +51,19 @@ export const marketingSite = {
       href: "/properties",
       items: [
         {
-          label: "View All",
-          href: "/properties",
-          icon: "Home",
-          description:
-            "Browse all available properties with advanced search and filtering options",
-          featured: true,
-        },
-        {
           label: "My Properties",
           href: "/properties/my-properties",
           icon: "Database",
           description:
             "View and manage all your property listings in one place",
-          featured: true,
+          featured: false,
+        },
+        {
+          label: "My Saved Properties",
+          href: "/saved-properties",
+          icon: "Heart",
+          description: "View all your saved properties in one convenient place",
+          featured: false,
         },
         {
           label: "List A Property",
@@ -80,7 +79,7 @@ export const marketingSite = {
           icon: "FileCode",
           description:
             "Get in touch with our team for property inquiries and support",
-          featured: true,
+          featured: false,
         },
       ],
     },
@@ -165,4 +164,3 @@ export const marketingSite = {
 } as const;
 
 export type MarketingSite = typeof marketingSite;
-

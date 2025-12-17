@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Search,
   Plus,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +43,7 @@ const iconMap = {
   ShoppingCart,
   Key,
   TrendingUp,
+  Heart,
 } as const;
 
 type MegaMenuItem = MarketingSite["megaMenu"][number]["items"][number];
