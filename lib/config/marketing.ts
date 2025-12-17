@@ -34,7 +34,7 @@ export const marketingSite = {
   quickLinks: [
     {
       label: "Browse available properties",
-      href: "/blogs",
+      href: "/properties",
     },
     {
       label: "List your property",
@@ -100,7 +100,7 @@ export const marketingSite = {
         { label: "Rent Property", href: "/properties?listingType=rent" },
         { label: "Sell Property", href: "/properties?listingType=sale" },
         { label: "List Property", href: "/properties/create" },
-        { label: "Featured Listings", href: "/blogs" },
+        { label: "Featured Listings", href: "/properties" },
         { label: "New Developments", href: "/developments" },
       ],
       company: [

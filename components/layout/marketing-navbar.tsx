@@ -24,7 +24,7 @@ import { MarketingProfileDropdown } from "@/components/core/marketing-profile-dr
 
 const marketingNavLinks = [
   { label: "Home", href: "/" },
-  { label: "Blogs", href: "/blogs" },
+  { label: "Appointments", href: "/appointments" },
   { label: "Services", href: "#services" },
 ] as const;
 
