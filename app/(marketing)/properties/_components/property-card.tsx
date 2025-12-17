@@ -1,17 +1,5 @@
 "use client";
 
-import {
-  MapPin,
-  BedDouble,
-  Bath,
-  Home,
-  Maximize2,
-  PawPrint,
-} from "lucide-react";
-import Link from "next/link";
-import { motion } from "motion/react";
-import { formatCurrency } from "@ashirbad/js-core";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -21,6 +9,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Property } from "@/lib/types/property.type";
+import { formatCurrency } from "@ashirbad/js-core";
+import {
+  Bath,
+  BedDouble,
+  Home,
+  MapPin,
+  Maximize2,
+  PawPrint,
+} from "lucide-react";
+import { motion } from "motion/react";
+import Link from "next/link";
 
 interface PropertyCardProps {
   property: Property;
