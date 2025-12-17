@@ -22,14 +22,15 @@ export default function SavedPropertiesPage() {
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Sync search to URL
+  // Sync search to URL (only when authenticated)
   useEffect(() => {
+    if (!isAuthenticated) return;
     const params = new URLSearchParams(searchParams.toString());
     if (search) params.set("q", search);
     else params.delete("q");
     const query = params.toString();
     router.replace(query ? `/saved-properties?${query}` : "/saved-properties");
-  }, [search, router, searchParams]);
+  }, [search, router, searchParams, isAuthenticated]);
 
   // Fetch saved properties
   const {

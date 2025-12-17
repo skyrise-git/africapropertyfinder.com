@@ -15,7 +15,11 @@ export function useRequireAuth(toastMessage: string = "Please sign in to continu
   useEffect(() => {
     if (!user) {
       toast.error(toastMessage);
-      router.push("/signin");
+      // Small delay to ensure toast is visible before redirect
+      const timer = setTimeout(() => {
+        router.replace("/signin");
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [user, router, toastMessage]);
 
