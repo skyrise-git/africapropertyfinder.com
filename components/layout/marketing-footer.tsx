@@ -69,7 +69,6 @@ export function MarketingFooter() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Company Information */}
             <div className="space-y-4">
-              <Building2 className="h-6 w-6 text-foreground" />
               <p className="text-sm text-foreground font-medium">
                 {marketingSite.footer.companyInfo.tagline}
               </p>

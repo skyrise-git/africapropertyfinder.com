@@ -134,9 +134,7 @@ export const marketingSite = {
     links: {
       properties: [
         { label: "View All Properties", href: "/properties" },
-        { label: "Buy Property", href: "/properties?listingType=sale" },
-        { label: "Rent Property", href: "/properties?listingType=rent" },
-        { label: "List Property", href: "/properties/create" },
+        { label: "List Your Property", href: "/properties/create" },
         { label: "My Saved Properties", href: "/saved-properties" },
       ],
       company: [
@@ -144,7 +142,6 @@ export const marketingSite = {
         { label: "Blogs", href: "/blogs" },
       ],
       resources: [
-        { label: "Property News", href: "/blogs" },
         { label: "Testimonials", href: "/testimonials" },
         { label: "FAQs", href: "/faq" },
       ],
