@@ -133,26 +133,20 @@ export const marketingSite = {
     },
     links: {
       properties: [
+        { label: "View All Properties", href: "/properties" },
         { label: "Buy Property", href: "/properties?listingType=sale" },
         { label: "Rent Property", href: "/properties?listingType=rent" },
-        { label: "Sell Property", href: "/properties?listingType=sale" },
         { label: "List Property", href: "/properties/create" },
-        { label: "Featured Listings", href: "/properties" },
-        { label: "New Developments", href: "/developments" },
+        { label: "My Saved Properties", href: "/saved-properties" },
       ],
       company: [
-        { label: "About Us", href: "/about" },
-        { label: "Our Team", href: "/team" },
-        { label: "Careers", href: "/careers" },
-        { label: "Press & Media", href: "/press" },
         { label: "Contact Us", href: "/contact" },
+        { label: "Blogs", href: "/blogs" },
       ],
       resources: [
-        { label: "Market Analysis", href: "/market-analysis" },
-        { label: "Investment Guide", href: "/investment-guide" },
-        { label: "Buying Guide", href: "/buying-guide" },
         { label: "Property News", href: "/blogs" },
-        { label: "FAQs", href: "/#faq" },
+        { label: "Testimonials", href: "/testimonials" },
+        { label: "FAQs", href: "/faq" },
       ],
     },
     legal: [
