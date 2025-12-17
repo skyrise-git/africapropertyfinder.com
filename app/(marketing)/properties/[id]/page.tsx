@@ -34,13 +34,21 @@ import {
   Video,
   ChevronLeft,
   ChevronRight,
+  ZoomIn,
+  ZoomOut,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+} from "@/components/ui/dialog";
+import { useState, useEffect, useCallback } from "react";
 import { PropertyMapView } from "../_components/property-map-view";
 
 const listingTypeLabel: Record<Property["listingType"], string> = {
@@ -93,6 +101,11 @@ export default function PropertyDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const { data, loading, error } = useFirebaseRealtime<Property>(
     `properties/${id}`,
@@ -102,7 +115,17 @@ export default function PropertyDetailPage() {
   const property = data ? ({ ...data, id } as Property) : null;
 
   const images = property?.images || [];
-  const currentImage = images[currentImageIndex];
+  
+  // Reset image index when images change or if index is out of bounds
+  useEffect(() => {
+    if (images.length > 0 && currentImageIndex >= images.length) {
+      setCurrentImageIndex(0);
+    }
+  }, [images.length, currentImageIndex]);
+
+  // Ensure currentImageIndex is within bounds
+  const safeImageIndex = Math.max(0, Math.min(currentImageIndex, images.length - 1));
+  const currentImage = images[safeImageIndex];
 
   const handlePreviousImage = () => {
     setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
@@ -111,6 +134,132 @@ export default function PropertyDetailPage() {
   const handleNextImage = () => {
     setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
   };
+
+  const handleOpenGallery = (index?: number) => {
+    if (index !== undefined) {
+      setCurrentImageIndex(index);
+    }
+    setIsGalleryOpen(true);
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  const handleCloseGallery = () => {
+    setIsGalleryOpen(false);
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => Math.min(prev + 0.25, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => Math.max(prev - 0.25, 0.5));
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  const handleGalleryPrevious = () => {
+    setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  const handleGalleryNext = () => {
+    setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isGalleryOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowLeft":
+          e.preventDefault();
+          setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+          setZoomLevel(1);
+          setImagePosition({ x: 0, y: 0 });
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+          setZoomLevel(1);
+          setImagePosition({ x: 0, y: 0 });
+          break;
+        case "Escape":
+          e.preventDefault();
+          handleCloseGallery();
+          break;
+        case "+":
+        case "=":
+          e.preventDefault();
+          setZoomLevel((prev) => Math.min(prev + 0.25, 3));
+          break;
+        case "-":
+          e.preventDefault();
+          setZoomLevel((prev) => Math.max(prev - 0.25, 0.5));
+          break;
+        case "0":
+          e.preventDefault();
+          setZoomLevel(1);
+          setImagePosition({ x: 0, y: 0 });
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isGalleryOpen, images.length]);
+
+  // Mouse drag for panning when zoomed
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y });
+    }
+  }, [zoomLevel, imagePosition]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isDragging && zoomLevel > 1) {
+      setImagePosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  }, [isDragging, zoomLevel, dragStart]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Reset zoom when image changes
+  useEffect(() => {
+    if (isGalleryOpen) {
+      setZoomLevel(1);
+      setImagePosition({ x: 0, y: 0 });
+    }
+  }, [currentImageIndex, isGalleryOpen]);
+
+  // Mouse wheel zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (!isGalleryOpen) return;
+    e.preventDefault();
+    
+    if (e.deltaY < 0) {
+      // Zoom in
+      setZoomLevel((prev) => Math.min(prev + 0.1, 3));
+    } else {
+      // Zoom out
+      setZoomLevel((prev) => Math.max(prev - 0.1, 0.5));
+    }
+  }, [isGalleryOpen]);
 
   if (loading) {
     return (
@@ -190,17 +339,23 @@ export default function PropertyDetailPage() {
       </motion.div>
 
       {/* Image Gallery */}
-      {images.length > 0 && (
+      {images.length > 0 && currentImage && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-xl overflow-hidden bg-muted"
+          className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-xl overflow-hidden bg-muted cursor-pointer group"
+          onClick={() => handleOpenGallery()}
         >
           <img
             src={currentImage.url}
-            alt={property.title}
-            className="w-full h-full object-cover"
+            alt={`${property.title} - Image ${safeImageIndex + 1}`}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium">
+              Click to view gallery
+            </div>
+          </div>
 
           {/* Image Navigation */}
           {images.length > 1 && (
@@ -229,7 +384,7 @@ export default function PropertyDetailPage() {
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
                     className={`h-2 rounded-full transition-all ${
-                      index === currentImageIndex
+                      index === safeImageIndex
                         ? "w-8 bg-white"
                         : "w-2 bg-white/50 hover:bg-white/75"
                     }`}
@@ -240,7 +395,7 @@ export default function PropertyDetailPage() {
 
               {/* Image Counter */}
               <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-md text-sm">
-                {currentImageIndex + 1} / {images.length}
+                {safeImageIndex + 1} / {images.length}
               </div>
             </>
           )}
@@ -265,6 +420,178 @@ export default function PropertyDetailPage() {
           </div>
         </motion.div>
       )}
+
+      {/* Thumbnail Gallery */}
+      {images.length > 1 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+        >
+          {images.map((image, index) => (
+            <button
+              key={image.fileKey || index}
+              onClick={() => handleOpenGallery(index)}
+              className={`relative flex-shrink-0 w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                index === safeImageIndex
+                  ? "border-primary ring-2 ring-primary/20"
+                  : "border-border/50 hover:border-primary/50"
+              }`}
+              aria-label={`View image ${index + 1}`}
+            >
+              <img
+                src={image.url}
+                alt={`${property.title} thumbnail ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+              {index === safeImageIndex && (
+                <div className="absolute inset-0 bg-primary/10" />
+              )}
+            </button>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Gallery Lightbox Modal */}
+      <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
+        <DialogContent
+          className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-0"
+          showCloseButton={true}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCloseGallery}
+              className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70 text-white border-0"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+
+            {/* Previous Button */}
+            {images.length > 1 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleGalleryPrevious}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-50 bg-black/50 hover:bg-black/70 text-white border-0"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+            )}
+
+            {/* Next Button */}
+            {images.length > 1 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleGalleryNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-50 bg-black/50 hover:bg-black/70 text-white border-0"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </Button>
+            )}
+
+            {/* Zoom Controls */}
+            <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleZoomIn}
+                disabled={zoomLevel >= 3}
+                className="bg-black/50 hover:bg-black/70 text-white border-0"
+              >
+                <ZoomIn className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleZoomOut}
+                disabled={zoomLevel <= 0.5}
+                className="bg-black/50 hover:bg-black/70 text-white border-0"
+              >
+                <ZoomOut className="h-5 w-5" />
+              </Button>
+              {zoomLevel !== 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleResetZoom}
+                  className="bg-black/50 hover:bg-black/70 text-white border-0"
+                >
+                  <Maximize2 className="h-5 w-5" />
+                </Button>
+              )}
+            </div>
+
+            {/* Image Counter */}
+            {images.length > 1 && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-md text-sm font-medium">
+                {safeImageIndex + 1} / {images.length}
+              </div>
+            )}
+
+            {/* Zoom Level Indicator */}
+            {zoomLevel !== 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-md text-sm font-medium">
+                {Math.round(zoomLevel * 100)}%
+              </div>
+            )}
+
+            {/* Main Image */}
+            <div
+              className="w-full h-full flex items-center justify-center overflow-hidden"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onWheel={handleWheel}
+            >
+              <img
+                src={currentImage.url}
+                alt={`${property.title} - Image ${safeImageIndex + 1}`}
+                className="max-w-full max-h-full object-contain select-none"
+                style={{
+                  transform: `scale(${zoomLevel}) translate(${imagePosition.x / zoomLevel}px, ${imagePosition.y / zoomLevel}px)`,
+                  cursor: zoomLevel > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+                  transition: isDragging ? "none" : "transform 0.2s ease-out",
+                }}
+                draggable={false}
+              />
+            </div>
+
+            {/* Thumbnail Strip */}
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-2 max-w-[90%] overflow-x-auto pb-2 px-4">
+                {images.map((image, index) => (
+                  <button
+                    key={image.fileKey || index}
+                    onClick={() => {
+                      setCurrentImageIndex(index);
+                      setZoomLevel(1);
+                      setImagePosition({ x: 0, y: 0 });
+                    }}
+                    className={`relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      index === safeImageIndex
+                        ? "border-white ring-2 ring-white/50"
+                        : "border-white/30 hover:border-white/60"
+                    }`}
+                    aria-label={`Go to image ${index + 1}`}
+                  >
+                    <img
+                      src={image.url}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
