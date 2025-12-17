@@ -63,7 +63,7 @@ function PropertyScheduleViewing({
 
       await mutate({
         action: "createWithId",
-        path: `properties/${property.id}/viewings`,
+        path: "appointments",
         data: {
           propertyId: property.id,
           propertyTitle: property.title,
