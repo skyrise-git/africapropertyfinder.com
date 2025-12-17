@@ -114,53 +114,55 @@ function PropertyScheduleViewing({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Select a time</label>
-              <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                <Select
-                  value={timeSelection}
-                  onValueChange={(value) => {
-                    setTimeSelection(value);
-                    if (value !== "custom") {
-                      setCustomTime("");
-                    }
-                  }}
-                >
-                  <SelectTrigger className="w-full md:w-1/2">
-                    <Clock className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Select time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      "09:00 am",
-                      "10:00 am",
-                      "11:00 am",
-                      "12:00 pm",
-                      "01:00 pm",
-                      "02:00 pm",
-                      "03:00 pm",
-                      "04:00 pm",
-                      "05:00 pm",
-                    ].map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="custom">Custom time</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex flex-col gap-3 md:flex-row">
+                <div className="flex-1 space-y-1">
+                  <label className="text-sm font-medium">Select a time</label>
+                  <Select
+                    value={timeSelection}
+                    onValueChange={(value) => {
+                      setTimeSelection(value);
+                      if (value !== "custom") {
+                        setCustomTime("");
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <Clock className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        "09:00 am",
+                        "10:00 am",
+                        "11:00 am",
+                        "12:00 pm",
+                        "01:00 pm",
+                        "02:00 pm",
+                        "03:00 pm",
+                        "04:00 pm",
+                        "05:00 pm",
+                      ].map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <AnimatePresence>
                   {timeSelection === "custom" && (
                     <motion.div
                       key="custom-time-input"
-                      initial={{ opacity: 0, x: 8, opacity: 0 }}
+                      initial={{ opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 8 }}
                       className="flex-1 space-y-1"
                     >
-                      <p className="text-xs text-muted-foreground">
+                      <label className="text-sm font-medium">
                         Enter a custom time
-                      </p>
+                      </label>
                       <Input
                         type="time"
                         className="w-full"
