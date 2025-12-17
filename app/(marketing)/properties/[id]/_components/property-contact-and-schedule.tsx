@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -135,6 +136,16 @@ function PropertyScheduleViewing({
                   ))}
                 </SelectContent>
               </Select>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  Or enter a custom time
+                </p>
+                <Input
+                  type="time"
+                  className="w-full"
+                  onChange={(event) => setSelectedTime(event.target.value)}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
