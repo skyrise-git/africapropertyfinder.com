@@ -92,7 +92,7 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
     >
       <Card className="group h-full overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
         {imageUrl && (
-          <div className="relative h-48 sm:h-56 md:h-64 w-full overflow-hidden bg-muted">
+          <div className="relative h-40 sm:h-48 md:h-56 w-full overflow-hidden bg-muted">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 transition-opacity duration-500 group-hover:opacity-100 opacity-90" />
 
             <img
@@ -117,7 +117,7 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
           </div>
         )}
 
-        <CardHeader className="space-y-2.5 sm:space-y-3 px-4 sm:px-6 pt-4 sm:pt-6">
+        <CardHeader className="space-y-1.5 sm:space-y-2 px-4 sm:px-5 pt-3 sm:pt-4">
           <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold tracking-tight leading-tight">
             {property.title}
           </CardTitle>
@@ -140,9 +140,9 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="flex flex-1 flex-col gap-3 sm:gap-4 px-4 sm:px-6 pb-4 sm:pb-6">
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-lg border border-border/50 bg-muted/30 px-2 sm:px-3 py-2 sm:py-2.5 transition-colors hover:bg-muted/50">
+        <CardContent className="flex flex-1 flex-col gap-2 sm:gap-2.5 px-4 sm:px-5 pb-3 sm:pb-4">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 rounded-lg border border-border/50 bg-muted/30 px-2 py-1.5 sm:py-2 transition-colors hover:bg-muted/50">
               <BedDouble className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0 mx-auto sm:mx-0" />
               <div className="flex flex-col items-center sm:items-start leading-tight">
                 <span className="text-xs sm:text-sm font-semibold">
@@ -154,7 +154,7 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-lg border border-border/50 bg-muted/30 px-2 sm:px-3 py-2 sm:py-2.5 transition-colors hover:bg-muted/50">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 rounded-lg border border-border/50 bg-muted/30 px-2 py-1.5 sm:py-2 transition-colors hover:bg-muted/50">
               <Bath className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0 mx-auto sm:mx-0" />
               <div className="flex flex-col items-center sm:items-start leading-tight">
                 <span className="text-xs sm:text-sm font-semibold">
@@ -166,7 +166,7 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-lg border border-border/50 bg-muted/30 px-2 sm:px-3 py-2 sm:py-2.5 transition-colors hover:bg-muted/50">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 rounded-lg border border-border/50 bg-muted/30 px-2 py-1.5 sm:py-2 transition-colors hover:bg-muted/50">
               <Maximize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0 mx-auto sm:mx-0" />
               <div className="flex flex-col items-center sm:items-start leading-tight min-w-0">
                 <span className="text-xs sm:text-sm font-semibold truncate w-full text-center sm:text-left">
