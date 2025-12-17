@@ -53,7 +53,7 @@ function MegaMenuContent({ items }: MegaMenuContentProps) {
 
           return (
             <motion.div
-              key={item.href}
+              key={`${item.label}-${index}`}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05, duration: 0.2 }}

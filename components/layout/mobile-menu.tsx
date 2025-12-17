@@ -130,7 +130,7 @@ export function MobileMenu({
 
                             return (
                               <motion.div
-                                key={item.href}
+                                key={`${item.label}-${itemIndex}`}
                                 initial={{ opacity: 0, x: -12 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{
@@ -213,7 +213,7 @@ export function MobileMenu({
 
                                   return (
                                     <motion.div
-                                      key={item.href}
+                                      key={`${item.label}-${itemIndex}`}
                                       initial={{ opacity: 0, x: -12 }}
                                       animate={{ opacity: 1, x: 0 }}
                                       transition={{
