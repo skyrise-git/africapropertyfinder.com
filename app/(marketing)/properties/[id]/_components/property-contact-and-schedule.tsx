@@ -5,13 +5,11 @@ import { format } from "date-fns";
 import { motion } from "motion/react";
 import {
   Calendar as CalendarIcon,
-  Calendar,
   Clock,
   Home,
   Mail,
   Phone,
   Smartphone,
-  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,90 +34,6 @@ type PropertyContactAndScheduleProps = {
   property: Property;
 };
 
-function PropertyContactInfo({ property }: PropertyContactAndScheduleProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle>Contact Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <div className="text-sm text-muted-foreground">Contact Name</div>
-            <div className="font-semibold">{property.contactName}</div>
-          </div>
-
-          {property.contactInfo.phone && (
-            <div>
-              <div className="text-sm text-muted-foreground mb-2">Phone</div>
-              <a
-                href={`tel:${property.contactInfo.phone}`}
-                className="flex items-center gap-2 text-primary hover:underline"
-              >
-                <Phone className="h-4 w-4" />
-                {property.contactInfo.phone}
-              </a>
-            </div>
-          )}
-
-          {property.contactInfo.email && (
-            <div>
-              <div className="text-sm text-muted-foreground mb-2">Email</div>
-              <a
-                href={`mailto:${property.contactInfo.email}`}
-                className="flex items-center gap-2 text-primary hover:underline"
-              >
-                <Mail className="h-4 w-4" />
-                {property.contactInfo.email}
-              </a>
-            </div>
-          )}
-
-          {property.preferredContactMethod.length > 0 && (
-            <div>
-              <div className="text-sm text-muted-foreground mb-2">
-                Preferred Contact Method
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {property.preferredContactMethod.map((method) => (
-                  <Badge
-                    key={method}
-                    variant="secondary"
-                    className="capitalize"
-                  >
-                    {method}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {property.viewingAvailability && (
-            <>
-              <Separator />
-              <div>
-                <div className="text-sm text-muted-foreground mb-2">
-                  Viewing Availability
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  <span className="text-sm">
-                    {property.viewingAvailability}
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
-
 function PropertyScheduleViewing({
   property,
 }: PropertyContactAndScheduleProps) {
@@ -138,24 +52,30 @@ function PropertyScheduleViewing({
           <CardTitle>Schedule a Viewing</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold">Contact Agent</h3>
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                {property.contactInfo.email ? (
-                  <div className="h-full w-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-6 w-6 text-primary" />
-                  </div>
-                ) : (
-                  <User className="h-6 w-6 text-muted-foreground" />
-                )}
-              </div>
-              <div>
-                <div className="font-semibold">{property.contactName}</div>
-                <div className="text-sm text-muted-foreground">
-                  Listing Agent
-                </div>
-              </div>
+          <div className="space-y-2">
+            <div className="text-sm font-medium">
+              {property.contactName || "Contact person"}
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {property.contactInfo.phone && (
+                <a
+                  href={`tel:${property.contactInfo.phone}`}
+                  className="flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <Phone className="h-4 w-4" />
+                  {property.contactInfo.phone}
+                </a>
+              )}
+
+              {property.contactInfo.email && (
+                <a
+                  href={`mailto:${property.contactInfo.email}`}
+                  className="flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <Mail className="h-4 w-4" />
+                  {property.contactInfo.email}
+                </a>
+              )}
             </div>
           </div>
 
@@ -310,8 +230,7 @@ export function PropertyContactAndSchedule({
 }: PropertyContactAndScheduleProps) {
   return (
     <div className="lg:col-span-1">
-      <div className="sticky top-6 space-y-4">
-        <PropertyContactInfo property={property} />
+      <div className="sticky top-6">
         <PropertyScheduleViewing property={property} />
       </div>
     </div>
