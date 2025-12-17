@@ -92,7 +92,6 @@ const amenitiesConfig = [
 
 type AmenityConfig = (typeof amenitiesConfig)[number];
 
-// @ts-expect-error Wifi is provided by lucide-react at runtime
 import { Wifi } from "lucide-react";
 
 export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps) {
