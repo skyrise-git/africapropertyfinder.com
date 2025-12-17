@@ -10,6 +10,7 @@ import type { Property } from "@/lib/types/property.type";
 import { PropertyCard } from "./_components/property-card";
 import { PropertySortControls } from "./_components/property-sort-controls";
 import { PropertyMapView } from "./_components/property-map-view";
+import { PropertySplitView } from "./_components/property-split-view";
 import { PropertyLoadingView } from "./_components/property-loading-view";
 import { PropertyErrorView } from "./_components/property-error-view";
 import { Input } from "@/components/ui/input";
@@ -345,6 +346,14 @@ export default function PropertiesPage() {
 
         {viewMode === "map" ? (
           <PropertyMapView properties={filteredSorted} />
+        ) : viewMode === "split" ? (
+          <PropertySplitView
+            properties={filteredSorted}
+            paginated={paginated}
+            totalPages={totalPages}
+            currentPage={Number(page) || 1}
+            onPageChange={handlePageChange}
+          />
         ) : (
           <AnimatePresence mode="popLayout">
             {filteredSorted.length === 0 ? (
@@ -389,7 +398,7 @@ export default function PropertiesPage() {
           </AnimatePresence>
         )}
 
-        {viewMode !== "map" && totalPages > 1 && (
+        {viewMode !== "map" && viewMode !== "split" && totalPages > 1 && (
           <Pagination className="pt-2">
             <PaginationContent>
               <PaginationItem>

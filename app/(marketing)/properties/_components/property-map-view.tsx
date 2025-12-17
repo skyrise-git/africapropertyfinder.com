@@ -1,7 +1,12 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
-import { GoogleMap, MarkerF, InfoWindowF, useJsApiLoader } from "@react-google-maps/api";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import {
+  GoogleMap,
+  MarkerF,
+  InfoWindowF,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 import { useQueryState, parseAsString } from "nuqs";
 import { Loader2, MapPin } from "lucide-react";
 
@@ -13,6 +18,9 @@ const libraries: ("places" | "geometry")[] = ["places", "geometry"];
 
 interface PropertyMapViewProps {
   properties: Property[];
+  selectedId?: string | null;
+  onMarkerClick?: (id: string) => void;
+  onPropertySelect?: (id: string | null) => void;
 }
 
 const defaultCenter = {
@@ -164,10 +172,38 @@ function createCustomMarkerIcon(
   };
 }
 
-export function PropertyMapView({ properties }: PropertyMapViewProps) {
+export function PropertyMapView({
+  properties,
+  selectedId: externalSelectedId,
+  onMarkerClick,
+  onPropertySelect,
+}: PropertyMapViewProps) {
   const [lat] = useQueryState("lat", parseAsString.withDefault(""));
   const [lng] = useQueryState("lng", parseAsString.withDefault(""));
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [internalSelectedId, setInternalSelectedId] =
+    useState<string | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  // Use external selectedId if provided, otherwise use internal state
+  const selectedId =
+    externalSelectedId !== undefined ? externalSelectedId : internalSelectedId;
+
+  // Pan map to selected property when selection changes
+  useEffect(() => {
+    if (!mapRef.current || !selectedId) return;
+
+    const property = properties.find((p) => p.id === selectedId);
+    if (
+      property?.location &&
+      typeof property.location.latitude === "number" &&
+      typeof property.location.longitude === "number"
+    ) {
+      mapRef.current.panTo({
+        lat: property.location.latitude,
+        lng: property.location.longitude,
+      });
+    }
+  }, [selectedId, properties]);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
@@ -202,9 +238,31 @@ export function PropertyMapView({ properties }: PropertyMapViewProps) {
     return defaultCenter;
   }, [lat, lng, properties]);
 
-  const handleMarkerClick = useCallback((id: string) => {
-    setSelectedId(id);
-  }, []);
+  const handleMarkerClick = useCallback(
+    (id: string) => {
+      if (onMarkerClick) {
+        onMarkerClick(id);
+      }
+      if (onPropertySelect) {
+        onPropertySelect(id);
+      }
+      // Only update internal state if not controlled externally
+      if (externalSelectedId === undefined) {
+        setInternalSelectedId(id);
+      }
+    },
+    [onMarkerClick, onPropertySelect, externalSelectedId]
+  );
+
+  const handleInfoWindowClose = useCallback(() => {
+    if (onPropertySelect) {
+      onPropertySelect(null);
+    }
+    // Only update internal state if not controlled externally
+    if (externalSelectedId === undefined) {
+      setInternalSelectedId(null);
+    }
+  }, [onPropertySelect, externalSelectedId]);
 
   if (loadError) {
     return (
@@ -234,6 +292,9 @@ export function PropertyMapView({ properties }: PropertyMapViewProps) {
         mapContainerStyle={containerStyle}
         center={center}
         zoom={13}
+        onLoad={(map) => {
+          mapRef.current = map;
+        }}
         options={{
           disableDefaultUI: false,
           zoomControl: true,
@@ -274,7 +335,7 @@ export function PropertyMapView({ properties }: PropertyMapViewProps) {
               lat: selectedProperty.location.latitude,
               lng: selectedProperty.location.longitude,
             }}
-            onCloseClick={() => setSelectedId(null)}
+            onCloseClick={handleInfoWindowClose}
           >
             <div className="w-[260px] space-y-2">
               <div className="flex items-start gap-2">
