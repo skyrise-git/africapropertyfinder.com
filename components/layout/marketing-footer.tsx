@@ -109,7 +109,7 @@ export function MarketingFooter() {
               </h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 {marketingSite.footer.links.properties.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.label}>
                     <Link
                       href={link.href}
                       className="hover:text-foreground transition-colors"
