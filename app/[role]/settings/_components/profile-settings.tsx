@@ -77,7 +77,7 @@ export function ProfileSettings() {
         `/api/uploadthing/delete?fileKey=${encodeURIComponent(fileKey)}`,
         {
           method: "DELETE",
-        },
+        }
       );
 
       if (!response.ok) {
@@ -217,7 +217,7 @@ export function ProfileSettings() {
       : "0";
 
     toast.success(
-      `Image optimized: ${originalSize} → ${optimizedSize} (${compressionRatio}% reduction)`,
+      `Image optimized: ${originalSize} → ${optimizedSize} (${compressionRatio}% reduction)`
     );
 
     // Delete old file BEFORE uploading new one (if fileKey exists)
@@ -510,21 +510,6 @@ export function ProfileSettings() {
                   Email address cannot be changed
                 </p>
               </div>
-
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium">
-                  <Shield className="h-4 w-4" />
-                  Role
-                </Label>
-                <Input
-                  value={user?.role === "admin" ? "Admin" : "Staff"}
-                  readOnly
-                  className="bg-muted cursor-not-allowed capitalize"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Role cannot be changed
-                </p>
-              </div>
             </div>
 
             <div className="bg-muted/50 p-3 sm:p-4 rounded-lg space-y-2">
@@ -547,10 +532,6 @@ export function ProfileSettings() {
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4" />
                   <span>Status: {user.status}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>UID: {user.uid}</span>
                 </div>
               </div>
             </div>
