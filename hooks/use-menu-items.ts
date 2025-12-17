@@ -1,4 +1,12 @@
-import { Home, Settings, Users2Icon, Clock, FileText } from "lucide-react";
+import {
+  Home,
+  Settings,
+  Briefcase,
+  Users,
+  Clock,
+  FileText,
+  MessageSquare,
+} from "lucide-react";
 import type { UserRole } from "@/lib/types/user.type";
 
 export type NavigationItem = {
@@ -19,14 +27,20 @@ export function useMenuItems() {
     {
       title: "Staffs",
       url: "/staffs",
-      icon: Users2Icon,
+      icon: Briefcase,
       roles: ["admin"],
     },
     {
       title: "Users",
       url: "/users",
-      icon: Users2Icon,
+      icon: Users,
       roles: ["admin"],
+    },
+    {
+      title: "Contacts",
+      url: "/contacts",
+      icon: MessageSquare,
+      roles: ["admin", "staff"],
     },
     {
       title: "Attendance",
