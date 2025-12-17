@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
+import { mutate } from "@atechhub/firebase";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -30,6 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Property } from "@/lib/types/property.type";
+import { useAppStore } from "@/hooks/use-app-store";
+import { toast } from "sonner";
 
 type PropertyContactAndScheduleProps = {
   property: Property;
@@ -42,7 +45,60 @@ function PropertyScheduleViewing({
   const [timeSelection, setTimeSelection] = useState<string>("");
   const [customTime, setCustomTime] = useState<string>("");
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const effectiveTime = timeSelection === "custom" ? customTime : timeSelection;
+  const { user } = useAppStore();
+
+  const handleScheduleViewing = async () => {
+    if (!selectedDate || !effectiveTime) return;
+    if (!property.id) {
+      toast.error("Property ID missing. Please refresh and try again.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const viewingDateISO = selectedDate.toISOString();
+
+      await mutate({
+        action: "createWithId",
+        path: `properties/${property.id}/viewings`,
+        data: {
+          propertyId: property.id,
+          propertyTitle: property.title,
+          date: viewingDateISO,
+          time: effectiveTime,
+          tourType,
+          contactName: property.contactName ?? null,
+          contactEmail: property.contactInfo?.email ?? null,
+          contactPhone: property.contactInfo?.phone ?? null,
+          requestedBy: user
+            ? {
+                uid: user.uid,
+                name: user.name,
+                email: user.email,
+              }
+            : null,
+        },
+        actionBy: user?.uid || "public-viewing-request",
+      });
+
+      toast.success("Viewing request submitted. We'll contact you soon.");
+
+      // Optional: reset selection after successful submit
+      setSelectedDate(undefined);
+      setTimeSelection("");
+      setCustomTime("");
+      setTourType("in-person");
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to schedule viewing:", error);
+      toast.error("Failed to schedule viewing. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <motion.div
@@ -243,17 +299,10 @@ function PropertyScheduleViewing({
 
             <Button
               className="w-full bg-primary hover:bg-primary/90"
-              onClick={() => {
-                // eslint-disable-next-line no-console
-                console.log("Schedule appointment", {
-                  date: selectedDate,
-                  time: effectiveTime,
-                  tourType,
-                });
-              }}
-              disabled={!selectedDate || !effectiveTime}
+              onClick={handleScheduleViewing}
+              disabled={!selectedDate || !effectiveTime || isSubmitting}
             >
-              Schedule Appointment
+              {isSubmitting ? "Scheduling..." : "Schedule Appointment"}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
