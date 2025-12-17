@@ -21,7 +21,7 @@ export default function AppointmentsPage() {
   const isAuthenticated = useRequireAuth("Please sign in to view your appointments");
   const searchParams = useSearchParams();
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return null;
   }
 
@@ -80,8 +80,8 @@ export default function AppointmentsPage() {
   const allAppointments = Array.isArray(data) ? data : [];
 
   const userAppointments = useMemo(
-    () => allAppointments.filter((appt) => appt?.requestedBy?.uid === user.uid),
-    [allAppointments, user.uid],
+    () => allAppointments.filter((appt) => appt?.requestedBy?.uid === user?.uid),
+    [allAppointments, user?.uid],
   );
 
   const filteredAppointments = useMemo(() => {
