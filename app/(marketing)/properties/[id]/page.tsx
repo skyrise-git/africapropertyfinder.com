@@ -375,7 +375,7 @@ export default function PropertyDetailPage() {
             >
               {/* Main Image */}
               <div
-                className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-xl overflow-hidden bg-muted cursor-pointer group"
+                className="relative w-full h-[300px] md:h-[400px] lg:h-[450px] rounded-xl overflow-hidden bg-muted cursor-pointer group"
                 onClick={() => handleOpenGallery(0)}
               >
                 <img
