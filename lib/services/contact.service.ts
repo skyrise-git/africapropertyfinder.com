@@ -4,6 +4,7 @@ import type {
   Contact,
   ContactInput,
   ContactUpdateInput,
+  ContactStatus,
 } from "@/lib/types/contact.type";
 
 class ContactService {
