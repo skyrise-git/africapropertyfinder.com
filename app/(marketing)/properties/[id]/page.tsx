@@ -363,132 +363,221 @@ export default function PropertyDetailPage() {
         </Link>
       </motion.div>
 
-      {/* Image Gallery - Split Layout */}
-      {images.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-2 md:gap-3 h-[400px] md:h-[500px] lg:h-[600px]"
-        >
-          {/* Main Image - Left Side */}
-          <div
-            className="relative lg:col-span-2 rounded-xl overflow-hidden bg-muted cursor-pointer group"
-            onClick={() => handleOpenGallery(0)}
-          >
-            <img
-              src={images[0].url}
-              alt={`${property.title} - Main image`}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-            {/* Badges Overlay - Top Left */}
-            <div className="absolute top-4 left-4 flex flex-col gap-2">
-              <Badge
-                variant="destructive"
-                className="bg-destructive/90 backdrop-blur-sm font-semibold uppercase text-xs"
+      {/* Image Gallery and Contact Info Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Side - Image Gallery */}
+        <div className="lg:col-span-2 space-y-3">
+          {images.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-3"
+            >
+              {/* Main Image */}
+              <div
+                className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-xl overflow-hidden bg-muted cursor-pointer group"
+                onClick={() => handleOpenGallery(0)}
               >
-                {listingTypeLabel[property.listingType]}
-              </Badge>
-            </div>
+                <img
+                  src={images[0].url}
+                  alt={`${property.title} - Main image`}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-            {/* Property Details Overlay - Bottom */}
-            <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm p-4 md:p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <div className="flex items-center gap-2 text-white">
-                  <BedDouble className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
-                  <div>
-                    <div className="text-lg md:text-xl font-bold">
-                      {property.numBedrooms}
-                    </div>
-                    <div className="text-xs md:text-sm text-white/80">
-                      Bedrooms
-                    </div>
-                  </div>
+                {/* Badges Overlay - Top Left */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  <Badge
+                    variant="destructive"
+                    className="bg-destructive/90 backdrop-blur-sm font-semibold uppercase text-xs"
+                  >
+                    {listingTypeLabel[property.listingType]}
+                  </Badge>
                 </div>
-                <div className="flex items-center gap-2 text-white">
-                  <Bath className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
-                  <div>
-                    <div className="text-lg md:text-xl font-bold">
-                      {property.numBathrooms}
+
+                {/* Property Details Overlay - Bottom */}
+                <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm p-4 md:p-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div className="flex items-center gap-2 text-white">
+                      <BedDouble className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
+                      <div>
+                        <div className="text-lg md:text-xl font-bold">
+                          {property.numBedrooms}
+                        </div>
+                        <div className="text-xs md:text-sm text-white/80">
+                          Bedrooms
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs md:text-sm text-white/80">
-                      Bathrooms
+                    <div className="flex items-center gap-2 text-white">
+                      <Bath className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
+                      <div>
+                        <div className="text-lg md:text-xl font-bold">
+                          {property.numBathrooms}
+                        </div>
+                        <div className="text-xs md:text-sm text-white/80">
+                          Bathrooms
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-white">
-                  <Maximize2 className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
-                  <div>
-                    <div className="text-lg md:text-xl font-bold">
-                      {property.area
-                        ? `${property.area.toLocaleString("en-US")}`
-                        : "—"}
+                    <div className="flex items-center gap-2 text-white">
+                      <Maximize2 className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
+                      <div>
+                        <div className="text-lg md:text-xl font-bold">
+                          {property.area
+                            ? `${property.area.toLocaleString("en-US")}`
+                            : "—"}
+                        </div>
+                        <div className="text-xs md:text-sm text-white/80">
+                          sq ft
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs md:text-sm text-white/80">
-                      sq ft
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-white">
-                  <Calendar className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
-                  <div>
-                    <div className="text-lg md:text-xl font-bold">
-                      {new Date(property.createdAt).getFullYear()}
-                    </div>
-                    <div className="text-xs md:text-sm text-white/80">
-                      Built
+                    <div className="flex items-center gap-2 text-white">
+                      <Calendar className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
+                      <div>
+                        <div className="text-lg md:text-xl font-bold">
+                          {new Date(property.createdAt).getFullYear()}
+                        </div>
+                        <div className="text-xs md:text-sm text-white/80">
+                          Built
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Thumbnail Grid - Right Side (2x2) */}
-          <div className="grid grid-cols-2 gap-2 md:gap-3">
-            {images.slice(1, 5).map((image, index) => {
-              const actualIndex = index + 1;
-              return (
-                <button
-                  key={image.fileKey || actualIndex}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenGallery(actualIndex);
-                  }}
-                  className="relative rounded-xl overflow-hidden bg-muted cursor-pointer group aspect-square"
-                  aria-label={`View image ${actualIndex + 1}`}
-                >
-                  <img
-                    src={image.url}
-                    alt={`${property.title} - Image ${actualIndex + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                </button>
-              );
-            })}
-            {/* Show "View All" placeholder if there are more than 5 images */}
-            {images.length > 5 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenGallery();
-                }}
-                className="relative rounded-xl overflow-hidden bg-muted/50 border-2 border-dashed border-border cursor-pointer group aspect-square flex items-center justify-center hover:bg-muted transition-colors"
-                aria-label="View all images"
-              >
-                <div className="text-center p-4">
-                  <div className="text-2xl font-bold text-muted-foreground mb-1">
-                    +{images.length - 5}
-                  </div>
-                  <div className="text-xs text-muted-foreground">More</div>
+              {/* Thumbnail Grid - Show up to 4 more images */}
+              {images.length > 1 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {images.slice(1, 5).map((image, index) => {
+                    const actualIndex = index + 1;
+                    const remainingCount = images.length - (actualIndex + 1);
+                    return (
+                      <button
+                        key={image.fileKey || actualIndex}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenGallery(actualIndex);
+                        }}
+                        className="relative rounded-xl overflow-hidden bg-muted cursor-pointer group aspect-square"
+                        aria-label={`View image ${actualIndex + 1}`}
+                      >
+                        <img
+                          src={image.url}
+                          alt={`${property.title} - Image ${actualIndex + 1}`}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                        {/* Show "+X more" overlay if there are more images */}
+                        {remainingCount > 0 && index === 3 && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <div className="text-white text-lg font-bold">
+                              +{remainingCount} more
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-              </button>
-            )}
+              )}
+            </motion.div>
+          )}
+        </div>
+
+        {/* Right Side - Sticky Contact Info */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contact Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground">
+                      Contact Name
+                    </div>
+                    <div className="font-semibold">{property.contactName}</div>
+                  </div>
+
+                  {property.contactInfo.phone && (
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Phone
+                      </div>
+                      <a
+                        href={`tel:${property.contactInfo.phone}`}
+                        className="flex items-center gap-2 text-primary hover:underline"
+                      >
+                        <Phone className="h-4 w-4" />
+                        {property.contactInfo.phone}
+                      </a>
+                    </div>
+                  )}
+
+                  {property.contactInfo.email && (
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Email
+                      </div>
+                      <a
+                        href={`mailto:${property.contactInfo.email}`}
+                        className="flex items-center gap-2 text-primary hover:underline"
+                      >
+                        <Mail className="h-4 w-4" />
+                        {property.contactInfo.email}
+                      </a>
+                    </div>
+                  )}
+
+                  {property.preferredContactMethod.length > 0 && (
+                    <div>
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Preferred Contact Method
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {property.preferredContactMethod.map((method) => (
+                          <Badge
+                            key={method}
+                            variant="secondary"
+                            className="capitalize"
+                          >
+                            {method}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {property.viewingAvailability && (
+                    <>
+                      <Separator />
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-2">
+                          Viewing Availability
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-primary" />
+                          <span className="text-sm">
+                            {property.viewingAvailability}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
-        </motion.div>
-      )}
+        </div>
+      </div>
 
       {/* Gallery Lightbox Modal */}
       <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
@@ -643,6 +732,7 @@ export default function PropertyDetailPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Main Content Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -1063,93 +1153,6 @@ export default function PropertyDetailPage() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Contact Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="text-sm text-muted-foreground">
-                    Contact Name
-                  </div>
-                  <div className="font-semibold">{property.contactName}</div>
-                </div>
-
-                {property.contactInfo.phone && (
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      Phone
-                    </div>
-                    <a
-                      href={`tel:${property.contactInfo.phone}`}
-                      className="flex items-center gap-2 text-primary hover:underline"
-                    >
-                      <Phone className="h-4 w-4" />
-                      {property.contactInfo.phone}
-                    </a>
-                  </div>
-                )}
-
-                {property.contactInfo.email && (
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      Email
-                    </div>
-                    <a
-                      href={`mailto:${property.contactInfo.email}`}
-                      className="flex items-center gap-2 text-primary hover:underline"
-                    >
-                      <Mail className="h-4 w-4" />
-                      {property.contactInfo.email}
-                    </a>
-                  </div>
-                )}
-
-                {property.preferredContactMethod.length > 0 && (
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      Preferred Contact Method
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {property.preferredContactMethod.map((method) => (
-                        <Badge
-                          key={method}
-                          variant="secondary"
-                          className="capitalize"
-                        >
-                          {method}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {property.viewingAvailability && (
-                  <>
-                    <Separator />
-                    <div>
-                      <div className="text-sm text-muted-foreground mb-2">
-                        Viewing Availability
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        <span className="text-sm">
-                          {property.viewingAvailability}
-                        </span>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-
           {/* Additional Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
