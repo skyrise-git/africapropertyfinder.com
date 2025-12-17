@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useAppStore } from "@/hooks/use-app-store";
-import { LogOut, Settings, LifeBuoy, Home } from "lucide-react";
+import { LogOut, Settings, LifeBuoy, Home, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -98,6 +98,16 @@ export function MarketingProfileDropdown() {
               <Link href="/properties/my-properties">
                 <Home className="mr-2 h-4 w-4" />
                 My Properties
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start h-9"
+              asChild
+            >
+              <Link href="/saved-properties">
+                <Heart className="mr-2 h-4 w-4" />
+                Saved Properties
               </Link>
             </Button>
             <Button

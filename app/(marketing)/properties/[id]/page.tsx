@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "motion/react";
 import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
@@ -15,7 +14,6 @@ import { PropertyDetailError } from "./_components/property-detail-error";
 export default function PropertyDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const [isSaved, setIsSaved] = useState(false);
 
   const { data, loading, error } = useFirebaseRealtime<Property>(
     `properties/${id}`,
@@ -45,10 +43,6 @@ export default function PropertyDetailPage() {
     }
   };
 
-  const handleSave = () => {
-    setIsSaved((prev) => !prev);
-  };
-
   if (loading) {
     return <PropertyDetailLoading />;
   }
@@ -63,12 +57,7 @@ export default function PropertyDetailPage() {
       animate={{ opacity: 1 }}
       className="container mx-auto max-w-7xl p-4 md:p-6 space-y-6"
     >
-      <PropertyHeader
-        property={property}
-        isSaved={isSaved}
-        onToggleSave={handleSave}
-        onShare={handleShare}
-      />
+      <PropertyHeader property={property} onShare={handleShare} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">

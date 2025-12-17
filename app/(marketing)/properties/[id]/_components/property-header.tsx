@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
@@ -17,26 +18,69 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAppStore } from "@/hooks/use-app-store";
+import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
 import { propertyService } from "@/lib/services/property.service";
+import { savedPropertyService } from "@/lib/services/saved-property.service";
 import { toast } from "sonner";
 import type { Property } from "@/lib/types/property.type";
+import type { SavedProperty } from "@/lib/types/saved-property.type";
 
 type PropertyHeaderProps = {
   property: Property;
-  isSaved: boolean;
-  onToggleSave: () => void;
   onShare: () => void;
 };
 
-export function PropertyHeader({
-  property,
-  isSaved,
-  onToggleSave,
-  onShare,
-}: PropertyHeaderProps) {
+export function PropertyHeader({ property, onShare }: PropertyHeaderProps) {
   const router = useRouter();
   const { user } = useAppStore();
   const isOwner = user?.uid === property.userId;
+
+  // Get all saved properties for the current user
+  const { data: savedPropertiesData } = useFirebaseRealtime<SavedProperty>(
+    "savedProperties",
+    {
+      asArray: true,
+      enabled: !!user,
+    }
+  );
+
+  const savedProperties = (savedPropertiesData as SavedProperty[]) || [];
+
+  // Check if current property is saved
+  const isSaved = useMemo(() => {
+    if (!user) return false;
+    return savedProperties.some(
+      (sp) => sp.userId === user.uid && sp.propertyId === property.id
+    );
+  }, [savedProperties, user, property.id]);
+
+  const handleToggleSave = async () => {
+    if (!user) {
+      toast.error("Please sign in to save properties");
+      router.push("/signin");
+      return;
+    }
+
+    try {
+      if (isSaved) {
+        await savedPropertyService.unsave(user.uid, property.id);
+        toast.success("Property removed from saved");
+      } else {
+        await savedPropertyService.save({
+          userId: user.uid,
+          propertyId: property.id,
+        });
+        toast.success("Property saved successfully");
+      }
+    } catch (error) {
+      console.error("Error toggling save:", error);
+      toast.error(
+        isSaved
+          ? "Failed to unsave property"
+          : "Failed to save property. Please try again."
+      );
+    }
+  };
 
   const handleDelete = async () => {
     try {
@@ -75,7 +119,11 @@ export function PropertyHeader({
             </Link>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 text-destructive hover:text-destructive">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 text-destructive hover:text-destructive"
+                >
                   <Trash2 className="h-4 w-4" />
                   Delete
                 </Button>
@@ -106,7 +154,7 @@ export function PropertyHeader({
             <Button
               variant="outline"
               size="sm"
-              onClick={onToggleSave}
+              onClick={handleToggleSave}
               className="gap-2"
             >
               <Heart
@@ -131,5 +179,3 @@ export function PropertyHeader({
     </motion.div>
   );
 }
-
-
