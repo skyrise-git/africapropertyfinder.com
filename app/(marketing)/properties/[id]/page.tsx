@@ -46,6 +46,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogOverlay,
 } from "@/components/ui/dialog";
 import { useState, useEffect, useCallback } from "react";
@@ -79,7 +81,9 @@ function formatPrice(property: Property) {
     try {
       const formatted = formatCurrency(property.rent, "USD");
       return `${formatted}${
-        property.paymentFrequency ? ` / ${property.paymentFrequency}` : " / monthly"
+        property.paymentFrequency
+          ? ` / ${property.paymentFrequency}`
+          : " / monthly"
       }`;
     } catch {
       const formatted = new Intl.NumberFormat("en-US", {
@@ -89,7 +93,9 @@ function formatPrice(property: Property) {
         maximumFractionDigits: 0,
       }).format(property.rent);
       return `${formatted}${
-        property.paymentFrequency ? ` / ${property.paymentFrequency}` : " / monthly"
+        property.paymentFrequency
+          ? ` / ${property.paymentFrequency}`
+          : " / monthly"
       }`;
     }
   }
@@ -115,7 +121,7 @@ export default function PropertyDetailPage() {
   const property = data ? ({ ...data, id } as Property) : null;
 
   const images = property?.images || [];
-  
+
   // Reset image index when images change or if index is out of bounds
   useEffect(() => {
     if (images.length > 0 && currentImageIndex >= images.length) {
@@ -124,7 +130,10 @@ export default function PropertyDetailPage() {
   }, [images.length, currentImageIndex]);
 
   // Ensure currentImageIndex is within bounds
-  const safeImageIndex = Math.max(0, Math.min(currentImageIndex, images.length - 1));
+  const safeImageIndex = Math.max(
+    0,
+    Math.min(currentImageIndex, images.length - 1)
+  );
   const currentImage = images[safeImageIndex];
 
   const handlePreviousImage = () => {
@@ -183,13 +192,17 @@ export default function PropertyDetailPage() {
       switch (e.key) {
         case "ArrowLeft":
           e.preventDefault();
-          setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+          setCurrentImageIndex((prev) =>
+            prev > 0 ? prev - 1 : images.length - 1
+          );
           setZoomLevel(1);
           setImagePosition({ x: 0, y: 0 });
           break;
         case "ArrowRight":
           e.preventDefault();
-          setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+          setCurrentImageIndex((prev) =>
+            prev < images.length - 1 ? prev + 1 : 0
+          );
           setZoomLevel(1);
           setImagePosition({ x: 0, y: 0 });
           break;
@@ -219,21 +232,30 @@ export default function PropertyDetailPage() {
   }, [isGalleryOpen, images.length]);
 
   // Mouse drag for panning when zoomed
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (zoomLevel > 1) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y });
-    }
-  }, [zoomLevel, imagePosition]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (zoomLevel > 1) {
+        setIsDragging(true);
+        setDragStart({
+          x: e.clientX - imagePosition.x,
+          y: e.clientY - imagePosition.y,
+        });
+      }
+    },
+    [zoomLevel, imagePosition]
+  );
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (isDragging && zoomLevel > 1) {
-      setImagePosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      });
-    }
-  }, [isDragging, zoomLevel, dragStart]);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (isDragging && zoomLevel > 1) {
+        setImagePosition({
+          x: e.clientX - dragStart.x,
+          y: e.clientY - dragStart.y,
+        });
+      }
+    },
+    [isDragging, zoomLevel, dragStart]
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -248,18 +270,21 @@ export default function PropertyDetailPage() {
   }, [currentImageIndex, isGalleryOpen]);
 
   // Mouse wheel zoom
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (!isGalleryOpen) return;
-    e.preventDefault();
-    
-    if (e.deltaY < 0) {
-      // Zoom in
-      setZoomLevel((prev) => Math.min(prev + 0.1, 3));
-    } else {
-      // Zoom out
-      setZoomLevel((prev) => Math.max(prev - 0.1, 0.5));
-    }
-  }, [isGalleryOpen]);
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      if (!isGalleryOpen) return;
+      e.preventDefault();
+
+      if (e.deltaY < 0) {
+        // Zoom in
+        setZoomLevel((prev) => Math.min(prev + 0.1, 3));
+      } else {
+        // Zoom out
+        setZoomLevel((prev) => Math.max(prev - 0.1, 0.5));
+      }
+    },
+    [isGalleryOpen]
+  );
 
   if (loading) {
     return (
@@ -459,6 +484,12 @@ export default function PropertyDetailPage() {
           className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-0"
           showCloseButton={true}
         >
+          <DialogHeader className="sr-only">
+            <DialogTitle>
+              {property.title} - Image Gallery ({safeImageIndex + 1} of{" "}
+              {images.length})
+            </DialogTitle>
+          </DialogHeader>
           <div className="relative w-full h-full flex items-center justify-center">
             {/* Close Button */}
             <Button
@@ -554,8 +585,15 @@ export default function PropertyDetailPage() {
                 alt={`${property.title} - Image ${safeImageIndex + 1}`}
                 className="max-w-full max-h-full object-contain select-none"
                 style={{
-                  transform: `scale(${zoomLevel}) translate(${imagePosition.x / zoomLevel}px, ${imagePosition.y / zoomLevel}px)`,
-                  cursor: zoomLevel > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+                  transform: `scale(${zoomLevel}) translate(${
+                    imagePosition.x / zoomLevel
+                  }px, ${imagePosition.y / zoomLevel}px)`,
+                  cursor:
+                    zoomLevel > 1
+                      ? isDragging
+                        ? "grabbing"
+                        : "grab"
+                      : "default",
                   transition: isDragging ? "none" : "transform 0.2s ease-out",
                 }}
                 draggable={false}
@@ -664,13 +702,17 @@ export default function PropertyDetailPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-sm text-muted-foreground">Property Type</div>
+                    <div className="text-sm text-muted-foreground">
+                      Property Type
+                    </div>
                     <div className="font-semibold capitalize">
                       {property.propertyType.replace("-", " ")}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Furnishing</div>
+                    <div className="text-sm text-muted-foreground">
+                      Furnishing
+                    </div>
                     <div className="font-semibold capitalize">
                       {property.furnishing.replace("-", " ")}
                     </div>
@@ -686,7 +728,9 @@ export default function PropertyDetailPage() {
                   )}
                   {property.availableFrom && (
                     <div>
-                      <div className="text-sm text-muted-foreground">Available From</div>
+                      <div className="text-sm text-muted-foreground">
+                        Available From
+                      </div>
                       <div className="font-semibold">
                         {new Date(property.availableFrom).toLocaleDateString()}
                       </div>
@@ -710,7 +754,8 @@ export default function PropertyDetailPage() {
                           </span>
                         </div>
                       )}
-                      {property.sharingDetails.currentOccupants !== undefined && (
+                      {property.sharingDetails.currentOccupants !==
+                        undefined && (
                         <div className="text-sm text-muted-foreground ml-6">
                           Current Occupants:{" "}
                           {property.sharingDetails.currentOccupants}
@@ -745,7 +790,9 @@ export default function PropertyDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-3xl font-bold">{formatPrice(property)}</div>
+                <div className="text-3xl font-bold">
+                  {formatPrice(property)}
+                </div>
                 {property.securityDeposit && (
                   <div>
                     <div className="text-sm text-muted-foreground">
@@ -754,7 +801,10 @@ export default function PropertyDetailPage() {
                     <div className="font-semibold">
                       {(() => {
                         try {
-                          return formatCurrency(property.securityDeposit, "USD");
+                          return formatCurrency(
+                            property.securityDeposit,
+                            "USD"
+                          );
                         } catch {
                           return new Intl.NumberFormat("en-US", {
                             style: "currency",
@@ -769,7 +819,9 @@ export default function PropertyDetailPage() {
                 )}
                 {property.leaseLength && (
                   <div>
-                    <div className="text-sm text-muted-foreground">Lease Length</div>
+                    <div className="text-sm text-muted-foreground">
+                      Lease Length
+                    </div>
                     <div className="font-semibold">
                       {property.leaseLength} months
                     </div>
@@ -777,11 +829,11 @@ export default function PropertyDetailPage() {
                 )}
                 {property.utilitiesIncluded !== undefined && (
                   <div>
-                    <div className="text-sm text-muted-foreground">Utilities</div>
+                    <div className="text-sm text-muted-foreground">
+                      Utilities
+                    </div>
                     <div className="font-semibold">
-                      {property.utilitiesIncluded
-                        ? "Included"
-                        : "Not Included"}
+                      {property.utilitiesIncluded ? "Included" : "Not Included"}
                     </div>
                   </div>
                 )}
@@ -853,7 +905,8 @@ export default function PropertyDetailPage() {
                         <Ban className="h-4 w-4 text-red-600" />
                       )}
                       <span className="text-sm">
-                        Smoking: {property.smokingAllowed ? "Allowed" : "Not Allowed"}
+                        Smoking:{" "}
+                        {property.smokingAllowed ? "Allowed" : "Not Allowed"}
                       </span>
                     </div>
                   )}
@@ -877,7 +930,8 @@ export default function PropertyDetailPage() {
                         <Ban className="h-4 w-4 text-red-600" />
                       )}
                       <span className="text-sm">
-                        Guests: {property.guestsAllowed ? "Allowed" : "Not Allowed"}
+                        Guests:{" "}
+                        {property.guestsAllowed ? "Allowed" : "Not Allowed"}
                       </span>
                     </div>
                   )}
@@ -902,7 +956,8 @@ export default function PropertyDetailPage() {
                         <Ban className="h-4 w-4 text-red-600" />
                       )}
                       <span className="text-sm">
-                        Parties: {property.partiesAllowed ? "Allowed" : "Not Allowed"}
+                        Parties:{" "}
+                        {property.partiesAllowed ? "Allowed" : "Not Allowed"}
                       </span>
                     </div>
                   )}
@@ -938,7 +993,9 @@ export default function PropertyDetailPage() {
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <div className="text-sm text-muted-foreground">Address</div>
+                      <div className="text-sm text-muted-foreground">
+                        Address
+                      </div>
                       <div className="font-semibold">
                         {property.address}, {property.city}, {property.state}{" "}
                         {property.zipCode}
@@ -1006,13 +1063,17 @@ export default function PropertyDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <div className="text-sm text-muted-foreground">Contact Name</div>
+                  <div className="text-sm text-muted-foreground">
+                    Contact Name
+                  </div>
                   <div className="font-semibold">{property.contactName}</div>
                 </div>
 
                 {property.contactInfo.phone && (
                   <div>
-                    <div className="text-sm text-muted-foreground mb-2">Phone</div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      Phone
+                    </div>
                     <a
                       href={`tel:${property.contactInfo.phone}`}
                       className="flex items-center gap-2 text-primary hover:underline"
@@ -1025,7 +1086,9 @@ export default function PropertyDetailPage() {
 
                 {property.contactInfo.email && (
                   <div>
-                    <div className="text-sm text-muted-foreground mb-2">Email</div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      Email
+                    </div>
                     <a
                       href={`mailto:${property.contactInfo.email}`}
                       className="flex items-center gap-2 text-primary hover:underline"
@@ -1043,7 +1106,11 @@ export default function PropertyDetailPage() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {property.preferredContactMethod.map((method) => (
-                        <Badge key={method} variant="secondary" className="capitalize">
+                        <Badge
+                          key={method}
+                          variant="secondary"
+                          className="capitalize"
+                        >
                           {method}
                         </Badge>
                       ))}
@@ -1060,7 +1127,9 @@ export default function PropertyDetailPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-primary" />
-                        <span className="text-sm">{property.viewingAvailability}</span>
+                        <span className="text-sm">
+                          {property.viewingAvailability}
+                        </span>
                       </div>
                     </div>
                   </>
@@ -1106,4 +1175,3 @@ export default function PropertyDetailPage() {
     </motion.div>
   );
 }
-
