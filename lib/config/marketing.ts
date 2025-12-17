@@ -137,6 +137,11 @@ export const marketingSite = {
         { label: "List Your Property", href: "/properties/create" },
         { label: "My Saved Properties", href: "/saved-properties" },
       ],
+      categories: [
+        { label: "Buy Property", href: "/properties?listingType=sale" },
+        { label: "Sell Property", href: "/properties?listingType=sale" },
+        { label: "Rent Property", href: "/properties?listingType=rent" },
+      ],
       company: [
         { label: "Contact Us", href: "/contact" },
         { label: "Blogs", href: "/blogs" },

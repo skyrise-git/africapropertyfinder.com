@@ -66,7 +66,7 @@ export function MarketingFooter() {
       {/* Main Footer Links */}
       <div className="border-b">
         <div className="mx-auto max-w-6xl px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Company Information */}
             <div className="space-y-4">
               <p className="text-sm text-foreground font-medium">
@@ -108,6 +108,25 @@ export function MarketingFooter() {
               </h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 {marketingSite.footer.links.properties.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Categories */}
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">
+                Categories
+              </h4>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                {marketingSite.footer.links.categories.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
