@@ -15,7 +15,12 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Property } from "@/lib/types/property.type";
 
 type PropertyImage = NonNullable<Property["images"]>[number];
@@ -45,7 +50,10 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
     }
   }, [images.length, currentImageIndex]);
 
-  const safeImageIndex = Math.max(0, Math.min(currentImageIndex, images.length - 1));
+  const safeImageIndex = Math.max(
+    0,
+    Math.min(currentImageIndex, images.length - 1)
+  );
   const currentImage = images[safeImageIndex];
 
   const handleOpenGallery = (index?: number) => {
@@ -96,7 +104,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
         case "ArrowLeft":
           e.preventDefault();
           setCurrentImageIndex((prev) =>
-            prev > 0 ? prev - 1 : images.length - 1,
+            prev > 0 ? prev - 1 : images.length - 1
           );
           setZoomLevel(1);
           setImagePosition({ x: 0, y: 0 });
@@ -104,7 +112,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
         case "ArrowRight":
           e.preventDefault();
           setCurrentImageIndex((prev) =>
-            prev < images.length - 1 ? prev + 1 : 0,
+            prev < images.length - 1 ? prev + 1 : 0
           );
           setZoomLevel(1);
           setImagePosition({ x: 0, y: 0 });
@@ -144,7 +152,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
         });
       }
     },
-    [zoomLevel, imagePosition],
+    [zoomLevel, imagePosition]
   );
 
   const handleMouseMove = useCallback(
@@ -156,7 +164,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
         });
       }
     },
-    [isDragging, zoomLevel, dragStart],
+    [isDragging, zoomLevel, dragStart]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -181,7 +189,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
         setZoomLevel((prev) => Math.max(prev - 0.1, 0.5));
       }
     },
-    [isGalleryOpen],
+    [isGalleryOpen]
   );
 
   if (images.length === 0) return null;
@@ -194,7 +202,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
         className="space-y-3"
       >
         <div
-          className="relative w-full h-[300px] md:h-[400px] lg:h-[450px] rounded-xl overflow-hidden bg-muted cursor-pointer group"
+          className="relative w-full h-[360px] md:h-[480px] lg:h-[540px] rounded-xl overflow-hidden bg-muted cursor-pointer group"
           onClick={() => handleOpenGallery(0)}
         >
           <img
@@ -221,7 +229,9 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
                   <div className="text-lg md:text-xl font-bold">
                     {property.numBedrooms}
                   </div>
-                  <div className="text-xs md:text-sm text-white/80">Bedrooms</div>
+                  <div className="text-xs md:text-sm text-white/80">
+                    Bedrooms
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-white">
@@ -230,14 +240,18 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
                   <div className="text-lg md:text-xl font-bold">
                     {property.numBathrooms}
                   </div>
-                  <div className="text-xs md:text-sm text-white/80">Bathrooms</div>
+                  <div className="text-xs md:text-sm text-white/80">
+                    Bathrooms
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-white">
                 <Maximize2 className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
                 <div>
                   <div className="text-lg md:text-xl font-bold">
-                    {property.area ? `${property.area.toLocaleString("en-US")}` : "—"}
+                    {property.area
+                      ? `${property.area.toLocaleString("en-US")}`
+                      : "—"}
                   </div>
                   <div className="text-xs md:text-sm text-white/80">sq ft</div>
                 </div>
@@ -294,7 +308,8 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
         <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-black/95 border-0">
           <DialogHeader className="sr-only">
             <DialogTitle>
-              {property.title} - Image Gallery ({safeImageIndex + 1} of {images.length})
+              {property.title} - Image Gallery ({safeImageIndex + 1} of{" "}
+              {images.length})
             </DialogTitle>
           </DialogHeader>
           <div className="relative w-full h-full flex items-center justify-center">
@@ -434,5 +449,3 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
     </>
   );
 }
-
-
