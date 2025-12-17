@@ -22,16 +22,22 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/hooks/use-app-store";
 import { MarketingProfileDropdown } from "@/components/core/marketing-profile-dropdown";
 
-const marketingNavLinks = [
-  { label: "Home", href: "/" },
-  { label: "Appointments", href: "/appointments" },
-  { label: "Services", href: "#services" },
-] as const;
-
 export function MarketingNavbar() {
   const [open, setOpen] = useState(false);
   const { theme, resolvedTheme, setTheme } = useTheme();
   const { user } = useAppStore();
+
+  const marketingNavLinks = user
+    ? [
+        { label: "Home", href: "/" },
+        { label: "Appointments", href: "/appointments" },
+        { label: "Services", href: "#services" },
+      ]
+    : [
+        { label: "Home", href: "/" },
+        { label: "Blogs", href: "/blogs" },
+        { label: "Services", href: "#services" },
+      ];
 
   const toggleMenu = () => setOpen((prev) => !prev);
 
