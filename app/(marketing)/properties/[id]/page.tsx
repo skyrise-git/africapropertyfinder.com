@@ -3,17 +3,14 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "motion/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
 import type { Property } from "@/lib/types/property.type";
 import { PropertyHeader } from "./_components/property-header";
 import { PropertyGallery } from "./_components/property-gallery";
 import { PropertyContactAndSchedule } from "./_components/property-contact-and-schedule";
 import { PropertyTabsAndSidebar } from "./_components/property-tabs-and-sidebar";
+import { PropertyDetailLoading } from "./_components/property-detail-loading";
+import { PropertyDetailError } from "./_components/property-detail-error";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -53,45 +50,11 @@ export default function PropertyDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto max-w-7xl p-4 md:p-6 space-y-6">
-        <Skeleton className="h-10 w-32" />
-        <Skeleton className="h-96 w-full" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
-          </div>
-          <div className="space-y-6">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
-          </div>
-        </div>
-      </div>
-    );
+    return <PropertyDetailLoading />;
   }
 
   if (error || !property) {
-    return (
-      <div className="container mx-auto max-w-4xl p-6">
-        <Card>
-          <CardHeader>
-            <h2 className="text-xl font-semibold text-destructive">Error</h2>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              {error?.message || "Property not found"}
-            </p>
-            <Link href="/properties">
-              <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Properties
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <PropertyDetailError message={error?.message} />;
   }
 
   return (

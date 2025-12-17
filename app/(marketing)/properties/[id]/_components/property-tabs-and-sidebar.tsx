@@ -27,7 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import type { Property } from "@/lib/types/property.type";
-import { PropertyMapView } from "../_components/property-map-view";
+import { PropertyMapView } from "../../_components/property-map-view";
 import { formatCurrency } from "@ashirbad/js-core";
 
 type PropertyTabsAndSidebarProps = {
