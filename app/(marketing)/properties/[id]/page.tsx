@@ -363,118 +363,130 @@ export default function PropertyDetailPage() {
         </Link>
       </motion.div>
 
-      {/* Image Gallery */}
-      {images.length > 0 && currentImage && (
+      {/* Image Gallery - Split Layout */}
+      {images.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-xl overflow-hidden bg-muted cursor-pointer group"
-          onClick={() => handleOpenGallery()}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-2 md:gap-3 h-[400px] md:h-[500px] lg:h-[600px]"
         >
-          <img
-            src={currentImage.url}
-            alt={`${property.title} - Image ${safeImageIndex + 1}`}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium">
-              Click to view gallery
+          {/* Main Image - Left Side */}
+          <div
+            className="relative lg:col-span-2 rounded-xl overflow-hidden bg-muted cursor-pointer group"
+            onClick={() => handleOpenGallery(0)}
+          >
+            <img
+              src={images[0].url}
+              alt={`${property.title} - Main image`}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+            {/* Badges Overlay - Top Left */}
+            <div className="absolute top-4 left-4 flex flex-col gap-2">
+              <Badge
+                variant="destructive"
+                className="bg-destructive/90 backdrop-blur-sm font-semibold uppercase text-xs"
+              >
+                {listingTypeLabel[property.listingType]}
+              </Badge>
+            </div>
+
+            {/* Property Details Overlay - Bottom */}
+            <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm p-4 md:p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div className="flex items-center gap-2 text-white">
+                  <BedDouble className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
+                  <div>
+                    <div className="text-lg md:text-xl font-bold">
+                      {property.numBedrooms}
+                    </div>
+                    <div className="text-xs md:text-sm text-white/80">
+                      Bedrooms
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-white">
+                  <Bath className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
+                  <div>
+                    <div className="text-lg md:text-xl font-bold">
+                      {property.numBathrooms}
+                    </div>
+                    <div className="text-xs md:text-sm text-white/80">
+                      Bathrooms
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-white">
+                  <Maximize2 className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
+                  <div>
+                    <div className="text-lg md:text-xl font-bold">
+                      {property.area
+                        ? `${property.area.toLocaleString("en-US")}`
+                        : "—"}
+                    </div>
+                    <div className="text-xs md:text-sm text-white/80">
+                      sq ft
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-white">
+                  <Calendar className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
+                  <div>
+                    <div className="text-lg md:text-xl font-bold">
+                      {new Date(property.createdAt).getFullYear()}
+                    </div>
+                    <div className="text-xs md:text-sm text-white/80">
+                      Built
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Image Navigation */}
-          {images.length > 1 && (
-            <>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
-                onClick={handlePreviousImage}
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
-                onClick={handleNextImage}
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-
-              {/* Image Indicators */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {images.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`h-2 rounded-full transition-all ${
-                      index === safeImageIndex
-                        ? "w-8 bg-white"
-                        : "w-2 bg-white/50 hover:bg-white/75"
-                    }`}
-                    aria-label={`Go to image ${index + 1}`}
+          {/* Thumbnail Grid - Right Side (2x2) */}
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
+            {images.slice(1, 5).map((image, index) => {
+              const actualIndex = index + 1;
+              return (
+                <button
+                  key={image.fileKey || actualIndex}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenGallery(actualIndex);
+                  }}
+                  className="relative rounded-xl overflow-hidden bg-muted cursor-pointer group aspect-square"
+                  aria-label={`View image ${actualIndex + 1}`}
+                >
+                  <img
+                    src={image.url}
+                    alt={`${property.title} - Image ${actualIndex + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
-                ))}
-              </div>
-
-              {/* Image Counter */}
-              <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-md text-sm">
-                {safeImageIndex + 1} / {images.length}
-              </div>
-            </>
-          )}
-
-          {/* Badges Overlay */}
-          <div className="absolute top-4 left-4 flex flex-col gap-2">
-            <Badge
-              variant="destructive"
-              className="bg-destructive/90 backdrop-blur-sm font-semibold uppercase"
-            >
-              {listingTypeLabel[property.listingType]}
-            </Badge>
-            <Badge className="bg-white/90 backdrop-blur-sm text-foreground font-semibold">
-              {property.propertyType.charAt(0).toUpperCase() +
-                property.propertyType.slice(1)}
-            </Badge>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                </button>
+              );
+            })}
+            {/* Show "View All" placeholder if there are more than 5 images */}
+            {images.length > 5 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenGallery();
+                }}
+                className="relative rounded-xl overflow-hidden bg-muted/50 border-2 border-dashed border-border cursor-pointer group aspect-square flex items-center justify-center hover:bg-muted transition-colors"
+                aria-label="View all images"
+              >
+                <div className="text-center p-4">
+                  <div className="text-2xl font-bold text-muted-foreground mb-1">
+                    +{images.length - 5}
+                  </div>
+                  <div className="text-xs text-muted-foreground">More</div>
+                </div>
+              </button>
+            )}
           </div>
-
-          {/* Price Overlay */}
-          <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
-            <span className="text-2xl font-bold">{formatPrice(property)}</span>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Thumbnail Gallery */}
-      {images.length > 1 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
-        >
-          {images.map((image, index) => (
-            <button
-              key={image.fileKey || index}
-              onClick={() => handleOpenGallery(index)}
-              className={`relative flex-shrink-0 w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                index === safeImageIndex
-                  ? "border-primary ring-2 ring-primary/20"
-                  : "border-border/50 hover:border-primary/50"
-              }`}
-              aria-label={`View image ${index + 1}`}
-            >
-              <img
-                src={image.url}
-                alt={`${property.title} thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-              {index === safeImageIndex && (
-                <div className="absolute inset-0 bg-primary/10" />
-              )}
-            </button>
-          ))}
         </motion.div>
       )}
 
