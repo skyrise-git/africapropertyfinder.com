@@ -11,6 +11,7 @@ import {
   Mail,
   Phone,
   Smartphone,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Property } from "@/lib/types/property.type";
 import { useAppStore } from "@/hooks/use-app-store";
 import { toast } from "sonner";
@@ -46,6 +54,7 @@ function PropertyScheduleViewing({
   const [customTime, setCustomTime] = useState<string>("");
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const effectiveTime = timeSelection === "custom" ? customTime : timeSelection;
   const { user } = useAppStore();
 
@@ -84,9 +93,10 @@ function PropertyScheduleViewing({
         actionBy: user?.uid || "public-viewing-request",
       });
 
-      toast.success("Viewing request submitted. We'll contact you soon.");
+      // Show success dialog
+      setShowSuccessDialog(true);
 
-      // Optional: reset selection after successful submit
+      // Reset selection after successful submit
       setSelectedDate(undefined);
       setTimeSelection("");
       setCustomTime("");
@@ -311,6 +321,33 @@ function PropertyScheduleViewing({
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex size-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                <CheckCircle2 className="size-8 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <DialogTitle className="text-center">
+              Appointment Scheduled Successfully!
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Thank you for scheduling a viewing. We've received your request
+              and will contact you soon to confirm the details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-4">
+            <Button
+              onClick={() => setShowSuccessDialog(false)}
+              className="w-full sm:w-auto"
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
