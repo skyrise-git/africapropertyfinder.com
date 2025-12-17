@@ -56,8 +56,10 @@ export function PropertyHeader({ property, onShare }: PropertyHeaderProps) {
 
   const handleToggleSave = async () => {
     if (!user) {
+      // Store current URL to redirect back after signin
+      const currentUrl = window.location.pathname + window.location.search;
+      router.push(`/signin?redirect=${encodeURIComponent(currentUrl)}`);
       toast.error("Please sign in to save properties");
-      router.push("/signin");
       return;
     }
 
