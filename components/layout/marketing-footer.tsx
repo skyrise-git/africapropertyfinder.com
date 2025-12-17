@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { marketingSite } from "@/lib/config";
 import {
-  Building2,
   Facebook,
   Instagram,
   Linkedin,
@@ -66,12 +66,18 @@ export function MarketingFooter() {
       {/* Main Footer Links */}
       <div className="border-b">
         <div className="mx-auto max-w-6xl px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-8">
             {/* Company Information */}
             <div className="space-y-4">
-              <p className="text-sm text-foreground font-medium">
-                {marketingSite.footer.companyInfo.tagline}
-              </p>
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/logo.png"
+                  alt={marketingSite.title}
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto transition dark:invert dark:brightness-0"
+                />
+              </Link>
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
