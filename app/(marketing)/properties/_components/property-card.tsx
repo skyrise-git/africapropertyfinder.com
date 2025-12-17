@@ -1,6 +1,13 @@
 "use client";
 
-import { MapPin, BedDouble, Bath, Home, Maximize2, PawPrint } from "lucide-react";
+import {
+  MapPin,
+  BedDouble,
+  Bath,
+  Home,
+  Maximize2,
+  PawPrint,
+} from "lucide-react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { formatCurrency } from "@ashirbad/js-core";
@@ -14,13 +21,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Property } from "@/lib/types/property.type";
-import { cn } from "@/lib/utils";
 
 interface PropertyCardProps {
   property: Property;
   href?: string;
-  onHoverChange?: (hovered: boolean) => void;
-  isHighlighted?: boolean;
 }
 
 const listingTypeLabel: Record<Property["listingType"], string> = {
@@ -52,7 +56,9 @@ function formatPrice(property: Property) {
     try {
       const formatted = formatCurrency(property.rent, "USD");
       return `${formatted}${
-        property.paymentFrequency ? ` / ${property.paymentFrequency}` : " / monthly"
+        property.paymentFrequency
+          ? ` / ${property.paymentFrequency}`
+          : " / monthly"
       }`;
     } catch {
       // Fallback if formatCurrency is not available
@@ -63,7 +69,9 @@ function formatPrice(property: Property) {
         maximumFractionDigits: 0,
       }).format(property.rent);
       return `${formatted}${
-        property.paymentFrequency ? ` / ${property.paymentFrequency}` : " / monthly"
+        property.paymentFrequency
+          ? ` / ${property.paymentFrequency}`
+          : " / monthly"
       }`;
     }
   }
@@ -71,12 +79,7 @@ function formatPrice(property: Property) {
   return "Price on request";
 }
 
-export function PropertyCard({
-  property,
-  href,
-  onHoverChange,
-  isHighlighted,
-}: PropertyCardProps) {
+export function PropertyCard({ property, href }: PropertyCardProps) {
   const imageUrl = property.images?.[0]?.url;
 
   const content = (
@@ -86,16 +89,9 @@ export function PropertyCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      onHoverStart={() => onHoverChange?.(true)}
-      onHoverEnd={() => onHoverChange?.(false)}
-      className={cn(
-        "h-full",
-        isHighlighted
-          ? "ring-2 ring-primary/70 ring-offset-2 ring-offset-background"
-          : "",
-      )}
+      className="h-full"
     >
-      <Card className="group h-full overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-lg">
+      <Card className="group h-full overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
         {imageUrl && (
           <div className="relative h-48 sm:h-56 md:h-64 w-full overflow-hidden bg-muted">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 transition-opacity duration-500 group-hover:opacity-100 opacity-90" />
@@ -175,7 +171,9 @@ export function PropertyCard({
               <Maximize2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0 mx-auto sm:mx-0" />
               <div className="flex flex-col items-center sm:items-start leading-tight min-w-0">
                 <span className="text-xs sm:text-sm font-semibold truncate w-full text-center sm:text-left">
-                  {property.area ? `${property.area.toLocaleString("en-US")} sq ft` : "—"}
+                  {property.area
+                    ? `${property.area.toLocaleString("en-US")} sq ft`
+                    : "—"}
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-muted-foreground">
                   Area
@@ -186,28 +184,43 @@ export function PropertyCard({
 
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {property.parkingAvailable && (
-              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
+              <Badge
+                variant="secondary"
+                className="text-[10px] sm:text-[11px] px-2 py-0.5"
+              >
                 Parking
               </Badge>
             )}
             {property.wifi && (
-              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
+              <Badge
+                variant="secondary"
+                className="text-[10px] sm:text-[11px] px-2 py-0.5"
+              >
                 Wi‑Fi
               </Badge>
             )}
             {property.petsAllowed && (
-              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
+              <Badge
+                variant="secondary"
+                className="text-[10px] sm:text-[11px] px-2 py-0.5"
+              >
                 <PawPrint className="mr-1 h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 Pets
               </Badge>
             )}
             {property.pool && (
-              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
+              <Badge
+                variant="secondary"
+                className="text-[10px] sm:text-[11px] px-2 py-0.5"
+              >
                 Pool
               </Badge>
             )}
             {property.gym && (
-              <Badge variant="secondary" className="text-[10px] sm:text-[11px] px-2 py-0.5">
+              <Badge
+                variant="secondary"
+                className="text-[10px] sm:text-[11px] px-2 py-0.5"
+              >
                 Gym
               </Badge>
             )}
@@ -227,5 +240,3 @@ export function PropertyCard({
 
   return content;
 }
-
-

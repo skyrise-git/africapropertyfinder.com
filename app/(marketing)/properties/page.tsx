@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useQueryState, parseAsString } from "nuqs";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Home, AlertTriangle } from "lucide-react";
@@ -35,7 +35,7 @@ function calculateDistance(
   lat1: number,
   lng1: number,
   lat2: number,
-  lng2: number,
+  lng2: number
 ): number {
   const R = 6371; // Earth's radius in kilometers
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -56,27 +56,27 @@ export default function PropertiesPage() {
   const { data, loading, error } = useFirebaseRealtime<Property>("properties");
   const [search, setSearch] = useQueryState(
     "search",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
   const [page, setPage] = useQueryState("page", parseAsString.withDefault("1"));
   const [viewMode] = useQueryState("view", parseAsString.withDefault("cards"));
   const [sortOption] = useQueryState(
     "sort",
-    parseAsString.withDefault("new-first"),
+    parseAsString.withDefault("new-first")
   );
   const [lat, setLat] = useQueryState("lat", parseAsString.withDefault(""));
   const [lng, setLng] = useQueryState("lng", parseAsString.withDefault(""));
   const [locationLabel, setLocationLabel] = useQueryState(
     "loc",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
   const [listingType, setListingType] = useQueryState(
     "listingType",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
   const [propertyType, setPropertyType] = useQueryState(
     "propertyType",
-    parseAsString.withDefault(""),
+    parseAsString.withDefault("")
   );
 
   const properties = (data as Property[]) || [];
@@ -143,7 +143,7 @@ export default function PropertiesPage() {
             selectedLat!,
             selectedLng!,
             propertyLat,
-            propertyLng,
+            propertyLng
           );
 
           // Only include properties within the search radius
@@ -168,13 +168,9 @@ export default function PropertiesPage() {
 
       if (sortOption === "price-low-high" || sortOption === "price-high-low") {
         const aPrice =
-          a.listingType === "sale"
-            ? (a.price ?? Infinity)
-            : (a.rent ?? Infinity);
+          a.listingType === "sale" ? a.price ?? Infinity : a.rent ?? Infinity;
         const bPrice =
-          b.listingType === "sale"
-            ? (b.price ?? Infinity)
-            : (b.rent ?? Infinity);
+          b.listingType === "sale" ? b.price ?? Infinity : b.rent ?? Infinity;
         return sortOption === "price-low-high"
           ? aPrice - bPrice
           : bPrice - aPrice;
@@ -216,8 +212,6 @@ export default function PropertiesPage() {
     propertyType,
   ]);
 
-  const [highlightedId, setHighlightedId] = useState<string | null>(null);
-
   const handlePageChange = (newPage: number) => {
     setPage(String(newPage));
   };
@@ -247,8 +241,8 @@ export default function PropertiesPage() {
               listingType === "sale"
                 ? "For Sale"
                 : listingType === "rent"
-                  ? "For Rent"
-                  : "Student Housing",
+                ? "For Rent"
+                : "Student Housing",
             onRemove: () => setListingType(null),
           },
         ]
@@ -396,7 +390,9 @@ export default function PropertiesPage() {
                 <h3 className="text-lg font-semibold">No properties found</h3>
                 <p className="max-w-md text-sm text-muted-foreground">
                   {locationLabel || listingType || propertyType
-                    ? `No properties found with your current filters${locationLabel ? ` near ${locationLabel}` : ""}. Try adjusting your search criteria.`
+                    ? `No properties found with your current filters${
+                        locationLabel ? ` near ${locationLabel}` : ""
+                      }. Try adjusting your search criteria.`
                     : "Try adjusting your search term to widen the results."}
                 </p>
               </motion.div>
@@ -417,10 +413,6 @@ export default function PropertiesPage() {
                     <PropertyCard
                       property={property}
                       href={`/properties/${property.id}`}
-                      isHighlighted={highlightedId === property.id}
-                      onHoverChange={(hovered) =>
-                        setHighlightedId(hovered ? property.id : null)
-                      }
                     />
                   </motion.div>
                 ))}
@@ -466,12 +458,12 @@ export default function PropertiesPage() {
                 <PaginationNext
                   href={`?page=${Math.min(
                     totalPages,
-                    (Number(page) || 1) + 1,
+                    (Number(page) || 1) + 1
                   )}`}
                   onClick={(e) => {
                     e.preventDefault();
                     handlePageChange(
-                      Math.min(totalPages, (Number(page) || 1) + 1),
+                      Math.min(totalPages, (Number(page) || 1) + 1)
                     );
                   }}
                 />
