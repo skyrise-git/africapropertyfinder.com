@@ -7,10 +7,12 @@ import { PropertyFormSteps } from "../_components/property-form-steps";
 import { propertyService } from "@/lib/services/property.service";
 import type { PropertyFormData } from "../_components/property-form-schema";
 import { useAppStore } from "@/hooks/use-app-store";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 export default function CreatePropertyPage() {
   const router = useRouter();
   const { user } = useAppStore();
+  const isAuthenticated = useRequireAuth("Please sign in to create a property listing");
   const [propertyId, setPropertyId] = useState<string | null>(null);
 
   const handleSubmit = async (data: PropertyFormData) => {
@@ -115,6 +117,10 @@ export default function CreatePropertyPage() {
       }, 2500);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

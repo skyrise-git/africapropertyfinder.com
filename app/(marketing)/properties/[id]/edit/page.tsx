@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
 import { useAppStore } from "@/hooks/use-app-store";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { PropertyFormSteps } from "../../_components/property-form-steps";
 import { propertyService } from "@/lib/services/property.service";
 import type { Property } from "@/lib/types/property.type";
@@ -16,6 +17,7 @@ export default function EditPropertyPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useAppStore();
+  const isAuthenticated = useRequireAuth("Please sign in to edit properties");
   const id = params.id as string;
   const [propertyId] = useState<string>(id);
 
@@ -135,7 +137,11 @@ export default function EditPropertyPage() {
     return <PropertyDetailError message={error?.message} />;
   }
 
-  if (property.userId !== user?.uid) {
+  if (!isAuthenticated || !user) {
+    return null;
+  }
+
+  if (property.userId !== user.uid) {
     return (
       <div className="container mx-auto max-w-4xl p-6">
         <div className="rounded-2xl border-2 border-destructive/40 bg-destructive/10 p-8 text-center">
@@ -223,4 +229,3 @@ export default function EditPropertyPage() {
     </div>
   );
 }
-

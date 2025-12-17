@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "@/hooks/use-app-store";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
 import { SavedPropertiesList } from "./_components/SavedPropertiesList";
 import { Input } from "@/components/ui/input";
@@ -14,16 +15,12 @@ import type { SavedProperty } from "@/lib/types/saved-property.type";
 export default function SavedPropertiesPage() {
   const { user } = useAppStore();
   const router = useRouter();
+  const isAuthenticated = useRequireAuth(
+    "Please sign in to view your saved properties"
+  );
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // Redirect unauthenticated users
-  useEffect(() => {
-    if (!user) {
-      router.push("/signin");
-    }
-  }, [user, router]);
 
   // Sync search to URL
   useEffect(() => {
@@ -35,11 +32,14 @@ export default function SavedPropertiesPage() {
   }, [search, router, searchParams]);
 
   // Fetch saved properties
-  const { data: savedPropertiesData, loading: savedLoading, error: savedError } =
-    useFirebaseRealtime<SavedProperty>("savedProperties", {
-      asArray: true,
-      enabled: !!user,
-    });
+  const {
+    data: savedPropertiesData,
+    loading: savedLoading,
+    error: savedError,
+  } = useFirebaseRealtime<SavedProperty>("savedProperties", {
+    asArray: true,
+    enabled: !!user,
+  });
 
   // Fetch all properties
   const { data: propertiesData, loading: propertiesLoading } =
@@ -85,7 +85,7 @@ export default function SavedPropertiesPage() {
     setRefreshKey((prev) => prev + 1);
   };
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return null;
   }
 
@@ -123,7 +123,9 @@ export default function SavedPropertiesPage() {
           ) : (
             <span>
               {filteredSavedProperties.length} saved
-              {filteredSavedProperties.length === 1 ? " property" : " properties"}
+              {filteredSavedProperties.length === 1
+                ? " property"
+                : " properties"}
             </span>
           )}
         </div>
@@ -143,4 +145,3 @@ export default function SavedPropertiesPage() {
     </motion.div>
   );
 }
-
