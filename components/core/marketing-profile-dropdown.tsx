@@ -47,10 +47,7 @@ export function MarketingProfileDropdown() {
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
           <Avatar className="h-9 w-9 border-2 border-border">
-            <AvatarImage
-              src={user.profilePicture}
-              alt={user.name || "User"}
-            />
+            <AvatarImage src={user.profilePicture} alt={user.name || "User"} />
             <AvatarFallback className="bg-primary text-primary-foreground text-sm">
               {user.name ? getUserInitials(user.name) : "U"}
             </AvatarFallback>
@@ -120,18 +117,20 @@ export function MarketingProfileDropdown() {
                 List Property
               </Link>
             </Button>
-            {user.role && (
-              <Button
-                variant="outline"
-                className="w-full justify-start h-9"
-                asChild
+            <Button
+              variant="outline"
+              className="w-full justify-start h-9"
+              asChild
+            >
+              <Link
+                href={
+                  user.role === "user" ? "/settings" : `/${user.role}/settings`
+                }
               >
-                <Link href={`/${user.role}/settings`}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Manage account
-                </Link>
-              </Button>
-            )}
+                <Settings className="mr-2 h-4 w-4" />
+                Manage account
+              </Link>
+            </Button>
             <Button
               variant="outline"
               className="w-full justify-start h-9"
@@ -156,4 +155,3 @@ export function MarketingProfileDropdown() {
     </DropdownMenu>
   );
 }
-
