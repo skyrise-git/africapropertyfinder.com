@@ -52,6 +52,9 @@ export interface Image {
 }
 
 export interface Property extends BaseEntity {
+  // Ownership
+  userId?: string; // ID of the user who created this property
+
   // Basic Info
   title: string;
   listingType: ListingType;
@@ -123,6 +126,7 @@ export interface Property extends BaseEntity {
 }
 
 export interface PropertyInput {
+  userId?: string; // ID of the user creating this property
   title: string;
   listingType: ListingType;
   propertyType: PropertyType;

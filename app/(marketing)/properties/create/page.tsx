@@ -6,9 +6,11 @@ import { toast } from "sonner";
 import { PropertyFormSteps } from "../_components/property-form-steps";
 import { propertyService } from "@/lib/services/property.service";
 import type { PropertyFormData } from "../_components/property-form-schema";
+import { useAppStore } from "@/hooks/use-app-store";
 
 export default function CreatePropertyPage() {
   const router = useRouter();
+  const { user } = useAppStore();
   const [propertyId, setPropertyId] = useState<string | null>(null);
 
   const handleSubmit = async (data: PropertyFormData) => {
@@ -17,6 +19,7 @@ export default function CreatePropertyPage() {
       // Here we just save the property
 
       const id = await propertyService.create({
+        userId: user?.uid,
         title: data.title,
         listingType: data.listingType,
         propertyType: data.propertyType,

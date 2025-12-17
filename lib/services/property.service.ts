@@ -162,6 +162,14 @@ class PropertyService {
       return false;
     });
   }
+
+  /**
+   * Get properties by user ID
+   */
+  async getByUserId(userId: string): Promise<Property[]> {
+    const properties = await this.getAll();
+    return properties.filter((property) => property.userId === userId);
+  }
 }
 
 export const propertyService = new PropertyService();

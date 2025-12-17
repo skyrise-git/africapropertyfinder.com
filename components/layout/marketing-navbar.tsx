@@ -30,11 +30,14 @@ export function MarketingNavbar() {
   const marketingNavLinks = user
     ? [
         { label: "Home", href: "/" },
+        { label: "Properties", href: "/properties" },
+        { label: "My Properties", href: "/properties/my-properties" },
         { label: "Appointments", href: "/appointments" },
         { label: "Services", href: "#services" },
       ]
     : [
         { label: "Home", href: "/" },
+        { label: "Properties", href: "/properties" },
         { label: "Blogs", href: "/blogs" },
         { label: "Services", href: "#services" },
       ];

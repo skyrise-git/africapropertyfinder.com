@@ -1,9 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { ArrowLeft, Heart, Share2 } from "lucide-react";
+import { ArrowLeft, Heart, Share2, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useAppStore } from "@/hooks/use-app-store";
+import { propertyService } from "@/lib/services/property.service";
+import { toast } from "sonner";
 import type { Property } from "@/lib/types/property.type";
 
 type PropertyHeaderProps = {
@@ -19,6 +34,21 @@ export function PropertyHeader({
   onToggleSave,
   onShare,
 }: PropertyHeaderProps) {
+  const router = useRouter();
+  const { user } = useAppStore();
+  const isOwner = user?.uid === property.userId;
+
+  const handleDelete = async () => {
+    try {
+      await propertyService.delete(property.id);
+      toast.success("Property deleted successfully");
+      router.push("/properties/my-properties");
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      toast.error("Failed to delete property. Please try again.");
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -35,28 +65,68 @@ export function PropertyHeader({
         <h1 className="text-2xl md:text-3xl font-bold">{property.title}</h1>
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onToggleSave}
-          className="gap-2"
-        >
-          <Heart
-            className={`h-4 w-4 transition-colors ${
-              isSaved ? "fill-red-500 text-red-500" : ""
-            }`}
-          />
-          {isSaved ? "Saved" : "Save"}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onShare}
-          className="gap-2"
-        >
-          <Share2 className="h-4 w-4" />
-          Share
-        </Button>
+        {isOwner && (
+          <>
+            <Link href={`/properties/${property.id}/edit`}>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Edit className="h-4 w-4" />
+                Edit
+              </Button>
+            </Link>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 text-destructive hover:text-destructive">
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your property listing.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        )}
+        {!isOwner && (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onToggleSave}
+              className="gap-2"
+            >
+              <Heart
+                className={`h-4 w-4 transition-colors ${
+                  isSaved ? "fill-red-500 text-red-500" : ""
+                }`}
+              />
+              {isSaved ? "Saved" : "Save"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShare}
+              className="gap-2"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+          </>
+        )}
       </div>
     </motion.div>
   );
