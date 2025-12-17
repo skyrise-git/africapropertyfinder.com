@@ -47,17 +47,47 @@ export const marketingSite = {
   ],
   megaMenu: [
     {
+      label: "Properties",
+      href: "/properties",
+      items: [
+        {
+          label: "View All",
+          href: "/properties",
+          icon: "Home",
+          description:
+            "Browse all available properties with advanced search and filtering options",
+          featured: true,
+        },
+        {
+          label: "My Properties",
+          href: "/properties/my-properties",
+          icon: "Database",
+          description:
+            "View and manage all your property listings in one place",
+          featured: true,
+        },
+        {
+          label: "List A Property",
+          href: "/properties/create",
+          icon: "Settings",
+          description:
+            "Create a new property listing and reach thousands of potential buyers and renters",
+          featured: true,
+        },
+        {
+          label: "Contact Us",
+          href: "/contact",
+          icon: "FileCode",
+          description:
+            "Get in touch with our team for property inquiries and support",
+          featured: true,
+        },
+      ],
+    },
+    {
       label: "Services",
       href: "#services",
       items: [
-        {
-          label: "List Property",
-          href: "/properties/create",
-          icon: "Home",
-          description:
-            "List your property with us and reach thousands of potential buyers and renters",
-          featured: true,
-        },
         {
           label: "Buy",
           href: "/properties?listingType=sale",
@@ -79,6 +109,14 @@ export const marketingSite = {
           icon: "TrendingUp",
           description:
             "Get the best price for your property with our expert selling services",
+          featured: true,
+        },
+        {
+          label: "View All",
+          href: "/properties",
+          icon: "Home",
+          description:
+            "Browse all available properties with advanced search and filtering options",
           featured: true,
         },
       ],

@@ -16,6 +16,8 @@ import {
   ShoppingCart,
   Key,
   TrendingUp,
+  Search,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +52,7 @@ interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
   navLinks: readonly NavLink[];
+  propertiesItems: readonly MegaMenuItem[];
   resourcesItems: readonly MegaMenuItem[];
   toggleTheme: () => void;
 }
@@ -58,6 +61,7 @@ export function MobileMenu({
   open,
   onClose,
   navLinks,
+  propertiesItems,
   resourcesItems,
   toggleTheme,
 }: MobileMenuProps) {
@@ -111,6 +115,78 @@ export function MobileMenu({
               {/* Content */}
               <div className="flex-1 overflow-y-auto px-4 py-6">
                 <nav className="flex flex-col gap-1">
+                  {/* Properties Dropdown */}
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="properties" className="border-none">
+                      <AccordionTrigger className="py-3 text-sm font-medium text-gray-900 dark:text-gray-100 hover:no-underline">
+                        Properties
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-2">
+                        <div className="flex flex-col gap-2 pl-4">
+                          {propertiesItems.map((item, itemIndex) => {
+                            const Icon =
+                              iconMap[item.icon as keyof typeof iconMap];
+                            const isExternal = item.href.startsWith("http");
+
+                            return (
+                              <motion.div
+                                key={item.href}
+                                initial={{ opacity: 0, x: -12 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{
+                                  delay: itemIndex * 0.05,
+                                  duration: 0.2,
+                                }}
+                              >
+                                <Link
+                                  href={item.href}
+                                  target={isExternal ? "_blank" : undefined}
+                                  rel={
+                                    isExternal
+                                      ? "noopener noreferrer"
+                                      : undefined
+                                  }
+                                  onClick={onClose}
+                                  className={cn(
+                                    "group flex items-start gap-3 rounded-md p-3 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-sm",
+                                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+                                  )}
+                                >
+                                  {Icon && (
+                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 transition-colors group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50">
+                                      <Icon className="size-4" />
+                                    </div>
+                                  )}
+                                  <div className="flex flex-1 flex-col gap-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {item.label}
+                                      </span>
+                                      {item.featured && (
+                                        <Badge
+                                          variant="secondary"
+                                          className="h-4 px-1.5 text-[10px] font-medium"
+                                        >
+                                          Popular
+                                        </Badge>
+                                      )}
+                                      {isExternal && (
+                                        <ExternalLink className="size-3 shrink-0 text-gray-400 dark:text-gray-500 opacity-0 transition-opacity group-hover:opacity-100" />
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                                      {item.description}
+                                    </p>
+                                  </div>
+                                </Link>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+
                   {navLinks.map((link, index) => {
                     if (link.href === "#services") {
                       return (

@@ -29,15 +29,10 @@ export function MarketingNavbar() {
 
   const marketingNavLinks = user
     ? [
-        { label: "Home", href: "/" },
-        { label: "Properties", href: "/properties" },
-        { label: "My Properties", href: "/properties/my-properties" },
         { label: "Appointments", href: "/appointments" },
         { label: "Services", href: "#services" },
       ]
     : [
-        { label: "Home", href: "/" },
-        { label: "Properties", href: "/properties" },
         { label: "Blogs", href: "/blogs" },
         { label: "Services", href: "#services" },
       ];
@@ -49,7 +44,8 @@ export function MarketingNavbar() {
     setTheme(current === "dark" ? "light" : "dark");
   };
 
-  const servicesMenu = marketingSite.megaMenu[0];
+  const propertiesMenu = marketingSite.megaMenu[0];
+  const servicesMenu = marketingSite.megaMenu[1];
   const simpleNavLinks = marketingNavLinks.filter(
     (link) => link.href !== "#services"
   );
@@ -71,6 +67,13 @@ export function MarketingNavbar() {
 
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList className="gap-1">
+              <NavigationMenuItem>
+                <MegaMenu
+                  label={propertiesMenu.label}
+                  href={propertiesMenu.href}
+                  items={propertiesMenu.items}
+                />
+              </NavigationMenuItem>
               {simpleNavLinks.map((item) => (
                 <NavigationMenuItem key={item.href}>
                   <NavigationMenuLink asChild>
@@ -165,6 +168,7 @@ export function MarketingNavbar() {
         open={open}
         onClose={() => setOpen(false)}
         navLinks={marketingNavLinks}
+        propertiesItems={propertiesMenu.items}
         resourcesItems={servicesMenu.items}
         toggleTheme={toggleTheme}
       />
