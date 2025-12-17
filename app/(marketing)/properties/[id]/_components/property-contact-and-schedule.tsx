@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -39,8 +39,10 @@ function PropertyScheduleViewing({
   property,
 }: PropertyContactAndScheduleProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [timeSelection, setTimeSelection] = useState<string>("");
+  const [customTime, setCustomTime] = useState<string>("");
   const [tourType, setTourType] = useState<"in-person" | "video">("in-person");
+  const effectiveTime = timeSelection === "custom" ? customTime : timeSelection;
 
   return (
     <motion.div
@@ -113,7 +115,15 @@ function PropertyScheduleViewing({
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Select a time</label>
-              <Select value={selectedTime} onValueChange={setSelectedTime}>
+              <Select
+                value={timeSelection}
+                onValueChange={(value) => {
+                  setTimeSelection(value);
+                  if (value !== "custom") {
+                    setCustomTime("");
+                  }
+                }}
+              >
                 <SelectTrigger className="w-full">
                   <Clock className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Select time" />
@@ -134,18 +144,33 @@ function PropertyScheduleViewing({
                       {time}
                     </SelectItem>
                   ))}
+                  <SelectItem value="custom">Custom time</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">
-                  Or enter a custom time
-                </p>
-                <Input
-                  type="time"
-                  className="w-full"
-                  onChange={(event) => setSelectedTime(event.target.value)}
-                />
-              </div>
+              <AnimatePresence>
+                {timeSelection === "custom" && (
+                  <motion.div
+                    key="custom-time-input"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="space-y-1"
+                  >
+                    <p className="text-xs text-muted-foreground">
+                      Enter a custom time
+                    </p>
+                    <Input
+                      type="time"
+                      className="w-full"
+                      value={customTime}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setCustomTime(value);
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="space-y-2">
@@ -217,11 +242,11 @@ function PropertyScheduleViewing({
                 // eslint-disable-next-line no-console
                 console.log("Schedule appointment", {
                   date: selectedDate,
-                  time: selectedTime,
+                  time: effectiveTime,
                   tourType,
                 });
               }}
-              disabled={!selectedDate || !selectedTime}
+              disabled={!selectedDate || !effectiveTime}
             >
               Schedule Appointment
             </Button>
