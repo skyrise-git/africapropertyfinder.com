@@ -3,19 +3,16 @@
 import { useEffect, useMemo } from "react";
 import { useQueryState, parseAsString } from "nuqs";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Home, AlertTriangle } from "lucide-react";
+import { Search, Home } from "lucide-react";
 
 import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
-import type {
-  Property,
-  ListingType,
-  PropertyType,
-} from "@/lib/types/property.type";
+import type { Property } from "@/lib/types/property.type";
 import { PropertyCard } from "./_components/property-card";
 import { PropertySortControls } from "./_components/property-sort-controls";
 import { PropertyMapView } from "./_components/property-map-view";
+import { PropertyLoadingView } from "./_components/property-loading-view";
+import { PropertyErrorView } from "./_components/property-error-view";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -268,40 +265,11 @@ export default function PropertiesPage() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6">
-        <div className="space-y-4 text-center">
-          <Skeleton className="mx-auto h-10 w-64" />
-          <Skeleton className="mx-auto h-5 w-80" />
-        </div>
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, idx) => (
-              <Skeleton key={idx} className="h-72" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <PropertyLoadingView />;
   }
 
   if (error) {
-    return (
-      <div className="container mx-auto max-w-4xl p-6">
-        <div className="rounded-2xl border-2 border-destructive/40 bg-destructive/10 p-8 text-center">
-          <div className="mb-3 flex items-center justify-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            <h2 className="text-lg font-semibold text-destructive">
-              Something went wrong
-            </h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {error.message || "Failed to load properties. Please try again."}
-          </p>
-        </div>
-      </div>
-    );
+    return <PropertyErrorView error={error} />;
   }
 
   return (
