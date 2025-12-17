@@ -43,6 +43,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -791,364 +792,351 @@ export default function PropertyDetailPage() {
             </Card>
           </motion.div>
 
-          {/* Property Details */}
+          {/* Tabs Navigation */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.15 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>Property Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Property Type
-                    </div>
-                    <div className="font-semibold capitalize">
-                      {property.propertyType.replace("-", " ")}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Furnishing
-                    </div>
-                    <div className="font-semibold capitalize">
-                      {property.furnishing.replace("-", " ")}
-                    </div>
-                  </div>
-                  {property.floorNumber && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">Floor</div>
-                      <div className="font-semibold">
-                        {property.floorNumber}
-                        {property.totalFloors && ` of ${property.totalFloors}`}
-                      </div>
-                    </div>
-                  )}
-                  {property.availableFrom && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">
-                        Available From
-                      </div>
-                      <div className="font-semibold">
-                        {new Date(property.availableFrom).toLocaleDateString()}
-                      </div>
-                    </div>
-                  )}
-                </div>
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="w-full justify-start overflow-x-auto">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="features">Features</TabsTrigger>
+                <TabsTrigger value="location">Location</TabsTrigger>
+                <TabsTrigger value="pricing">Pricing</TabsTrigger>
+                <TabsTrigger value="policies">Policies</TabsTrigger>
+              </TabsList>
 
-                {property.isShared && property.sharingDetails && (
-                  <>
-                    <Separator />
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span className="font-semibold">Shared Property</span>
-                      </div>
-                      {property.sharingDetails.sharingType && (
-                        <div className="text-sm text-muted-foreground ml-6">
-                          Sharing Type:{" "}
-                          <span className="capitalize">
-                            {property.sharingDetails.sharingType}
-                          </span>
-                        </div>
-                      )}
-                      {property.sharingDetails.currentOccupants !==
-                        undefined && (
-                        <div className="text-sm text-muted-foreground ml-6">
-                          Current Occupants:{" "}
-                          {property.sharingDetails.currentOccupants}
-                        </div>
-                      )}
-                      {property.sharingDetails.preferredTenantType && (
-                        <div className="text-sm text-muted-foreground ml-6">
-                          Preferred:{" "}
-                          <span className="capitalize">
-                            {property.sharingDetails.preferredTenantType}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Pricing Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  Pricing Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-3xl font-bold">
-                  {formatPrice(property)}
-                </div>
-                {property.securityDeposit && (
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Security Deposit
-                    </div>
-                    <div className="font-semibold">
-                      {(() => {
-                        try {
-                          return formatCurrency(
-                            property.securityDeposit,
-                            "USD"
-                          );
-                        } catch {
-                          return new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          }).format(property.securityDeposit);
-                        }
-                      })()}
-                    </div>
-                  </div>
-                )}
-                {property.leaseLength && (
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Lease Length
-                    </div>
-                    <div className="font-semibold">
-                      {property.leaseLength} months
-                    </div>
-                  </div>
-                )}
-                {property.utilitiesIncluded !== undefined && (
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      Utilities
-                    </div>
-                    <div className="font-semibold">
-                      {property.utilitiesIncluded ? "Included" : "Not Included"}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Amenities */}
-          {amenities.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>Amenities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {amenities.map((amenity) => {
-                      const Icon = amenity.icon;
-                      return (
-                        <div
-                          key={amenity.key}
-                          className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30"
-                        >
-                          <Icon className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-medium">
-                            {amenity.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {property.otherAmenities && (
-                    <>
-                      <Separator className="my-4" />
-                      <div>
-                        <div className="text-sm text-muted-foreground mb-2">
-                          Other Amenities
-                        </div>
-                        <p className="text-sm">{property.otherAmenities}</p>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Policies */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Policies</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  {property.smokingAllowed !== undefined && (
-                    <div className="flex items-center gap-2">
-                      {property.smokingAllowed ? (
-                        <UserCheck className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Ban className="h-4 w-4 text-red-600" />
-                      )}
-                      <span className="text-sm">
-                        Smoking:{" "}
-                        {property.smokingAllowed ? "Allowed" : "Not Allowed"}
-                      </span>
-                    </div>
-                  )}
-                  {property.petsAllowed !== undefined && (
-                    <div className="flex items-center gap-2">
-                      {property.petsAllowed ? (
-                        <UserCheck className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Ban className="h-4 w-4 text-red-600" />
-                      )}
-                      <span className="text-sm">
-                        Pets: {property.petsAllowed ? "Allowed" : "Not Allowed"}
-                      </span>
-                    </div>
-                  )}
-                  {property.guestsAllowed !== undefined && (
-                    <div className="flex items-center gap-2">
-                      {property.guestsAllowed ? (
-                        <UserCheck className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Ban className="h-4 w-4 text-red-600" />
-                      )}
-                      <span className="text-sm">
-                        Guests:{" "}
-                        {property.guestsAllowed ? "Allowed" : "Not Allowed"}
-                      </span>
-                    </div>
-                  )}
-                  {property.sublettingAllowed !== undefined && (
-                    <div className="flex items-center gap-2">
-                      {property.sublettingAllowed ? (
-                        <UserCheck className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Ban className="h-4 w-4 text-red-600" />
-                      )}
-                      <span className="text-sm">
-                        Subletting:{" "}
-                        {property.sublettingAllowed ? "Allowed" : "Not Allowed"}
-                      </span>
-                    </div>
-                  )}
-                  {property.partiesAllowed !== undefined && (
-                    <div className="flex items-center gap-2">
-                      {property.partiesAllowed ? (
-                        <UserCheck className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Ban className="h-4 w-4 text-red-600" />
-                      )}
-                      <span className="text-sm">
-                        Parties:{" "}
-                        {property.partiesAllowed ? "Allowed" : "Not Allowed"}
-                      </span>
-                    </div>
-                  )}
-                  {property.quietHours !== undefined && (
-                    <div className="flex items-center gap-2">
-                      {property.quietHours ? (
-                        <Clock className="h-4 w-4 text-blue-600" />
-                      ) : null}
-                      <span className="text-sm">
-                        Quiet Hours: {property.quietHours ? "Yes" : "No"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Location Map */}
-          {property.location && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5" />
-                    Location
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="text-sm text-muted-foreground">
-                        Address
-                      </div>
-                      <div className="font-semibold">
-                        {property.address}, {property.city}, {property.state}{" "}
-                        {property.zipCode}
-                      </div>
-                    </div>
-                    {property.nearbyTransit && (
+              {/* Details Tab */}
+              <TabsContent value="details" className="space-y-6 mt-6">
+                {/* Property Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Property Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <div className="text-sm text-muted-foreground">
-                          Nearby Transit
+                          Property Type
+                        </div>
+                        <div className="font-semibold capitalize">
+                          {property.propertyType.replace("-", " ")}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Furnishing
+                        </div>
+                        <div className="font-semibold capitalize">
+                          {property.furnishing.replace("-", " ")}
+                        </div>
+                      </div>
+                      {property.floorNumber && (
+                        <div>
+                          <div className="text-sm text-muted-foreground">
+                            Floor
+                          </div>
+                          <div className="font-semibold">
+                            {property.floorNumber}
+                            {property.totalFloors &&
+                              ` of ${property.totalFloors}`}
+                          </div>
+                        </div>
+                      )}
+                      {property.availableFrom && (
+                        <div>
+                          <div className="text-sm text-muted-foreground">
+                            Available From
+                          </div>
+                          <div className="font-semibold">
+                            {new Date(
+                              property.availableFrom
+                            ).toLocaleDateString()}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {property.isShared && property.sharingDetails && (
+                      <>
+                        <Separator />
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-primary" />
+                            <span className="font-semibold">
+                              Shared Property
+                            </span>
+                          </div>
+                          {property.sharingDetails.sharingType && (
+                            <div className="text-sm text-muted-foreground ml-6">
+                              Sharing Type:{" "}
+                              <span className="capitalize">
+                                {property.sharingDetails.sharingType}
+                              </span>
+                            </div>
+                          )}
+                          {property.sharingDetails.currentOccupants !==
+                            undefined && (
+                            <div className="text-sm text-muted-foreground ml-6">
+                              Current Occupants:{" "}
+                              {property.sharingDetails.currentOccupants}
+                            </div>
+                          )}
+                          {property.sharingDetails.preferredTenantType && (
+                            <div className="text-sm text-muted-foreground ml-6">
+                              Preferred:{" "}
+                              <span className="capitalize">
+                                {property.sharingDetails.preferredTenantType}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Features Tab */}
+              <TabsContent value="features" className="space-y-6 mt-6">
+                {/* Amenities */}
+                {amenities.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Amenities</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {amenities.map((amenity) => {
+                          const Icon = amenity.icon;
+                          return (
+                            <div
+                              key={amenity.key}
+                              className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30"
+                            >
+                              <Icon className="h-4 w-4 text-primary" />
+                              <span className="text-sm font-medium">
+                                {amenity.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {property.otherAmenities && (
+                        <>
+                          <Separator className="my-4" />
+                          <div>
+                            <div className="text-sm text-muted-foreground mb-2">
+                              Other Amenities
+                            </div>
+                            <p className="text-sm">{property.otherAmenities}</p>
+                          </div>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              {/* Location Tab */}
+              <TabsContent value="location" className="space-y-6 mt-6">
+                {property.location && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5" />
+                        Location
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="text-sm text-muted-foreground">
+                            Address
+                          </div>
+                          <div className="font-semibold">
+                            {property.address}, {property.city},{" "}
+                            {property.state} {property.zipCode}
+                          </div>
+                        </div>
+                        {property.nearbyTransit && (
+                          <div>
+                            <div className="text-sm text-muted-foreground">
+                              Nearby Transit
+                            </div>
+                            <div className="font-semibold">
+                              {property.nearbyTransit}
+                            </div>
+                          </div>
+                        )}
+                        <div className="h-[400px] rounded-lg overflow-hidden">
+                          <PropertyMapView properties={[property]} />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              {/* Pricing Tab */}
+              <TabsContent value="pricing" className="space-y-6 mt-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="h-5 w-5" />
+                      Pricing Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-3xl font-bold">
+                      {formatPrice(property)}
+                    </div>
+                    {property.securityDeposit && (
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Security Deposit
                         </div>
                         <div className="font-semibold">
-                          {property.nearbyTransit}
+                          {(() => {
+                            try {
+                              return formatCurrency(
+                                property.securityDeposit,
+                                "USD"
+                              );
+                            } catch {
+                              return new Intl.NumberFormat("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0,
+                              }).format(property.securityDeposit);
+                            }
+                          })()}
                         </div>
                       </div>
                     )}
-                    <div className="h-[400px] rounded-lg overflow-hidden">
-                      <PropertyMapView properties={[property]} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+                    {property.leaseLength && (
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Lease Length
+                        </div>
+                        <div className="font-semibold">
+                          {property.leaseLength} months
+                        </div>
+                      </div>
+                    )}
+                    {property.utilitiesIncluded !== undefined && (
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Utilities
+                        </div>
+                        <div className="font-semibold">
+                          {property.utilitiesIncluded
+                            ? "Included"
+                            : "Not Included"}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-          {/* Video Tour */}
-          {property.videoTourUrl && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Video className="h-5 w-5" />
-                    Video Tour
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="aspect-video rounded-lg overflow-hidden">
-                    <iframe
-                      src={property.videoTourUrl}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+              {/* Policies Tab */}
+              <TabsContent value="policies" className="space-y-6 mt-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Policies</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      {property.smokingAllowed !== undefined && (
+                        <div className="flex items-center gap-2">
+                          {property.smokingAllowed ? (
+                            <UserCheck className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Ban className="h-4 w-4 text-red-600" />
+                          )}
+                          <span className="text-sm">
+                            Smoking:{" "}
+                            {property.smokingAllowed
+                              ? "Allowed"
+                              : "Not Allowed"}
+                          </span>
+                        </div>
+                      )}
+                      {property.petsAllowed !== undefined && (
+                        <div className="flex items-center gap-2">
+                          {property.petsAllowed ? (
+                            <UserCheck className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Ban className="h-4 w-4 text-red-600" />
+                          )}
+                          <span className="text-sm">
+                            Pets:{" "}
+                            {property.petsAllowed ? "Allowed" : "Not Allowed"}
+                          </span>
+                        </div>
+                      )}
+                      {property.guestsAllowed !== undefined && (
+                        <div className="flex items-center gap-2">
+                          {property.guestsAllowed ? (
+                            <UserCheck className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Ban className="h-4 w-4 text-red-600" />
+                          )}
+                          <span className="text-sm">
+                            Guests:{" "}
+                            {property.guestsAllowed ? "Allowed" : "Not Allowed"}
+                          </span>
+                        </div>
+                      )}
+                      {property.sublettingAllowed !== undefined && (
+                        <div className="flex items-center gap-2">
+                          {property.sublettingAllowed ? (
+                            <UserCheck className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Ban className="h-4 w-4 text-red-600" />
+                          )}
+                          <span className="text-sm">
+                            Subletting:{" "}
+                            {property.sublettingAllowed
+                              ? "Allowed"
+                              : "Not Allowed"}
+                          </span>
+                        </div>
+                      )}
+                      {property.partiesAllowed !== undefined && (
+                        <div className="flex items-center gap-2">
+                          {property.partiesAllowed ? (
+                            <UserCheck className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Ban className="h-4 w-4 text-red-600" />
+                          )}
+                          <span className="text-sm">
+                            Parties:{" "}
+                            {property.partiesAllowed
+                              ? "Allowed"
+                              : "Not Allowed"}
+                          </span>
+                        </div>
+                      )}
+                      {property.quietHours !== undefined && (
+                        <div className="flex items-center gap-2">
+                          {property.quietHours ? (
+                            <Clock className="h-4 w-4 text-blue-600" />
+                          ) : null}
+                          <span className="text-sm">
+                            Quiet Hours: {property.quietHours ? "Yes" : "No"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
         </div>
 
         {/* Sidebar */}
