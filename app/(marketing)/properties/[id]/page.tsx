@@ -37,6 +37,8 @@ import {
   ZoomIn,
   ZoomOut,
   X,
+  Heart,
+  Share2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -113,6 +115,7 @@ export default function PropertyDetailPage() {
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isSaved, setIsSaved] = useState(false);
 
   const { data, loading, error } = useFirebaseRealtime<Property>(
     `properties/${id}`,
@@ -270,6 +273,35 @@ export default function PropertyDetailPage() {
     }
   }, [currentImageIndex, isGalleryOpen]);
 
+  const handleShare = async () => {
+    if (!property) return;
+
+    const shareData = {
+      title: property.title,
+      text: `Check out this property: ${property.title}`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        // You could add a toast notification here
+      }
+    } catch (err) {
+      // User cancelled or error occurred
+      console.error("Error sharing:", err);
+    }
+  };
+
+  const handleSave = () => {
+    setIsSaved(!isSaved);
+    // Here you could add logic to save to localStorage or send to backend
+    // localStorage.setItem(`saved-property-${id}`, JSON.stringify(property));
+  };
+
   // Mouse wheel zoom
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -351,17 +383,45 @@ export default function PropertyDetailPage() {
       animate={{ opacity: 1 }}
       className="container mx-auto max-w-7xl p-4 md:p-6 space-y-6"
     >
-      {/* Back Button */}
+      {/* Back Button, Title, and Action Buttons */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
+        className="flex items-center justify-between gap-4 flex-wrap"
       >
-        <Link href="/properties">
-          <Button variant="ghost" size="sm" className="group">
-            <ArrowLeft className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
-            Back to Properties
+        <div className="flex items-center gap-4 flex-wrap">
+          <Link href="/properties">
+            <Button variant="ghost" size="sm" className="group">
+              <ArrowLeft className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
+              Back to Properties
+            </Button>
+          </Link>
+          <h1 className="text-2xl md:text-3xl font-bold">{property.title}</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSave}
+            className="gap-2"
+          >
+            <Heart
+              className={`h-4 w-4 transition-colors ${
+                isSaved ? "fill-red-500 text-red-500" : ""
+              }`}
+            />
+            {isSaved ? "Saved" : "Save"}
           </Button>
-        </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+            className="gap-2"
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </Button>
+        </div>
       </motion.div>
 
       {/* Image Gallery and Contact Info Layout */}
@@ -737,61 +797,6 @@ export default function PropertyDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Title and Basic Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl md:text-3xl font-bold">
-                  {property.title}
-                </CardTitle>
-                <div className="flex items-center gap-2 text-muted-foreground mt-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>
-                    {property.address}, {property.city}, {property.state}{" "}
-                    {property.zipCode}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
-                    <BedDouble className="h-5 w-5 text-primary" />
-                    <div>
-                      <div className="text-2xl font-bold">
-                        {property.numBedrooms}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Beds</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
-                    <Bath className="h-5 w-5 text-primary" />
-                    <div>
-                      <div className="text-2xl font-bold">
-                        {property.numBathrooms}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Baths</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
-                    <Maximize2 className="h-5 w-5 text-primary" />
-                    <div>
-                      <div className="text-2xl font-bold">
-                        {property.area
-                          ? `${property.area.toLocaleString("en-US")} sq ft`
-                          : "—"}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Area</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
           {/* Tabs Navigation */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
