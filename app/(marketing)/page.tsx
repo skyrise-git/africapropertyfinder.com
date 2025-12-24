@@ -7,7 +7,7 @@ import { faqData } from "@/lib/config";
 
 export default function MarketingHome() {
   return (
-    <div className="space-y-0">
+    <div className="space-y-0 overflow-x-hidden w-full max-w-full">
       <HeroSection />
       <FeaturesSection />
       <FeaturedProperties />

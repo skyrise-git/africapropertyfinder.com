@@ -121,7 +121,7 @@ function PropertyLocationSearchInner({
   return (
     <div ref={containerRef} className={`relative w-full ${className || ""}`}>
       <div className="relative">
-        <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/60 z-10" />
+        <MapPin className="pointer-events-none absolute left-2.5 sm:left-3 top-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 -translate-y-1/2 text-primary/60 z-10" />
         <Input
           value={displayValue}
           onChange={handleInputChange}
@@ -132,8 +132,8 @@ function PropertyLocationSearchInner({
             }
           }}
           placeholder={placeholder}
-          className={`h-9 pl-10 text-sm w-full bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 placeholder:text-gray-500 ${
-            hasValue && !isLoading ? "pr-10" : isLoading ? "pr-10" : "pr-3"
+          className={`h-8 sm:h-9 md:h-10 pl-8 sm:pl-10 text-[10px] sm:text-xs md:text-sm w-full bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 placeholder:text-gray-500 ${
+            hasValue && !isLoading ? "pr-8 sm:pr-10" : isLoading ? "pr-8 sm:pr-10" : "pr-2.5 sm:pr-3"
           }`}
           disabled={isLoading}
         />

@@ -51,9 +51,9 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background text-foreground relative">
+    <div className="min-h-screen bg-background text-foreground relative w-full max-w-full overflow-x-hidden">
       <MarketingNavbar />
-      <main className="flex-1 relative z-0">{children}</main>
+      <main className="flex-1 relative z-0 w-full max-w-full overflow-x-hidden">{children}</main>
       <MarketingFooter />
     </div>
   );

@@ -51,7 +51,7 @@ export function FurnishingStatsCard({
               </p>
             )}
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
               <ChartContainer
                 config={chartConfig}
                 className="h-40 w-40 flex-none"
@@ -90,7 +90,7 @@ export function FurnishingStatsCard({
                 </PieChart>
               </ChartContainer>
 
-              <div className="flex flex-1 flex-col gap-1 text-xs">
+              <div className="flex w-full flex-1 flex-col gap-1 text-xs sm:w-auto">
                 {stats.map((item) => (
                   <div
                     key={item.label}
@@ -98,18 +98,18 @@ export function FurnishingStatsCard({
                   >
                     <div className="flex items-center gap-2">
                       <span
-                        className="size-2 rounded-sm"
+                        className="size-2 rounded-sm shrink-0"
                         style={{
                           backgroundColor:
                             chartConfig[item.label as keyof typeof chartConfig]
                               ?.color ?? "#22c55e",
                         }}
                       />
-                      <span className="capitalize">
+                      <span className="capitalize truncate">
                         {item.label.replace("-", " ")}
                       </span>
                     </div>
-                    <span className="font-mono text-muted-foreground">
+                    <span className="font-mono text-muted-foreground shrink-0">
                       {item.value}
                     </span>
                   </div>

@@ -152,12 +152,12 @@ export function AdminDashboard() {
   const loading = propertiesLoading || usersLoading;
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-4 sm:space-y-6">
       {(propertiesError || usersError) && (
         <Card className="border-destructive/40 bg-destructive/5">
           <CardContent className="flex items-center gap-2 py-3 text-sm text-destructive">
-            <AlertCircle className="size-4" />
-            <span>
+            <AlertCircle className="size-4 shrink-0" />
+            <span className="break-words">
               Failed to load some analytics data. Please refresh the page.
             </span>
           </CardContent>
@@ -172,7 +172,7 @@ export function AdminDashboard() {
         totalProperties={properties.length}
       />
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
         {loading ? (
           <>
             <Skeleton className="h-48 w-full" />
@@ -189,7 +189,7 @@ export function AdminDashboard() {
         )}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <RecentSalesTable loading={loading} properties={recentSales} />
         <RecentUsersTable loading={loading} users={recentUsers} />
         <BookedPropertiesTable

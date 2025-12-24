@@ -110,7 +110,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 dark:from-background dark:via-primary/10 dark:to-primary/15">
+    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 dark:from-background dark:via-primary/10 dark:to-primary/15 w-full max-w-full">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.primary)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.primary)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-10" />
 
@@ -123,30 +123,30 @@ export function HeroSection() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full px-4 py-2">
+      <div className="relative z-10 w-full max-w-full px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 py-4 sm:py-6 md:py-8 lg:py-12 xl:py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center space-y-6"
+          className="text-center space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 xl:space-y-8 w-full"
         >
           {/* Hero Text */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="inline-flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              <Home className="h-4 w-4" />
-              Find Your Dream Property
+              <Home className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
+              <span className="whitespace-nowrap text-[10px] sm:text-xs md:text-sm">Find Your Dream Property</span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-gray-900 via-primary to-primary/80 dark:from-white dark:via-primary dark:to-primary/90 bg-clip-text text-transparent leading-tight"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold bg-gradient-to-r from-gray-900 via-primary to-primary/80 dark:from-white dark:via-primary dark:to-primary/90 bg-clip-text text-transparent leading-tight px-1 sm:px-2 break-words"
             >
               Africa Property Finder
             </motion.h1>
@@ -155,7 +155,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed px-4"
+              className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-snug sm:leading-relaxed px-1 sm:px-2 md:px-4"
             >
               Discover your perfect home with our advanced search technology.
               From luxury apartments to cozy studios, find exactly what you're
@@ -168,16 +168,16 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="max-w-4xl mx-auto"
+            className="max-w-4xl mx-auto w-full"
           >
-            <div className="p-4 md:p-6 rounded-3xl bg-white/20 backdrop-blur-lg border border-white/30 shadow-2xl">
+            <div className="p-2.5 sm:p-3 md:p-4 lg:p-5 xl:p-6 rounded-xl sm:rounded-2xl md:rounded-3xl bg-white/20 backdrop-blur-lg border border-white/30 shadow-2xl w-full">
               {/* Listing Type Tabs */}
-              <div className="flex flex-wrap gap-2 md:gap-3 mb-3 md:mb-4 justify-center">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-2.5 lg:gap-3 mb-3 sm:mb-3.5 md:mb-4 lg:mb-5 justify-center">
                 {listingTypes.map((type) => (
                   <button
                     key={type.value}
                     onClick={() => setSelectedListingType(type.value)}
-                    className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 rounded-full text-xs sm:text-sm md:text-base font-medium transition-all duration-300 ${
+                    className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-6 py-1.5 sm:py-2 md:py-2.5 lg:py-3 rounded-full text-[10px] sm:text-xs md:text-sm lg:text-base font-medium transition-all duration-300 ${
                       selectedListingType === type.value
                         ? "bg-primary/20 backdrop-blur-md text-primary dark:text-primary shadow-lg border border-primary/40"
                         : "bg-white/10 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:bg-white/20 border border-white/20"
@@ -190,10 +190,10 @@ export function HeroSection() {
               </div>
 
               {/* Search Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 items-end">
                 {/* Location Search */}
-                <div className="sm:col-span-2 lg:col-span-2 space-y-1.5 md:space-y-2">
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="sm:col-span-2 lg:col-span-2 space-y-1 sm:space-y-1.5 md:space-y-2">
+                  <label className="block text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5 sm:mb-1">
                     Location
                   </label>
                   <div className="relative">
@@ -204,8 +204,8 @@ export function HeroSection() {
                 </div>
 
                 {/* Property Type */}
-                <div className="sm:col-span-1 lg:col-span-1 space-y-1.5 md:space-y-2 w-full">
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="sm:col-span-1 lg:col-span-1 space-y-1 sm:space-y-1.5 md:space-y-2 w-full">
+                  <label className="block text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5 sm:mb-1">
                     Property Type
                   </label>
                   <div className="w-full">
@@ -215,7 +215,7 @@ export function HeroSection() {
                         setSelectedPropertyType(value as PropertyType | "all")
                       }
                     >
-                      <SelectTrigger className="w-full h-9 text-xs sm:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 min-w-0 flex-1">
+                      <SelectTrigger className="w-full h-8 sm:h-9 md:h-10 text-[10px] sm:text-xs md:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 min-w-0 flex-1">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent className="bg-white/95 backdrop-blur-lg border-white/30 min-w-[var(--radix-select-trigger-width)]">
@@ -230,17 +230,17 @@ export function HeroSection() {
                 </div>
 
                 {/* Search Term */}
-                <div className="sm:col-span-1 lg:col-span-1 space-y-1.5 md:space-y-2">
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="sm:col-span-1 lg:col-span-1 space-y-1 sm:space-y-1.5 md:space-y-2">
+                  <label className="block text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5 sm:mb-1">
                     Keywords
                   </label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                     <Input
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="City, neighborhood, or features..."
-                      className="h-9 pl-10 text-xs sm:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 placeholder:text-gray-500"
+                      placeholder="City, neighborhood..."
+                      className="h-8 sm:h-9 md:h-10 pl-8 sm:pl-10 text-[10px] sm:text-xs md:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 placeholder:text-gray-500"
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                   </div>
@@ -251,16 +251,17 @@ export function HeroSection() {
                   <Button
                     onClick={handleSearch}
                     disabled={isSearching}
-                    className="w-full h-9 text-xs sm:text-sm bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
+                    className="w-full h-8 sm:h-9 md:h-10 text-[10px] sm:text-xs md:text-sm bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
                   >
                     {isSearching ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Searching...
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span className="hidden sm:inline">Searching...</span>
+                        <span className="sm:hidden">...</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <Search className="h-4 w-4" />
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         Search
                       </div>
                     )}
@@ -276,19 +277,19 @@ export function HeroSection() {
               )}
 
               {/* Quick Stats */}
-              <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-white/20">
-                <div className="flex flex-wrap justify-center gap-3 md:gap-6 text-xs text-gray-600 dark:text-gray-300">
+              <div className="mt-4 sm:mt-5 md:mt-6 pt-4 sm:pt-5 md:pt-6 border-t border-white/20">
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span>10,000+ Properties</span>
+                    <span className="whitespace-nowrap">10,000+ Properties</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary/80 rounded-full"></div>
-                    <span>Real-time Updates</span>
+                    <span className="whitespace-nowrap">Real-time Updates</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary/60 rounded-full"></div>
-                    <span>Expert Verified</span>
+                    <span className="whitespace-nowrap">Expert Verified</span>
                   </div>
                 </div>
               </div>
@@ -300,7 +301,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-gray-600 dark:text-gray-400 text-sm sm:text-base max-w-xl mx-auto px-4"
+            className="text-gray-600 dark:text-gray-400 text-sm sm:text-base md:text-lg max-w-xl mx-auto px-2 sm:px-4 mt-4 sm:mt-6"
           >
             Join thousands of satisfied customers who found their dream homes
             with us

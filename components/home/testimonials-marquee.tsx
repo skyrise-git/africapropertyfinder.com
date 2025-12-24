@@ -44,7 +44,7 @@ export function TestimonialCard({
   return (
     <div
       className={cn(
-        "mb-4 flex w-full cursor-pointer break-inside-avoid flex-col items-center justify-between gap-6 rounded-xl p-4",
+        "mb-2 sm:mb-3 md:mb-4 flex w-full cursor-pointer break-inside-avoid flex-col items-center justify-between gap-3 sm:gap-4 md:gap-6 rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4",
         // theme styles
         "border-border bg-card/50 border shadow-sm",
         // hover effect
@@ -53,29 +53,29 @@ export function TestimonialCard({
       )}
       {...props}
     >
-      <div className="text-muted-foreground text-sm font-normal select-none">
+      <div className="text-muted-foreground text-[11px] sm:text-xs md:text-sm font-normal select-none w-full">
         {description}
-        <div className="flex flex-row py-1">
-          <Star className="size-4 fill-primary text-primary" />
-          <Star className="size-4 fill-primary text-primary" />
-          <Star className="size-4 fill-primary text-primary" />
-          <Star className="size-4 fill-primary text-primary" />
-          <Star className="size-4 fill-primary text-primary" />
+        <div className="flex flex-row py-0.5 sm:py-1">
+          <Star className="size-3 sm:size-3.5 md:size-4 fill-primary text-primary" />
+          <Star className="size-3 sm:size-3.5 md:size-4 fill-primary text-primary" />
+          <Star className="size-3 sm:size-3.5 md:size-4 fill-primary text-primary" />
+          <Star className="size-3 sm:size-3.5 md:size-4 fill-primary text-primary" />
+          <Star className="size-3 sm:size-3.5 md:size-4 fill-primary text-primary" />
         </div>
       </div>
 
-      <div className="flex w-full items-center justify-start gap-5 select-none">
+      <div className="flex w-full items-center justify-start gap-2 sm:gap-3 md:gap-5 select-none">
         <img
           width={40}
           height={40}
           src={img || ""}
           alt={name}
-          className="size-10 rounded-full ring-1 ring-primary/20 ring-offset-2"
+          className="size-8 sm:size-9 md:size-10 rounded-full ring-1 ring-primary/20 ring-offset-1 sm:ring-offset-2"
         />
 
         <div>
-          <p className="text-foreground font-medium">{name}</p>
-          <p className="text-muted-foreground text-xs font-normal">{role}</p>
+          <p className="text-foreground font-medium text-xs sm:text-sm md:text-base">{name}</p>
+          <p className="text-muted-foreground text-[10px] sm:text-xs font-normal">{role}</p>
         </div>
       </div>
     </div>
@@ -230,20 +230,20 @@ const testimonials = [
 
 export function TestimonialsMarquee() {
   return (
-    <section className="relative mx-auto max-w-6xl px-4 py-12 md:py-16">
+    <section className="relative mx-auto max-w-6xl px-3 sm:px-4 md:px-5 lg:px-6 py-6 sm:py-8 md:py-10 lg:py-12 xl:py-16 w-full max-w-full overflow-x-hidden">
       {/* Decorative elements */}
-      <div className="absolute top-20 -left-20 z-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute -right-20 bottom-20 z-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute top-20 -left-20 z-10 h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-64 lg:w-64 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute -right-20 bottom-20 z-10 h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-64 lg:w-64 rounded-full bg-primary/5 blur-3xl" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-foreground mb-4 text-center text-4xl leading-[1.2] font-bold tracking-tighter md:text-5xl">
+        <h2 className="text-foreground mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 text-center text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl leading-[1.2] font-bold tracking-tighter px-1 sm:px-2">
           What Our Users Are Saying
         </h2>
-        <h3 className="text-muted-foreground mx-auto mb-8 max-w-lg text-center text-lg font-medium tracking-tight text-balance">
+        <h3 className="text-muted-foreground mx-auto mb-4 sm:mb-5 md:mb-6 lg:mb-8 max-w-lg text-center text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg font-medium tracking-tight text-balance px-1 sm:px-2">
           Don&apos;t just take our word for it. Here&apos;s what{" "}
           <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
             real clients
@@ -255,12 +255,12 @@ export function TestimonialsMarquee() {
         </h3>
       </motion.div>
 
-      <div className="relative mt-6 max-h-[800px] overflow-hidden">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      <div className="relative mt-4 sm:mt-5 md:mt-6 max-h-[400px] sm:max-h-[500px] md:max-h-[600px] lg:max-h-[700px] xl:max-h-[800px] overflow-hidden">
+        <div className="grid grid-cols-1 gap-2 sm:gap-3 md:gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {Array(Math.ceil(testimonials.length / 3))
             .fill(0)
             .map((_, i) => (
-              <div key={i} className="h-[800px] overflow-hidden">
+              <div key={i} className="h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px] overflow-hidden">
                 <Marquee
                   vertical
                   repeat={3}

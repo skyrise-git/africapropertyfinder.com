@@ -12,13 +12,13 @@ export default function RoleLayout({
     <>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className="flex h-screen flex-col overflow-hidden">
           <AppHeader />
           <div className="px-4 pt-4">
             <DynamicBreadcrumb />
           </div>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-2">
-            <main className="flex-1">{children}</main>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 pt-2">
+            <main className="flex-1 min-w-0">{children}</main>
           </div>
         </SidebarInset>
       </SidebarProvider>

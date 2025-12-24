@@ -47,30 +47,32 @@ export function RecentSalesTable({
             No sale properties recorded yet.
           </p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Price</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {properties.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="max-w-[140px] truncate text-xs">
-                    {p.title}
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {p.city}
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {p.price ? `₹${p.price.toLocaleString()}` : "-"}
-                  </TableCell>
+          <div className="overflow-x-auto -mx-6 px-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px]">Title</TableHead>
+                  <TableHead className="min-w-[100px]">City</TableHead>
+                  <TableHead className="min-w-[100px]">Price</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {properties.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="max-w-[140px] truncate text-xs">
+                      {p.title}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {p.city}
+                    </TableCell>
+                    <TableCell className="text-xs whitespace-nowrap">
+                      {p.price ? `₹${p.price.toLocaleString()}` : "-"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -97,28 +99,30 @@ export function RecentUsersTable({ loading, users }: RecentUsersTableProps) {
             No users found yet. New signups will appear here.
           </p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((u) => (
-                <TableRow key={u.uid}>
-                  <TableCell className="max-w-[120px] truncate text-xs">
-                    {u.name}
-                  </TableCell>
-                  <TableCell className="max-w-[160px] truncate text-xs">
-                    {u.email}
-                  </TableCell>
-                  <TableCell className="text-xs capitalize">{u.role}</TableCell>
+          <div className="overflow-x-auto -mx-6 px-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[100px]">Name</TableHead>
+                  <TableHead className="min-w-[140px]">Email</TableHead>
+                  <TableHead className="min-w-[80px]">Role</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {users.map((u) => (
+                  <TableRow key={u.uid}>
+                    <TableCell className="max-w-[120px] truncate text-xs">
+                      {u.name}
+                    </TableCell>
+                    <TableCell className="max-w-[160px] truncate text-xs">
+                      {u.email}
+                    </TableCell>
+                    <TableCell className="text-xs capitalize whitespace-nowrap">{u.role}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -152,30 +156,32 @@ export function BookedPropertiesTable({
             show up here.
           </p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {properties.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="max-w-[140px] truncate text-xs">
-                    {p.title}
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {p.city}
-                  </TableCell>
-                  <TableCell className="text-xs capitalize">
-                    {p.status || "booked"}
-                  </TableCell>
+          <div className="overflow-x-auto -mx-6 px-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px]">Title</TableHead>
+                  <TableHead className="min-w-[100px]">City</TableHead>
+                  <TableHead className="min-w-[80px]">Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {properties.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="max-w-[140px] truncate text-xs">
+                      {p.title}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {p.city}
+                    </TableCell>
+                    <TableCell className="text-xs capitalize whitespace-nowrap">
+                      {p.status || "booked"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
