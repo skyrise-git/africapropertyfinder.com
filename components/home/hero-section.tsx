@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Search, MapPin, Home, Building, GraduationCap } from "lucide-react";
+import { Search, Home, Building, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,8 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import { PropertyLocationSearch } from "@/components/home/property-location-search";
-import type { ListingType, PropertyType } from "@/lib/types/property.type";
+import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import type {
+  ListingType,
+  PropertyType,
+  Property,
+} from "@/lib/types/property.type";
 
 interface LocationData {
   lat: string;
@@ -56,10 +62,49 @@ export function HeroSection() {
     PropertyType | "all"
   >("all");
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
-    null,
+    null
   );
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+
+  // Fetch properties for stats
+  const { data: propertiesData } = useFirebaseRealtime<Property>("properties");
+  const properties = (propertiesData as Property[]) || [];
+
+  // Fetch users for client count
+  const { data: usersData } = useFirebaseRealtime<{
+    uid: string;
+    status?: string;
+  }>("users");
+  const users = (usersData as { uid: string; status?: string }[]) || [];
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    // Filter out hidden properties if isHidden field exists
+    const visibleProperties = properties.filter((p) => {
+      const prop = p as Property & { isHidden?: boolean };
+      return !prop.isHidden;
+    });
+
+    // Get unique cities
+    const uniqueCities = new Set(
+      visibleProperties
+        .map((p) => p.city)
+        .filter(
+          (city): city is string => typeof city === "string" && city.length > 0
+        )
+    );
+
+    // Active users (clients)
+    const activeUsers = users.filter((u) => u.status === "active" || !u.status);
+
+    return {
+      propertiesListed: visibleProperties.length,
+      happyClients: activeUsers.length,
+      citiesCovered: uniqueCities.size,
+      expertAgents: 50, // Placeholder - can be replaced with actual staff count
+    };
+  }, [properties, users]);
 
   const handleSearch = async () => {
     setIsSearching(true);
@@ -93,13 +138,14 @@ export function HeroSection() {
 
       // Navigate to properties page with filters
       const queryString = params.toString();
-      router.push(`/properties${queryString ? `?${queryString}` : ""}`);
+      const url = queryString ? `/properties?${queryString}` : "/properties";
+      router.push(url);
 
       setTimeout(() => setIsSearching(false), 1000);
     } catch (error) {
       console.error("Search error:", error);
       setSearchError(
-        "Something went wrong with your search. Please try again.",
+        "Something went wrong with your search. Please try again."
       );
       setIsSearching(false);
     }
@@ -110,7 +156,18 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 dark:from-background dark:via-primary/10 dark:to-primary/15 w-full max-w-full">
+    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden w-full max-w-full">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/images/backkground.png')",
+        }}
+      />
+
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 dark:from-black/70 dark:via-black/60 dark:to-black/70" />
+
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.primary)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.primary)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-10" />
 
@@ -136,17 +193,19 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="inline-flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="inline-flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2.5 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-[10px] sm:text-xs md:text-sm font-semibold text-white shadow-lg"
             >
               <Home className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
-              <span className="whitespace-nowrap text-[10px] sm:text-xs md:text-sm">Find Your Dream Property</span>
+              <span className="whitespace-nowrap text-[10px] sm:text-xs md:text-sm">
+                Find Your Dream Property
+              </span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold bg-gradient-to-r from-gray-900 via-primary to-primary/80 dark:from-white dark:via-primary dark:to-primary/90 bg-clip-text text-transparent leading-tight px-1 sm:px-2 break-words"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-primary leading-tight px-1 sm:px-2 break-words drop-shadow-lg"
             >
               Africa Property Finder
             </motion.h1>
@@ -155,7 +214,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-snug sm:leading-relaxed px-1 sm:px-2 md:px-4"
+              className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-white/95 max-w-2xl mx-auto leading-snug sm:leading-relaxed px-1 sm:px-2 md:px-4 font-medium drop-shadow-md"
             >
               Discover your perfect home with our advanced search technology.
               From luxury apartments to cozy studios, find exactly what you're
@@ -177,10 +236,10 @@ export function HeroSection() {
                   <button
                     key={type.value}
                     onClick={() => setSelectedListingType(type.value)}
-                    className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-6 py-1.5 sm:py-2 md:py-2.5 lg:py-3 rounded-full text-[10px] sm:text-xs md:text-sm lg:text-base font-medium transition-all duration-300 ${
+                    className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-6 py-1.5 sm:py-2 md:py-2.5 lg:py-3 rounded-full text-[10px] sm:text-xs md:text-sm lg:text-base font-semibold transition-all duration-300 ${
                       selectedListingType === type.value
-                        ? "bg-primary/20 backdrop-blur-md text-primary dark:text-primary shadow-lg border border-primary/40"
-                        : "bg-white/10 backdrop-blur-sm text-gray-600 dark:text-gray-300 hover:bg-white/20 border border-white/20"
+                        ? "bg-primary/30 backdrop-blur-md text-white shadow-lg border border-primary/50"
+                        : "bg-white/10 backdrop-blur-sm text-white/90 hover:bg-white/20 border border-white/30"
                     }`}
                   >
                     {type.icon}
@@ -193,7 +252,10 @@ export function HeroSection() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 items-end">
                 {/* Location Search */}
                 <div className="sm:col-span-2 lg:col-span-2 space-y-1 sm:space-y-1.5 md:space-y-2">
-                  <label className="block text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5 sm:mb-1">
+                  <label
+                    htmlFor="location-search"
+                    className="block text-[10px] sm:text-xs md:text-sm font-semibold text-white/95 mb-0.5 sm:mb-1"
+                  >
                     Location
                   </label>
                   <div className="relative">
@@ -205,7 +267,10 @@ export function HeroSection() {
 
                 {/* Property Type */}
                 <div className="sm:col-span-1 lg:col-span-1 space-y-1 sm:space-y-1.5 md:space-y-2 w-full">
-                  <label className="block text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5 sm:mb-1">
+                  <label
+                    htmlFor="property-type"
+                    className="block text-[10px] sm:text-xs md:text-sm font-semibold text-white/95 mb-0.5 sm:mb-1"
+                  >
                     Property Type
                   </label>
                   <div className="w-full">
@@ -215,7 +280,7 @@ export function HeroSection() {
                         setSelectedPropertyType(value as PropertyType | "all")
                       }
                     >
-                      <SelectTrigger className="w-full h-8 sm:h-9 md:h-10 text-[10px] sm:text-xs md:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 min-w-0 flex-1">
+                      <SelectTrigger className="w-full h-8 sm:h-9 md:h-10 text-[10px] sm:text-xs md:text-sm bg-white/60 backdrop-blur-sm border-white/40 text-gray-900 min-w-0 flex-1">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent className="bg-white/95 backdrop-blur-lg border-white/30 min-w-[var(--radix-select-trigger-width)]">
@@ -231,16 +296,20 @@ export function HeroSection() {
 
                 {/* Search Term */}
                 <div className="sm:col-span-1 lg:col-span-1 space-y-1 sm:space-y-1.5 md:space-y-2">
-                  <label className="block text-[10px] sm:text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5 sm:mb-1">
+                  <label
+                    htmlFor="search-keywords"
+                    className="block text-[10px] sm:text-xs md:text-sm font-semibold text-white/95 mb-0.5 sm:mb-1"
+                  >
                     Keywords
                   </label>
                   <div className="relative">
-                    <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+                    <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/70" />
                     <Input
+                      id="search-keywords"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="City, neighborhood..."
-                      className="h-8 sm:h-9 md:h-10 pl-8 sm:pl-10 text-[10px] sm:text-xs md:text-sm bg-white/50 backdrop-blur-sm border-white/30 text-gray-700 dark:text-gray-300 placeholder:text-gray-500"
+                      className="h-8 sm:h-9 md:h-10 pl-8 sm:pl-10 text-[10px] sm:text-xs md:text-sm bg-white/60 backdrop-blur-sm border-white/40 text-gray-900 placeholder:text-gray-600"
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                   </div>
@@ -277,22 +346,112 @@ export function HeroSection() {
               )}
 
               {/* Quick Stats */}
-              <div className="mt-4 sm:mt-5 md:mt-6 pt-4 sm:pt-5 md:pt-6 border-t border-white/20">
-                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              <div className="mt-4 sm:mt-5 md:mt-6 pt-4 sm:pt-5 md:pt-6 border-t border-white/30">
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6 text-xs sm:text-sm text-white/95 font-medium">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    <span className="whitespace-nowrap">10,000+ Properties</span>
+                    <div className="w-2 h-2 bg-primary rounded-full shadow-lg"></div>
+                    <span className="whitespace-nowrap">
+                      10,000+ Properties
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-primary/80 rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary rounded-full shadow-lg"></div>
                     <span className="whitespace-nowrap">Real-time Updates</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-primary/60 rounded-full"></div>
+                    <div className="w-2 h-2 bg-primary rounded-full shadow-lg"></div>
                     <span className="whitespace-nowrap">Expert Verified</span>
                   </div>
                 </div>
               </div>
+            </div>
+          </motion.div>
+
+          {/* Stats Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.7 }}
+            className="max-w-6xl mx-auto w-full mt-8 sm:mt-10 md:mt-12"
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl rounded-2xl overflow-hidden">
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
+                      {stats.propertiesListed > 0
+                        ? `${stats.propertiesListed}+`
+                        : "1000+"}
+                    </div>
+                    <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium">
+                      Properties Listed
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl rounded-2xl overflow-hidden">
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
+                      {stats.happyClients > 0
+                        ? `${stats.happyClients}+`
+                        : "500+"}
+                    </div>
+                    <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium">
+                      Happy Clients
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl rounded-2xl overflow-hidden">
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
+                      {stats.citiesCovered > 0
+                        ? `${stats.citiesCovered}+`
+                        : "50+"}
+                    </div>
+                    <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium">
+                      Cities Covered
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 1.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl rounded-2xl overflow-hidden">
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
+                      {stats.expertAgents}+
+                    </div>
+                    <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium">
+                      Expert Agents
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
           </motion.div>
 
@@ -301,7 +460,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-gray-600 dark:text-gray-400 text-sm sm:text-base md:text-lg max-w-xl mx-auto px-2 sm:px-4 mt-4 sm:mt-6"
+            className="text-white/90 dark:text-white/80 text-sm sm:text-base md:text-lg max-w-xl mx-auto px-2 sm:px-4 mt-6 sm:mt-8"
           >
             Join thousands of satisfied customers who found their dream homes
             with us
@@ -310,7 +469,7 @@ export function HeroSection() {
       </div>
 
       {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/50 to-transparent dark:from-gray-900/50 backdrop-blur-sm" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/80 to-transparent dark:from-gray-900/80 backdrop-blur-sm" />
     </section>
   );
 }
