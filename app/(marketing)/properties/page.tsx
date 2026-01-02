@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useQueryState, parseAsString } from "nuqs";
+import { useEffect, useMemo, useState } from "react";
+import { useQueryState, parseAsString, parseAsArrayOf } from "nuqs";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Home } from "lucide-react";
+import { Search, Home, Filter } from "lucide-react";
 
 import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
 import type { Property } from "@/lib/types/property.type";
@@ -24,6 +24,16 @@ import {
 } from "@/components/ui/pagination";
 import { PropertyLocationSearch } from "./_components/property-location-search";
 import { FilterChips } from "@/components/ui/filter-chips";
+import { PropertyFiltersSidebar } from "./_components/property-filters-sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PAGE_SIZE = 24;
 
@@ -52,6 +62,8 @@ const SEARCH_RADIUS_KM = 50; // Default search radius in kilometers
 
 export default function PropertiesPage() {
   const { data, loading, error } = useFirebaseRealtime<Property>("properties");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const isMobile = useIsMobile();
   const [search, setSearch] = useQueryState(
     "search",
     parseAsString.withDefault("")
@@ -77,13 +89,68 @@ export default function PropertiesPage() {
     parseAsString.withDefault("")
   );
 
+  // Sidebar filters
+  const [selectedListingTypes] = useQueryState(
+    "listingTypes",
+    parseAsArrayOf(parseAsString).withDefault([])
+  );
+  const [selectedPropertyTypes] = useQueryState(
+    "propertyTypes",
+    parseAsArrayOf(parseAsString).withDefault([])
+  );
+  const [minPriceStr] = useQueryState(
+    "minPrice",
+    parseAsString.withDefault("")
+  );
+  const [maxPriceStr] = useQueryState(
+    "maxPrice",
+    parseAsString.withDefault("")
+  );
+  const [minBedroomsStr] = useQueryState(
+    "minBedrooms",
+    parseAsString.withDefault("")
+  );
+  const [minBathroomsStr] = useQueryState(
+    "minBathrooms",
+    parseAsString.withDefault("")
+  );
+  const [selectedFurnishing] = useQueryState(
+    "furnishing",
+    parseAsString.withDefault("")
+  );
+  const [selectedAmenities] = useQueryState(
+    "amenities",
+    parseAsArrayOf(parseAsString).withDefault([])
+  );
+
+  // Convert string filters to numbers
+  const minPrice = minPriceStr ? Number(minPriceStr) : null;
+  const maxPrice = maxPriceStr ? Number(maxPriceStr) : null;
+  const minBedrooms = minBedroomsStr ? Number(minBedroomsStr) : null;
+  const minBathrooms = minBathroomsStr ? Number(minBathroomsStr) : null;
+
   const properties = (data as Property[]) || [];
 
   // Reset page to 1 when search, sort, or location change
   useEffect(() => {
     setPage("1");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, sortOption, lat, lng, listingType, propertyType]);
+  }, [
+    search,
+    sortOption,
+    lat,
+    lng,
+    listingType,
+    propertyType,
+    selectedListingTypes,
+    selectedPropertyTypes,
+    minPrice,
+    maxPrice,
+    minBedrooms,
+    minBathrooms,
+    selectedFurnishing,
+    selectedAmenities,
+  ]);
 
   const { filteredSorted, paginated, totalPages } = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
@@ -116,14 +183,81 @@ export default function PropertiesPage() {
         }
       }
 
-      // Filter by listing type if specified
+      // Filter by listing type (legacy single filter or new multi-select)
       if (listingType && property.listingType !== listingType) {
         return false;
       }
+      if ((selectedListingTypes as string[]).length > 0) {
+        if (
+          !(selectedListingTypes as string[]).includes(property.listingType)
+        ) {
+          return false;
+        }
+      }
 
-      // Filter by property type if specified
+      // Filter by property type (legacy single filter or new multi-select)
       if (propertyType && property.propertyType !== propertyType) {
         return false;
+      }
+      if ((selectedPropertyTypes as string[]).length > 0) {
+        if (
+          !(selectedPropertyTypes as string[]).includes(property.propertyType)
+        ) {
+          return false;
+        }
+      }
+
+      // Filter by price range
+      const propertyPrice =
+        property.listingType === "sale" ? property.price : property.rent;
+      if (propertyPrice !== undefined) {
+        if (minPrice !== null && propertyPrice < minPrice) {
+          return false;
+        }
+        if (maxPrice !== null && propertyPrice > maxPrice) {
+          return false;
+        }
+      }
+
+      // Filter by bedrooms
+      if (minBedrooms !== null && property.numBedrooms < minBedrooms) {
+        return false;
+      }
+
+      // Filter by bathrooms
+      if (minBathrooms !== null && property.numBathrooms < minBathrooms) {
+        return false;
+      }
+
+      // Filter by furnishing
+      if (selectedFurnishing && property.furnishing !== selectedFurnishing) {
+        return false;
+      }
+
+      // Filter by amenities
+      if ((selectedAmenities as string[]).length > 0) {
+        const propertyAmenities = [
+          property.parkingAvailable && "parkingAvailable",
+          property.laundry && "laundry",
+          property.heatingCooling && "heatingCooling",
+          property.balcony && "balcony",
+          property.wifi && "wifi",
+          property.gym && "gym",
+          property.pool && "pool",
+          property.elevator && "elevator",
+          property.security && "security",
+          property.garden && "garden",
+          property.dishwasher && "dishwasher",
+          property.fireplace && "fireplace",
+        ].filter(Boolean) as string[];
+
+        const hasAllSelectedAmenities = (selectedAmenities as string[]).every(
+          (amenity) => propertyAmenities.includes(amenity)
+        );
+
+        if (!hasAllSelectedAmenities) {
+          return false;
+        }
       }
 
       // Filter by location if a location is selected
@@ -208,6 +342,14 @@ export default function PropertiesPage() {
     lng,
     listingType,
     propertyType,
+    selectedListingTypes,
+    selectedPropertyTypes,
+    minPrice,
+    maxPrice,
+    minBedrooms,
+    minBathrooms,
+    selectedFurnishing,
+    selectedAmenities,
   ]);
 
   const handlePageChange = (newPage: number) => {
@@ -258,11 +400,11 @@ export default function PropertiesPage() {
   ];
 
   const handleClearAllFilters = () => {
-    setLat(null);
-    setLng(null);
-    setLocationLabel(null);
-    setListingType(null);
-    setPropertyType(null);
+    setLat("");
+    setLng("");
+    setLocationLabel("");
+    setListingType("");
+    setPropertyType("");
   };
 
   if (loading) {
@@ -274,181 +416,220 @@ export default function PropertiesPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6"
-    >
+    <div className="w-full min-h-screen">
       <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="space-y-3 text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="w-full space-y-8 p-4 md:p-6"
       >
-        <div className="inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
-          <Home className="h-3.5 w-3.5" />
-          Live properties from Realtime Database
-        </div>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
-          Find your next home
-        </h1>
-        <p className="text-sm text-muted-foreground sm:text-base">
-          Browse all properties with realtime updates and an interactive map
-          view.
-        </p>
-      </motion.div>
-
-      <div className="space-y-5">
         <motion.div
-          initial={{ opacity: 0, y: -8 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="rounded-xl border-2 border-border/60 bg-card/70 p-4 sm:p-5 shadow-sm"
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="space-y-3 text-center"
         >
-          {/* Search Inputs Row */}
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-4 sm:mb-5">
-            <div className="relative flex-1 min-w-0">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value || null)}
-                placeholder="Search by title, address, city…"
-                className="h-9 pl-9 text-sm w-full"
-              />
-            </div>
-            <div className="relative flex-1 min-w-0 sm:flex-shrink-0 sm:max-w-[280px]">
-              <PropertyLocationSearch />
-            </div>
+          <div className="inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
+            <Home className="h-3.5 w-3.5" />
+            Live properties from Realtime Database
           </div>
-
-          {/* Active Filters */}
-          {activeFilters.length > 0 && (
-            <div className="pt-2 border-t border-border/40">
-              <FilterChips
-                filters={activeFilters}
-                onClearAll={handleClearAllFilters}
-              />
-            </div>
-          )}
-
-          {/* Bottom Row: Results Count + Sort Controls */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-3 border-t border-border/40">
-            <div className="text-xs text-muted-foreground">
-              <span>
-                Showing {paginated.length} of {filteredSorted.length} properties
-              </span>
-            </div>
-            <div className="flex-shrink-0">
-              <PropertySortControls />
-            </div>
-          </div>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
+            Find your next home
+          </h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
+            Browse all properties with realtime updates and an interactive map
+            view.
+          </p>
         </motion.div>
 
-        {viewMode === "map" ? (
-          <PropertyMapView properties={filteredSorted} />
-        ) : viewMode === "split" ? (
-          <PropertySplitView
-            properties={filteredSorted}
-            paginated={paginated}
-            totalPages={totalPages}
-            currentPage={Number(page) || 1}
-            onPageChange={handlePageChange}
-          />
-        ) : (
-          <AnimatePresence mode="popLayout">
-            {filteredSorted.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border/60 bg-muted/40 p-10 text-center"
+        {/* Main Content with Sidebar */}
+        <div className="relative w-full flex flex-col lg:flex-row gap-6">
+          {/* Filters Sidebar - Desktop (Sticky) */}
+          <div className="hidden lg:block lg:w-80 shrink-0">
+            <PropertyFiltersSidebar properties={properties} />
+          </div>
+
+          {/* Main Content - Scrollable */}
+          <div className="flex-1 min-w-0 space-y-5">
+            {/* Mobile Filter Button */}
+            {isMobile && (
+              <Sheet
+                open={mobileFiltersOpen}
+                onOpenChange={setMobileFiltersOpen}
               >
-                <Home className="h-10 w-10 text-muted-foreground" />
-                <h3 className="text-lg font-semibold">No properties found</h3>
-                <p className="max-w-md text-sm text-muted-foreground">
-                  {locationLabel || listingType || propertyType
-                    ? `No properties found with your current filters${
-                        locationLabel ? ` near ${locationLabel}` : ""
-                      }. Try adjusting your search criteria.`
-                    : "Try adjusting your search term to widen the results."}
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div
-                layout
-                className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
-              >
-                {paginated.map((property) => (
-                  <motion.div
-                    key={property.id}
-                    layout
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                  >
-                    <PropertyCard
-                      property={property}
-                      href={`/properties/${property.id}`}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="left"
+                  className="w-[320px] sm:w-[380px] overflow-y-auto"
+                >
+                  <SheetHeader>
+                    <SheetTitle>Filters</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <PropertyFiltersSidebar properties={properties} />
+                  </div>
+                </SheetContent>
+              </Sheet>
             )}
-          </AnimatePresence>
-        )}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="rounded-xl border-2 border-border/60 bg-card/70 p-4 sm:p-5 shadow-sm"
+            >
+              {/* Search Inputs Row */}
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-4 sm:mb-5">
+                <div className="relative flex-1 min-w-0">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value || null)}
+                    placeholder="Search by title, address, city…"
+                    className="h-9 pl-9 text-sm w-full"
+                  />
+                </div>
+                <div className="relative flex-1 min-w-0 sm:flex-shrink-0 sm:max-w-[280px]">
+                  <PropertyLocationSearch />
+                </div>
+              </div>
 
-        {viewMode !== "map" && viewMode !== "split" && totalPages > 1 && (
-          <Pagination className="pt-2">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href={`?page=${Math.max(1, (Number(page) || 1) - 1)}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(Math.max(1, (Number(page) || 1) - 1));
-                  }}
-                />
-              </PaginationItem>
+              {/* Active Filters */}
+              {activeFilters.length > 0 && (
+                <div className="pt-2 border-t border-border/40">
+                  <FilterChips
+                    filters={activeFilters}
+                    onClearAll={handleClearAllFilters}
+                  />
+                </div>
+              )}
 
-              {Array.from({ length: totalPages }).map((_, index) => {
-                const pageNumber = index + 1;
-                const isActive = pageNumber === (Number(page) || 1);
+              {/* Bottom Row: Results Count + Sort Controls */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-3 border-t border-border/40">
+                <div className="text-xs text-muted-foreground">
+                  <span>
+                    Showing {paginated.length} of {filteredSorted.length}{" "}
+                    properties
+                  </span>
+                </div>
+                <div className="flex-shrink-0">
+                  <PropertySortControls />
+                </div>
+              </div>
+            </motion.div>
 
-                return (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      href={`?page=${pageNumber}`}
-                      isActive={isActive}
+            {viewMode === "map" ? (
+              <PropertyMapView properties={filteredSorted} />
+            ) : viewMode === "split" ? (
+              <PropertySplitView
+                properties={filteredSorted}
+                paginated={paginated}
+                totalPages={totalPages}
+                currentPage={Number(page) || 1}
+                onPageChange={handlePageChange}
+              />
+            ) : (
+              <AnimatePresence mode="popLayout">
+                {filteredSorted.length === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border/60 bg-muted/40 p-10 text-center"
+                  >
+                    <Home className="h-10 w-10 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold">
+                      No properties found
+                    </h3>
+                    <p className="max-w-md text-sm text-muted-foreground">
+                      {locationLabel || listingType || propertyType
+                        ? `No properties found with your current filters${
+                            locationLabel ? ` near ${locationLabel}` : ""
+                          }. Try adjusting your search criteria.`
+                        : "Try adjusting your search term to widen the results."}
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    layout
+                    className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+                  >
+                    {paginated.map((property) => (
+                      <motion.div
+                        key={property.id}
+                        layout
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -12 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                      >
+                        <PropertyCard
+                          property={property}
+                          href={`/properties/${property.id}`}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            )}
+
+            {viewMode !== "map" && viewMode !== "split" && totalPages > 1 && (
+              <Pagination className="pt-2">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href={`?page=${Math.max(1, (Number(page) || 1) - 1)}`}
                       onClick={(e) => {
                         e.preventDefault();
-                        handlePageChange(pageNumber);
+                        handlePageChange(Math.max(1, (Number(page) || 1) - 1));
                       }}
-                    >
-                      {pageNumber}
-                    </PaginationLink>
+                    />
                   </PaginationItem>
-                );
-              })}
 
-              <PaginationItem>
-                <PaginationNext
-                  href={`?page=${Math.min(
-                    totalPages,
-                    (Number(page) || 1) + 1
-                  )}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(
-                      Math.min(totalPages, (Number(page) || 1) + 1)
+                  {Array.from({ length: totalPages }).map((_, index) => {
+                    const pageNumber = index + 1;
+                    const isActive = pageNumber === (Number(page) || 1);
+
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          href={`?page=${pageNumber}`}
+                          isActive={isActive}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(pageNumber);
+                          }}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
                     );
-                  }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
-      </div>
-    </motion.div>
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      href={`?page=${Math.min(
+                        totalPages,
+                        (Number(page) || 1) + 1
+                      )}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(
+                          Math.min(totalPages, (Number(page) || 1) + 1)
+                        );
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </div>
   );
 }
