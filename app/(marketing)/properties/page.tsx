@@ -568,7 +568,7 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl p-4 md:p-6">
+    <div className="container mx-auto max-w-7xl p-4 md:p-6">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
