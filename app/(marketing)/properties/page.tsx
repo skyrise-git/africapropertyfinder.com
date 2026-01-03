@@ -596,7 +596,7 @@ export default function PropertiesPage() {
         {/* Main Content with Sidebar */}
         <div className="relative w-full flex flex-col lg:flex-row gap-6 items-start">
           {/* Filters Sidebar - Desktop (Sticky) */}
-          <aside className="hidden lg:block lg:w-80 shrink-0 sticky top-24 h-[calc(100vh-8rem)] overflow-y-auto z-20 transition-all duration-300 ease-in-out">
+          <aside className="hidden lg:block lg:w-80 shrink-0 sticky top-24 z-20 transition-all duration-300 ease-in-out">
             <PropertyFiltersSidebar properties={properties} />
           </aside>
 

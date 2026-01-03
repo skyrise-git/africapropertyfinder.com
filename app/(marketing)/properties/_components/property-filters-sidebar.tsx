@@ -250,7 +250,7 @@ export function PropertyFiltersSidebar({
       transition={{ duration: 0.3 }}
       className="w-full lg:w-80 shrink-0"
     >
-      <Card className="lg:w-[320px] border-border/60 bg-card/70 flex flex-col shadow-lg">
+      <Card className="lg:w-[320px] border-border/60 bg-card/70 flex flex-col shadow-lg h-auto">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -270,7 +270,7 @@ export function PropertyFiltersSidebar({
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 h-auto">
           {/* Listing Type */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold">Listing Type</Label>

@@ -60,36 +60,36 @@ export function BlogFilters({ blogs }: BlogFiltersProps) {
   // URL Query State
   const [selectedCategories, setSelectedCategories] = useQueryState(
     "categories",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
 
   const [selectedTags, setSelectedTags] = useQueryState(
     "tags",
-    parseAsArrayOf(parseAsString).withDefault([]),
+    parseAsArrayOf(parseAsString).withDefault([])
   );
 
   const [selectedAuthor, setSelectedAuthor] = useQueryState(
     "author",
-    parseAsString.withDefault("all"),
+    parseAsString.withDefault("all")
   );
 
   const [showFeaturedOnly, setShowFeaturedOnly] = useQueryState(
     "featured",
-    parseAsBoolean.withDefault(false),
+    parseAsBoolean.withDefault(false)
   );
 
   // Get unique tags and authors from blogs
   const allTags = useMemo(
     () => Array.from(new Set(blogs.flatMap((blog) => blog.tags || []))).sort(),
-    [blogs],
+    [blogs]
   );
 
   const allAuthors = useMemo(
     () =>
       Array.from(
-        new Set(blogs.map((blog) => blog.author).filter(Boolean)),
+        new Set(blogs.map((blog) => blog.author).filter(Boolean))
       ).sort(),
-    [blogs],
+    [blogs]
   );
 
   const handleCategoryToggle = (category: BlogCategory) => {
@@ -119,7 +119,7 @@ export function BlogFilters({ blogs }: BlogFiltersProps) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <Card className="border-2 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg">
+      <Card className="border-2 border-border/50 bg-card/50 backdrop-blur-sm shadow-lg h-auto">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export function BlogFilters({ blogs }: BlogFiltersProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 h-auto">
           {/* Featured Filter */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold flex items-center gap-2">
