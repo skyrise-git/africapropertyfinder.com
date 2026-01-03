@@ -90,35 +90,35 @@ export default function PropertiesPage() {
   );
 
   // Sidebar filters
-  const [selectedListingTypes] = useQueryState(
+  const [selectedListingTypes, setSelectedListingTypes] = useQueryState(
     "listingTypes",
     parseAsArrayOf(parseAsString).withDefault([])
   );
-  const [selectedPropertyTypes] = useQueryState(
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useQueryState(
     "propertyTypes",
     parseAsArrayOf(parseAsString).withDefault([])
   );
-  const [minPriceStr] = useQueryState(
+  const [minPriceStr, setMinPriceStr] = useQueryState(
     "minPrice",
     parseAsString.withDefault("")
   );
-  const [maxPriceStr] = useQueryState(
+  const [maxPriceStr, setMaxPriceStr] = useQueryState(
     "maxPrice",
     parseAsString.withDefault("")
   );
-  const [minBedroomsStr] = useQueryState(
+  const [minBedroomsStr, setMinBedroomsStr] = useQueryState(
     "minBedrooms",
     parseAsString.withDefault("")
   );
-  const [minBathroomsStr] = useQueryState(
+  const [minBathroomsStr, setMinBathroomsStr] = useQueryState(
     "minBathrooms",
     parseAsString.withDefault("")
   );
-  const [selectedFurnishing] = useQueryState(
+  const [selectedFurnishing, setSelectedFurnishing] = useQueryState(
     "furnishing",
     parseAsString.withDefault("")
   );
-  const [selectedAmenities] = useQueryState(
+  const [selectedAmenities, setSelectedAmenities] = useQueryState(
     "amenities",
     parseAsArrayOf(parseAsString).withDefault([])
   );
@@ -128,6 +128,30 @@ export default function PropertiesPage() {
   const maxPrice = maxPriceStr ? Number(maxPriceStr) : null;
   const minBedrooms = minBedroomsStr ? Number(minBedroomsStr) : null;
   const minBathrooms = minBathroomsStr ? Number(minBathroomsStr) : null;
+
+  // Sync legacy listingType with sidebar filters
+  useEffect(() => {
+    if (listingType && (selectedListingTypes as string[]).length === 0) {
+      setSelectedListingTypes([listingType]);
+    } else if (
+      !listingType &&
+      (selectedListingTypes as string[]).length === 1
+    ) {
+      // If sidebar has one filter and legacy is cleared, keep sidebar
+    }
+  }, [listingType, selectedListingTypes, setSelectedListingTypes]);
+
+  // Sync legacy propertyType with sidebar filters
+  useEffect(() => {
+    if (propertyType && (selectedPropertyTypes as string[]).length === 0) {
+      setSelectedPropertyTypes([propertyType]);
+    } else if (
+      !propertyType &&
+      (selectedPropertyTypes as string[]).length === 1
+    ) {
+      // If sidebar has one filter and legacy is cleared, keep sidebar
+    }
+  }, [propertyType, selectedPropertyTypes, setSelectedPropertyTypes]);
 
   const properties = (data as Property[]) || [];
 
@@ -372,7 +396,8 @@ export default function PropertiesPage() {
           },
         ]
       : []),
-    ...(listingType
+    // Legacy single listing type filter
+    ...(listingType && (selectedListingTypes as string[]).length === 0
       ? [
           {
             id: "listingType",
@@ -387,16 +412,135 @@ export default function PropertiesPage() {
           },
         ]
       : []),
-    ...(propertyType
+    // Sidebar multi-select listing types
+    ...(selectedListingTypes as string[]).map((type) => ({
+      id: `listingType-${type}`,
+      label: "Type",
+      value:
+        type === "sale"
+          ? "For Sale"
+          : type === "rent"
+          ? "For Rent"
+          : "Student Housing",
+      onRemove: () => {
+        const current = selectedListingTypes as string[];
+        setSelectedListingTypes(current.filter((t) => t !== type));
+      },
+    })),
+    // Legacy single property type filter (only show if sidebar is empty)
+    ...(propertyType && (selectedPropertyTypes as string[]).length === 0
       ? [
           {
             id: "propertyType",
             label: "Property",
             value: propertyType.charAt(0).toUpperCase() + propertyType.slice(1),
-            onRemove: () => setPropertyType(null),
+            onRemove: () => {
+              setPropertyType(null);
+            },
           },
         ]
       : []),
+    // Sidebar multi-select property types
+    ...(selectedPropertyTypes as string[]).map((type) => ({
+      id: `propertyType-${type}`,
+      label: "Property",
+      value: type.charAt(0).toUpperCase() + type.slice(1),
+      onRemove: () => {
+        const current = selectedPropertyTypes as string[];
+        setSelectedPropertyTypes(current.filter((t) => t !== type));
+      },
+    })),
+    // Price range
+    ...(minPrice !== null || maxPrice !== null
+      ? [
+          {
+            id: "price",
+            label: "Price",
+            value:
+              minPrice !== null && maxPrice !== null
+                ? `$${minPrice.toLocaleString()} - $${maxPrice.toLocaleString()}`
+                : minPrice !== null
+                ? `Min: $${minPrice.toLocaleString()}`
+                : maxPrice !== null
+                ? `Max: $${maxPrice.toLocaleString()}`
+                : "",
+            onRemove: () => {
+              setMinPriceStr("");
+              setMaxPriceStr("");
+            },
+          },
+        ]
+      : []),
+    // Bedrooms
+    ...(minBedrooms !== null
+      ? [
+          {
+            id: "bedrooms",
+            label: "Bedrooms",
+            value: `${minBedrooms}+`,
+            onRemove: () => {
+              setMinBedroomsStr("");
+            },
+          },
+        ]
+      : []),
+    // Bathrooms
+    ...(minBathrooms !== null
+      ? [
+          {
+            id: "bathrooms",
+            label: "Bathrooms",
+            value: `${minBathrooms}+`,
+            onRemove: () => {
+              setMinBathroomsStr("");
+            },
+          },
+        ]
+      : []),
+    // Furnishing
+    ...(selectedFurnishing
+      ? [
+          {
+            id: "furnishing",
+            label: "Furnishing",
+            value:
+              selectedFurnishing === "furnished"
+                ? "Furnished"
+                : selectedFurnishing === "semi-furnished"
+                ? "Semi-Furnished"
+                : "Unfurnished",
+            onRemove: () => {
+              setSelectedFurnishing("");
+            },
+          },
+        ]
+      : []),
+    // Amenities
+    ...(selectedAmenities as string[]).map((amenity) => {
+      const amenityLabels: Record<string, string> = {
+        parkingAvailable: "Parking",
+        laundry: "Laundry",
+        heatingCooling: "Heating & Cooling",
+        balcony: "Balcony",
+        wifi: "WiFi",
+        gym: "Gym",
+        pool: "Pool",
+        elevator: "Elevator",
+        security: "Security",
+        garden: "Garden",
+        dishwasher: "Dishwasher",
+        fireplace: "Fireplace",
+      };
+      return {
+        id: `amenity-${amenity}`,
+        label: "Amenity",
+        value: amenityLabels[amenity] || amenity,
+        onRemove: () => {
+          const current = selectedAmenities as string[];
+          setSelectedAmenities(current.filter((a) => a !== amenity));
+        },
+      };
+    }),
   ];
 
   const handleClearAllFilters = () => {
@@ -405,6 +549,14 @@ export default function PropertiesPage() {
     setLocationLabel("");
     setListingType("");
     setPropertyType("");
+    setSelectedListingTypes([]);
+    setSelectedPropertyTypes([]);
+    setMinPriceStr("");
+    setMaxPriceStr("");
+    setMinBedroomsStr("");
+    setMinBathroomsStr("");
+    setSelectedFurnishing("");
+    setSelectedAmenities([]);
   };
 
   if (loading) {
@@ -416,11 +568,11 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="container mx-auto max-w-6xl p-4 md:p-6">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="w-full space-y-8 p-4 md:p-6"
+        className="w-full space-y-8"
       >
         <motion.div
           initial={{ opacity: 0, y: -12 }}

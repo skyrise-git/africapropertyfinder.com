@@ -1,12 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { motion } from "motion/react";
-import {
-  useQueryState,
-  parseAsArrayOf,
-  parseAsString,
-} from "nuqs";
+import { useQueryState, parseAsArrayOf, parseAsString } from "nuqs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -26,54 +22,128 @@ import {
   GraduationCap,
   DollarSign,
   BedDouble,
-  Bath,
   Sofa,
+  Building2,
+  DoorOpen,
+  Square,
+  Package,
+  Car,
+  Shirt,
+  ThermometerSun,
+  Sun,
+  Wifi,
+  Dumbbell,
+  Waves,
+  ArrowUpDown,
+  Shield,
+  Sprout,
+  ChefHat,
+  Flame,
 } from "lucide-react";
-import type { Property, ListingType, PropertyType, FurnishingType } from "@/lib/types/property.type";
+import type {
+  Property,
+  ListingType,
+  PropertyType,
+  FurnishingType,
+} from "@/lib/types/property.type";
 import { Separator } from "@/components/ui/separator";
 
 interface PropertyFiltersSidebarProps {
   properties: Property[];
 }
 
-const listingTypes: { value: ListingType; label: string; icon: React.ReactNode }[] = [
+const listingTypes: {
+  value: ListingType;
+  label: string;
+  icon: React.ReactNode;
+}[] = [
   { value: "sale", label: "For Sale", icon: <Home className="h-4 w-4" /> },
   { value: "rent", label: "For Rent", icon: <Building className="h-4 w-4" /> },
-  { value: "student-housing", label: "Student Housing", icon: <GraduationCap className="h-4 w-4" /> },
+  {
+    value: "student-housing",
+    label: "Student Housing",
+    icon: <GraduationCap className="h-4 w-4" />,
+  },
 ];
 
-const propertyTypes: { value: PropertyType; label: string }[] = [
-  { value: "apartment", label: "Apartment" },
-  { value: "house", label: "House" },
-  { value: "condo", label: "Condo" },
-  { value: "townhouse", label: "Townhouse" },
-  { value: "studio", label: "Studio" },
-  { value: "room", label: "Room" },
-  { value: "other", label: "Other" },
+const propertyTypes: {
+  value: PropertyType;
+  label: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    value: "apartment",
+    label: "Apartment",
+    icon: <Building2 className="h-4 w-4" />,
+  },
+  { value: "house", label: "House", icon: <Home className="h-4 w-4" /> },
+  { value: "condo", label: "Condo", icon: <Building2 className="h-4 w-4" /> },
+  {
+    value: "townhouse",
+    label: "Townhouse",
+    icon: <Building className="h-4 w-4" />,
+  },
+  { value: "studio", label: "Studio", icon: <Square className="h-4 w-4" /> },
+  { value: "room", label: "Room", icon: <DoorOpen className="h-4 w-4" /> },
+  { value: "other", label: "Other", icon: <Package className="h-4 w-4" /> },
 ];
 
-const furnishingTypes: { value: FurnishingType; label: string }[] = [
-  { value: "furnished", label: "Furnished" },
-  { value: "semi-furnished", label: "Semi-Furnished" },
-  { value: "unfurnished", label: "Unfurnished" },
+const furnishingTypes: {
+  value: FurnishingType;
+  label: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    value: "furnished",
+    label: "Furnished",
+    icon: <Sofa className="h-4 w-4" />,
+  },
+  {
+    value: "semi-furnished",
+    label: "Semi-Furnished",
+    icon: <Package className="h-4 w-4" />,
+  },
+  {
+    value: "unfurnished",
+    label: "Unfurnished",
+    icon: <Square className="h-4 w-4" />,
+  },
 ];
 
 const amenities = [
-  { key: "parkingAvailable", label: "Parking" },
-  { key: "laundry", label: "Laundry" },
-  { key: "heatingCooling", label: "Heating & Cooling" },
-  { key: "balcony", label: "Balcony" },
-  { key: "wifi", label: "WiFi" },
-  { key: "gym", label: "Gym" },
-  { key: "pool", label: "Pool" },
-  { key: "elevator", label: "Elevator" },
-  { key: "security", label: "Security" },
-  { key: "garden", label: "Garden" },
-  { key: "dishwasher", label: "Dishwasher" },
-  { key: "fireplace", label: "Fireplace" },
+  {
+    key: "parkingAvailable",
+    label: "Parking",
+    icon: <Car className="h-4 w-4" />,
+  },
+  { key: "laundry", label: "Laundry", icon: <Shirt className="h-4 w-4" /> },
+  {
+    key: "heatingCooling",
+    label: "Heating & Cooling",
+    icon: <ThermometerSun className="h-4 w-4" />,
+  },
+  { key: "balcony", label: "Balcony", icon: <Sun className="h-4 w-4" /> },
+  { key: "wifi", label: "WiFi", icon: <Wifi className="h-4 w-4" /> },
+  { key: "gym", label: "Gym", icon: <Dumbbell className="h-4 w-4" /> },
+  { key: "pool", label: "Pool", icon: <Waves className="h-4 w-4" /> },
+  {
+    key: "elevator",
+    label: "Elevator",
+    icon: <ArrowUpDown className="h-4 w-4" />,
+  },
+  { key: "security", label: "Security", icon: <Shield className="h-4 w-4" /> },
+  { key: "garden", label: "Garden", icon: <Sprout className="h-4 w-4" /> },
+  {
+    key: "dishwasher",
+    label: "Dishwasher",
+    icon: <ChefHat className="h-4 w-4" />,
+  },
+  { key: "fireplace", label: "Fireplace", icon: <Flame className="h-4 w-4" /> },
 ];
 
-export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarProps) {
+export function PropertyFiltersSidebar({
+  properties,
+}: PropertyFiltersSidebarProps) {
   const [selectedListingTypes, setSelectedListingTypes] = useQueryState(
     "listingTypes",
     parseAsArrayOf(parseAsString).withDefault([])
@@ -116,7 +186,9 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
   const priceRange = useMemo(() => {
     const prices = properties
       .map((p) => (p.listingType === "sale" ? p.price : p.rent))
-      .filter((price): price is number => typeof price === "number" && price > 0);
+      .filter(
+        (price): price is number => typeof price === "number" && price > 0
+      );
     return {
       min: prices.length > 0 ? Math.min(...prices) : 0,
       max: prices.length > 0 ? Math.max(...prices) : 1000000,
@@ -204,7 +276,9 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
             <Label className="text-sm font-semibold">Listing Type</Label>
             <div className="flex flex-wrap gap-2">
               {listingTypes.map((type) => {
-                const isSelected = (selectedListingTypes as string[]).includes(type.value);
+                const isSelected = (selectedListingTypes as string[]).includes(
+                  type.value
+                );
                 return (
                   <Button
                     key={type.value}
@@ -229,7 +303,9 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
             <Label className="text-sm font-semibold">Property Type</Label>
             <div className="flex flex-wrap gap-2">
               {propertyTypes.map((type) => {
-                const isSelected = (selectedPropertyTypes as string[]).includes(type.value);
+                const isSelected = (selectedPropertyTypes as string[]).includes(
+                  type.value
+                );
                 return (
                   <Button
                     key={type.value}
@@ -237,8 +313,9 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
                     onClick={() => handlePropertyTypeToggle(type.value)}
-                    className="h-9 capitalize"
+                    className="h-9 capitalize flex items-center gap-2"
                   >
+                    {type.icon}
                     {type.label}
                   </Button>
                 );
@@ -256,7 +333,10 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
             </Label>
             <div className="space-y-2.5">
               <div className="space-y-1.5">
-                <Label htmlFor="min-price" className="text-xs text-muted-foreground">
+                <Label
+                  htmlFor="min-price"
+                  className="text-xs text-muted-foreground"
+                >
                   Min Price
                 </Label>
                 <Input
@@ -264,14 +344,15 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
                   type="number"
                   placeholder="Min"
                   value={minPriceStr}
-                  onChange={(e) =>
-                    setMinPriceStr(e.target.value || "")
-                  }
+                  onChange={(e) => setMinPriceStr(e.target.value || "")}
                   className="h-9 text-sm"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="max-price" className="text-xs text-muted-foreground">
+                <Label
+                  htmlFor="max-price"
+                  className="text-xs text-muted-foreground"
+                >
                   Max Price
                 </Label>
                 <Input
@@ -279,14 +360,13 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
                   type="number"
                   placeholder="Max"
                   value={maxPriceStr}
-                  onChange={(e) =>
-                    setMaxPriceStr(e.target.value || "")
-                  }
+                  onChange={(e) => setMaxPriceStr(e.target.value || "")}
                   className="h-9 text-sm"
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Range: ${priceRange.min.toLocaleString()} - ${priceRange.max.toLocaleString()}
+                Range: ${priceRange.min.toLocaleString()} - $
+                {priceRange.max.toLocaleString()}
               </p>
             </div>
           </div>
@@ -301,14 +381,15 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
             </Label>
             <div className="space-y-2.5">
               <div className="space-y-1.5">
-                <Label htmlFor="min-bedrooms" className="text-xs text-muted-foreground">
+                <Label
+                  htmlFor="min-bedrooms"
+                  className="text-xs text-muted-foreground"
+                >
                   Min Bedrooms
                 </Label>
                 <Select
                   value={minBedroomsStr || undefined}
-                  onValueChange={(value) =>
-                    setMinBedroomsStr(value || "")
-                  }
+                  onValueChange={(value) => setMinBedroomsStr(value || "")}
                 >
                   <SelectTrigger id="min-bedrooms" className="h-9 text-sm">
                     <SelectValue placeholder="Any" />
@@ -323,14 +404,15 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="min-bathrooms" className="text-xs text-muted-foreground">
+                <Label
+                  htmlFor="min-bathrooms"
+                  className="text-xs text-muted-foreground"
+                >
                   Min Bathrooms
                 </Label>
                 <Select
                   value={minBathroomsStr || undefined}
-                  onValueChange={(value) =>
-                    setMinBathroomsStr(value || "")
-                  }
+                  onValueChange={(value) => setMinBathroomsStr(value || "")}
                 >
                   <SelectTrigger id="min-bathrooms" className="h-9 text-sm">
                     <SelectValue placeholder="Any" />
@@ -364,9 +446,12 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
                     type="button"
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedFurnishing(isSelected ? "" : type.value)}
-                    className="h-9"
+                    onClick={() =>
+                      setSelectedFurnishing(isSelected ? "" : type.value)
+                    }
+                    className="h-9 flex items-center gap-2"
                   >
+                    {type.icon}
                     {type.label}
                   </Button>
                 );
@@ -381,7 +466,9 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
             <Label className="text-sm font-semibold">Amenities</Label>
             <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
               {amenities.map((amenity) => {
-                const isSelected = (selectedAmenities as string[]).includes(amenity.key);
+                const isSelected = (selectedAmenities as string[]).includes(
+                  amenity.key
+                );
                 return (
                   <Button
                     key={amenity.key}
@@ -389,8 +476,9 @@ export function PropertyFiltersSidebar({ properties }: PropertyFiltersSidebarPro
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleAmenityToggle(amenity.key)}
-                    className="h-9 w-full"
+                    className="h-9 w-full flex items-center gap-2 justify-start"
                   >
+                    {amenity.icon}
                     {amenity.label}
                   </Button>
                 );
