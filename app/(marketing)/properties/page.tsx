@@ -594,11 +594,11 @@ export default function PropertiesPage() {
         </motion.div>
 
         {/* Main Content with Sidebar */}
-        <div className="relative w-full flex flex-col lg:flex-row gap-6">
+        <div className="relative w-full flex flex-col lg:flex-row gap-6 items-start">
           {/* Filters Sidebar - Desktop (Sticky) */}
-          <div className="hidden lg:block lg:w-80 shrink-0">
+          <aside className="hidden lg:block lg:w-80 shrink-0 sticky top-24 h-[calc(100vh-8rem)] overflow-y-auto z-20 transition-all duration-300 ease-in-out">
             <PropertyFiltersSidebar properties={properties} />
-          </div>
+          </aside>
 
           {/* Main Content - Scrollable */}
           <div className="flex-1 min-w-0 space-y-5">

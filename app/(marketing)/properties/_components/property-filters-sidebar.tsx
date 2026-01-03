@@ -250,7 +250,7 @@ export function PropertyFiltersSidebar({
       transition={{ duration: 0.3 }}
       className="w-full lg:w-80 shrink-0"
     >
-      <Card className="lg:sticky lg:top-24 lg:w-[320px] border-border/60 bg-card/70 h-fit max-h-[calc(100vh-7rem)] overflow-y-auto flex flex-col shadow-lg">
+      <Card className="lg:w-[320px] border-border/60 bg-card/70 flex flex-col shadow-lg">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -270,7 +270,7 @@ export function PropertyFiltersSidebar({
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-6 overflow-y-auto flex-1">
+        <CardContent className="space-y-6">
           {/* Listing Type */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold">Listing Type</Label>
@@ -464,7 +464,7 @@ export function PropertyFiltersSidebar({
           {/* Amenities */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold">Amenities</Label>
-            <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+            <div className="grid grid-cols-2 gap-2">
               {amenities.map((amenity) => {
                 const isSelected = (selectedAmenities as string[]).includes(
                   amenity.key
