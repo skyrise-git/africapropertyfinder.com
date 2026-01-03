@@ -44,7 +44,7 @@ const iconMap = {
 export const FAQSection = ({ questions }: FAQSectionProps) => {
   return (
     <section className="bg-background py-6 sm:py-8 md:py-10 lg:py-12 xl:py-16 w-full max-w-full overflow-x-hidden">
-      <div className="mx-auto max-w-6xl px-3 sm:px-4 md:px-5 lg:px-6 w-full">
+      <div className="mx-auto max-w-7xl px-3 sm:px-4 md:px-5 lg:px-6 w-full">
         <div className="text-center mb-4 sm:mb-6 md:mb-8 lg:mb-12 xl:mb-16">
           <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 text-primary px-1 sm:px-2 break-words">
             Frequently Asked Questions

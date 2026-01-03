@@ -16,7 +16,7 @@ export function Highlight({
     <span
       className={cn(
         "bg-primary/10 p-1 py-0.5 font-bold text-primary",
-        className,
+        className
       )}
     >
       {children}
@@ -49,7 +49,7 @@ export function TestimonialCard({
         "border-border bg-card/50 border shadow-sm",
         // hover effect
         "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md",
-        className,
+        className
       )}
       {...props}
     >
@@ -74,8 +74,12 @@ export function TestimonialCard({
         />
 
         <div>
-          <p className="text-foreground font-medium text-xs sm:text-sm md:text-base">{name}</p>
-          <p className="text-muted-foreground text-[10px] sm:text-xs font-normal">{role}</p>
+          <p className="text-foreground font-medium text-xs sm:text-sm md:text-base">
+            {name}
+          </p>
+          <p className="text-muted-foreground text-[10px] sm:text-xs font-normal">
+            {role}
+          </p>
         </div>
       </div>
     </div>
@@ -230,7 +234,7 @@ const testimonials = [
 
 export function TestimonialsMarquee() {
   return (
-    <section className="relative mx-auto max-w-6xl px-3 sm:px-4 md:px-5 lg:px-6 py-6 sm:py-8 md:py-10 lg:py-12 xl:py-16 w-full max-w-full overflow-x-hidden">
+    <section className="relative mx-auto max-w-7xl px-3 sm:px-4 md:px-5 lg:px-6 py-6 sm:py-8 md:py-10 lg:py-12 xl:py-16 w-full overflow-x-hidden">
       {/* Decorative elements */}
       <div className="absolute top-20 -left-20 z-10 h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-64 lg:w-64 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute -right-20 bottom-20 z-10 h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-64 lg:w-64 rounded-full bg-primary/5 blur-3xl" />
@@ -260,7 +264,10 @@ export function TestimonialsMarquee() {
           {Array(Math.ceil(testimonials.length / 3))
             .fill(0)
             .map((_, i) => (
-              <div key={i} className="h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px] overflow-hidden">
+              <div
+                key={i}
+                className="h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px] overflow-hidden"
+              >
                 <Marquee
                   vertical
                   repeat={3}

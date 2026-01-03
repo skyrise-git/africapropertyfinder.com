@@ -130,7 +130,7 @@ export function FeaturesSection() {
 
   return (
     <section className="w-full max-w-full overflow-x-hidden">
-      <div className="container mx-auto max-w-4xl px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 py-6 sm:py-8 md:py-10 lg:py-12 xl:py-16 w-full">
+      <div className="container mx-auto max-w-7xl px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 py-6 sm:py-8 md:py-10 lg:py-12 xl:py-16 w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

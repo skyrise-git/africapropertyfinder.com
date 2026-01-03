@@ -31,7 +31,7 @@ export function MarketingFooter() {
     <footer className="bg-background border-t">
       {/* Newsletter Section */}
       <div className="border-b">
-        <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="mx-auto max-w-7xl px-4 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-foreground">
@@ -65,7 +65,7 @@ export function MarketingFooter() {
 
       {/* Main Footer Links */}
       <div className="border-b">
-        <div className="mx-auto max-w-6xl px-4 py-12">
+        <div className="mx-auto max-w-7xl px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-8">
             {/* Company Information */}
             <div className="space-y-4">
@@ -188,7 +188,7 @@ export function MarketingFooter() {
 
       {/* Bottom Section */}
       <div className="border-t">
-        <div className="mx-auto max-w-6xl px-4 py-6">
+        <div className="mx-auto max-w-7xl px-4 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Copyright - Left */}
             <p className="text-sm text-muted-foreground order-1 lg:order-none">
