@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtimeSingle } from "@/hooks/use-supabase-realtime";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { PropertyFormSteps } from "../../_components/property-form-steps";
@@ -21,12 +21,12 @@ export default function EditPropertyPage() {
   const id = params.id as string;
   const [propertyId] = useState<string>(id);
 
-  const { data, loading, error } = useFirebaseRealtime<Property>(
-    `properties/${id}`,
-    { asArray: false }
+  const { data, loading, error } = useSupabaseRealtimeSingle<Property>(
+    "properties",
+    id
   );
 
-  const property = data ? ({ ...data, id } as Property) : null;
+  const property = data;
 
   // Redirect if user is not the owner
   useEffect(() => {

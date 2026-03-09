@@ -41,7 +41,7 @@ export function DeleteStaffDialog({
 
     setIsDeleting(true);
     try {
-      await staffService.delete(staff.id, staff.email, deletePassword);
+      await staffService.delete(staff.id);
       toast.success("Staff deleted successfully!");
       onSuccess();
       onOpenChange(false);

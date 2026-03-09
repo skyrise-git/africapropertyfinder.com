@@ -1,5 +1,4 @@
-import { getArrFromObj } from "@ashirbad/js-core";
-import { mutate } from "@atechhub/firebase";
+import { createClient } from "@/lib/supabase/client";
 import type {
   Property,
   PropertyInput,
@@ -7,170 +6,98 @@ import type {
 } from "@/lib/types/property.type";
 
 class PropertyService {
-  /**
-   * Create a new property
-   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private get db(): any {
+    return createClient();
+  }
+
   async create(data: PropertyInput): Promise<string> {
     const nowISO = new Date().toISOString();
+    const { data: row, error } = await this.db
+      .from("properties")
+      .insert({ ...data, createdAt: nowISO, updatedAt: nowISO })
+      .select("id")
+      .single();
 
-    const propertyData = {
-      ...data,
-      createdAt: nowISO,
-      updatedAt: nowISO,
-    };
-
-    const id = await mutate({
-      action: "createWithId",
-      path: "properties",
-      data: propertyData,
-      actionBy: "admin",
-    });
-
-    return id;
+    if (error) throw new Error(error.message);
+    return row.id;
   }
 
-  /**
-   * Get all properties
-   */
   async getAll(): Promise<Property[]> {
-    const data = await mutate({
-      action: "get",
-      path: "properties",
-    });
-    const properties = getArrFromObj(data || {}) as unknown as Property[];
+    const { data, error } = await this.db
+      .from("properties")
+      .select("*")
+      .order("createdAt", { ascending: false });
 
-    // Sort by createdAt (newest first)
-    return properties.sort((a, b) => {
-      const aTime =
-        typeof a.createdAt === "string" ? new Date(a.createdAt).getTime() : 0;
-      const bTime =
-        typeof b.createdAt === "string" ? new Date(b.createdAt).getTime() : 0;
-      return bTime - aTime;
-    });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as Property[];
   }
 
-  /**
-   * Get property by ID
-   */
   async getById(id: string): Promise<Property | null> {
-    const data = await mutate({
-      action: "get",
-      path: `properties/${id}`,
-    });
-    if (!data) {
-      return null;
-    }
-    // Add id to the property object
-    return { ...data, id } as Property;
+    const { data, error } = await this.db
+      .from("properties")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) return null;
+    return data as unknown as Property;
   }
 
-  /**
-   * Update property
-   */
   async update(id: string, data: PropertyUpdateInput): Promise<void> {
-    if (!id) {
-      throw new Error("Property ID is required");
-    }
+    if (!id) throw new Error("Property ID is required");
 
-    // Try to get existing property to check if it exists
-    let existingProperty: Property | null = null;
-    try {
-      existingProperty = await this.getById(id);
-    } catch {
-      // If getById fails, try getting from getAll
-      const allProperties = await this.getAll();
-      existingProperty = allProperties.find((p) => p.id === id) || null;
-    }
+    const { error } = await this.db
+      .from("properties")
+      .update({ ...data, updatedAt: new Date().toISOString() })
+      .eq("id", id);
 
-    // If still not found, check if property exists in database
-    if (!existingProperty) {
-      const allProperties = await this.getAll();
-      const propertyExists = allProperties.find((p) => p.id === id);
-      if (!propertyExists) {
-        throw new Error(`Property with ID "${id}" not found`);
-      }
-      existingProperty = propertyExists;
-    }
-
-    const updateData: Record<string, unknown> = {
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Update all provided fields
-    Object.keys(data).forEach((key) => {
-      const value = data[key as keyof PropertyUpdateInput];
-      if (value !== undefined) {
-        updateData[key] = value;
-      }
-    });
-
-    await mutate({
-      action: "update",
-      path: `properties/${id}`,
-      data: updateData,
-      actionBy: "admin",
-    });
+    if (error) throw new Error(error.message);
   }
 
-  /**
-   * Delete property
-   */
   async delete(id: string): Promise<void> {
-    await mutate({
-      action: "delete",
-      path: `properties/${id}`,
-      actionBy: "admin",
-    });
+    const { error } = await this.db
+      .from("properties")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw new Error(error.message);
   }
 
-  /**
-   * Get properties by listing type
-   */
   async getByListingType(listingType: string): Promise<Property[]> {
-    const properties = await this.getAll();
-    return properties.filter((property) => property.listingType === listingType);
+    const { data, error } = await this.db
+      .from("properties")
+      .select("*")
+      .eq("listingType", listingType)
+      .order("createdAt", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as Property[];
   }
 
-  /**
-   * Search properties
-   */
   async search(query: string): Promise<Property[]> {
-    const properties = await this.getAll();
-    const lowerQuery = query.toLowerCase();
+    const { data, error } = await this.db
+      .from("properties")
+      .select("*")
+      .or(
+        `title.ilike.%${query}%,address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`
+      )
+      .order("createdAt", { ascending: false });
 
-    return properties.filter((property) => {
-      // Search in title
-      if (property.title?.toLowerCase().includes(lowerQuery)) {
-        return true;
-      }
-
-      // Search in address
-      if (property.address?.toLowerCase().includes(lowerQuery)) {
-        return true;
-      }
-
-      // Search in city
-      if (property.city?.toLowerCase().includes(lowerQuery)) {
-        return true;
-      }
-
-      // Search in state
-      if (property.state?.toLowerCase().includes(lowerQuery)) {
-        return true;
-      }
-
-      return false;
-    });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as Property[];
   }
 
-  /**
-   * Get properties by user ID
-   */
   async getByUserId(userId: string): Promise<Property[]> {
-    const properties = await this.getAll();
-    return properties.filter((property) => property.userId === userId);
+    const { data, error } = await this.db
+      .from("properties")
+      .select("*")
+      .eq("userId", userId)
+      .order("createdAt", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as Property[];
   }
 }
 
 export const propertyService = new PropertyService();
-

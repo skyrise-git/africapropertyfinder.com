@@ -20,10 +20,9 @@ export function MarketingProfileDropdown() {
 
   const handleLogout = async () => {
     try {
-      const { firebaseAuth } = await import("@atechhub/firebase");
-      await firebaseAuth({
-        action: "logout",
-      });
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      await supabase.auth.signOut();
       router.push("/signin");
     } catch (error) {
       console.error("Logout error:", error);
@@ -148,7 +147,7 @@ export function MarketingProfileDropdown() {
         <div className="p-3 bg-muted/50">
           <p className="text-xs text-center text-muted-foreground">
             Secured by{" "}
-            <span className="font-semibold text-foreground">Firebase Auth</span>
+            <span className="font-semibold text-foreground">Supabase Auth</span>
           </p>
         </div>
       </DropdownMenuContent>

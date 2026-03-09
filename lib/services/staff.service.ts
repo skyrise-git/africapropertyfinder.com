@@ -1,128 +1,128 @@
-import { getArrFromObj } from "@ashirbad/js-core";
-import {
-  changePassword,
-  createUser,
-  deleteUser,
-  mutate,
-} from "@atechhub/firebase";
+import { createClient } from "@/lib/supabase/client";
 import type { User, UserInput, UserUpdateInput } from "@/lib/types/user.type";
 
 class StaffService {
-  /**
-   * Create a new staff (includes Firebase Auth user creation)
-   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private get db(): any {
+    return createClient();
+  }
+
   async create(data: UserInput): Promise<{
     userId: string;
-    authResponse: Awaited<ReturnType<typeof createUser>>;
+    authResponse: { localId: string };
   }> {
-    // Step 1: Create Firebase Auth user
-    const authResponse = await createUser(data.email, data.password);
+    const { data: authData, error: authError } = await this.db.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          role: "staff",
+        },
+      },
+    });
 
-    // Step 2: Create staff record in users database
-    const userId = await mutate({
-      action: "create",
-      path: `users/${authResponse.localId}`,
-      data: {
-        uid: authResponse.localId,
+    if (authError) throw new Error(authError.message);
+
+    const userId = authData.user?.id;
+    if (!userId) throw new Error("Failed to create user");
+
+    const { error: profileError } = await this.db
+      .from("profiles")
+      .upsert({
+        id: userId,
         name: data.name,
         email: data.email,
-        password: data.password,
         role: "staff",
         status: "active",
-      },
-      actionBy: "admin",
-    });
+      });
 
-    return { userId, authResponse };
+    if (profileError) throw new Error(profileError.message);
+
+    return { userId, authResponse: { localId: userId } };
   }
 
-  /**
-   * Get all staffs
-   */
   async getAll(): Promise<User[]> {
-    const data = await mutate({
-      action: "get",
-      path: "users",
-    });
-    const allUsers = getArrFromObj(data || {}) as unknown as User[];
-    return allUsers.filter((user) => user.role === "staff");
+    const { data, error } = await this.db
+      .from("profiles")
+      .select("*")
+      .eq("role", "staff");
+
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as Record<string, unknown>[]).map(this.mapProfile);
   }
 
-  /**
-   * Get a staff by ID
-   */
   async getById(id: string): Promise<User | null> {
-    const data = await mutate({
-      action: "get",
-      path: `users/${id}`,
-    });
-    const staff = data as unknown as User;
-    return staff && staff.role === "staff" ? staff : null;
+    const { data, error } = await this.db
+      .from("profiles")
+      .select("*")
+      .eq("id", id)
+      .eq("role", "staff")
+      .single();
+
+    if (error) return null;
+    return this.mapProfile(data as Record<string, unknown>);
   }
 
-  /**
-   * Update a staff
-   */
   async update(id: string, data: UserUpdateInput): Promise<void> {
-    await mutate({
-      action: "update",
-      path: `users/${id}`,
-      data: {
-        ...data,
-      },
-      actionBy: "admin",
-    });
+    const { error } = await this.db
+      .from("profiles")
+      .update({ ...data, updatedAt: new Date().toISOString() })
+      .eq("id", id);
+
+    if (error) throw new Error(error.message);
   }
 
-  /**
-   * Delete a staff (includes Firebase Auth user deletion)
-   */
-  async delete(
-    id: string,
-    email: string,
-    currentPassword: string,
-  ): Promise<void> {
-    // Step 1: Delete Firebase Auth user
-    await deleteUser(email, currentPassword);
+  async delete(id: string): Promise<void> {
+    const { error } = await this.db
+      .from("profiles")
+      .delete()
+      .eq("id", id);
 
-    // Step 2: Delete database record
-    await mutate({
-      action: "delete",
-      path: `users/${id}`,
-      actionBy: "admin",
-    });
+    if (error) throw new Error(error.message);
   }
 
-  /**
-   * Get staff by email
-   */
   async getByEmail(email: string): Promise<User | null> {
-    const staffs = await this.getAll();
-    return staffs.find((staff) => staff.email === email) || null;
+    const { data, error } = await this.db
+      .from("profiles")
+      .select("*")
+      .eq("email", email)
+      .eq("role", "staff")
+      .single();
+
+    if (error) return null;
+    return this.mapProfile(data as Record<string, unknown>);
   }
 
-  /**
-   * Get staff by Firebase UID
-   */
   async getByFirebaseUid(uid: string): Promise<User | null> {
-    const staffs = await this.getAll();
-    return staffs.find((staff) => staff.uid === uid) || null;
+    return this.getById(uid);
   }
 
-  /**
-   * Change staff password
-   */
   async changePassword(
-    id: string,
-    currentPassword: string,
-    newPassword: string,
+    _id: string,
+    _currentPassword: string,
+    newPassword: string
   ): Promise<void> {
-    const staff = await this.getById(id);
-    if (!staff) {
-      throw new Error("Staff not found");
-    }
+    const { error } = await this.db.auth.updateUser({
+      password: newPassword,
+    });
+    if (error) throw new Error(error.message);
+  }
 
-    await changePassword(staff.email, currentPassword, newPassword);
+  private mapProfile(row: Record<string, unknown>): User {
+    return {
+      id: row.id as string,
+      uid: row.id as string,
+      name: (row.name as string) ?? "",
+      email: (row.email as string) ?? "",
+      role: (row.role as User["role"]) ?? "staff",
+      status: (row.status as User["status"]) ?? "active",
+      password: "",
+      profilePicture: row.profilePicture as string | undefined,
+      profilePictureFileKey: row.profilePictureFileKey as string | undefined,
+      createdAt: (row.createdAt as string) ?? new Date().toISOString(),
+      updatedAt: row.updatedAt as string | undefined,
+    };
   }
 }
 

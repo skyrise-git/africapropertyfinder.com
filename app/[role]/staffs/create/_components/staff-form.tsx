@@ -92,7 +92,7 @@ export function StaffForm() {
         <h1 className="text-3xl font-bold tracking-tight">Create Staff</h1>
         <p className="text-muted-foreground">
           Add a new staff to the platform. This will create both a database
-          record and Firebase Auth account.
+          record and auth account.
         </p>
       </div>
 
@@ -207,7 +207,7 @@ export function StaffForm() {
                 </h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>
-                    • A Firebase Auth account is created with the provided email
+                    • An auth account is created with the provided email
                     and password
                   </li>
                   <li>

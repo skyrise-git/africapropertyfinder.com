@@ -29,10 +29,12 @@ export function MarketingNavbar() {
 
   const marketingNavLinks = user
     ? [
+        { label: "Area Safety", href: "/area-safety" },
         { label: "Appointments", href: "/appointments" },
         { label: "Services", href: "#services" },
       ]
     : [
+        { label: "Area Safety", href: "/area-safety" },
         { label: "Blogs", href: "/blogs" },
         { label: "Services", href: "#services" },
       ];

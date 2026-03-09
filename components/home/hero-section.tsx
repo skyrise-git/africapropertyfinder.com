@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyLocationSearch } from "@/components/home/property-location-search";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import type {
   ListingType,
   PropertyType,
@@ -68,15 +68,15 @@ export function HeroSection() {
   const [searchError, setSearchError] = useState<string | null>(null);
 
   // Fetch properties for stats
-  const { data: propertiesData } = useFirebaseRealtime<Property>("properties");
-  const properties = (propertiesData as Property[]) || [];
+  const { data: propertiesData } = useSupabaseRealtime<Property>("properties");
+  const properties = propertiesData || [];
 
   // Fetch users for client count
-  const { data: usersData } = useFirebaseRealtime<{
-    uid: string;
+  const { data: usersData } = useSupabaseRealtime<{
+    id: string;
     status?: string;
-  }>("users");
-  const users = (usersData as { uid: string; status?: string }[]) || [];
+  }>("profiles");
+  const users = usersData || [];
 
   // Calculate stats
   const stats = useMemo(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import { contactService } from "@/lib/services/contact.service";
 import type { Contact, ContactStatus } from "@/lib/types/contact.type";
 import {
@@ -77,12 +77,11 @@ export default function ContactsPage() {
   );
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
-  const { data, loading, error } = useFirebaseRealtime<Contact>("contacts", {
-    asArray: true,
+  const { data, loading, error } = useSupabaseRealtime<Contact>("contacts", {
     enabled: !!user,
   });
 
-  const contacts = (data as Contact[]) || [];
+  const contacts = data ?? [];
 
   const filteredContacts = useMemo(() => {
     let result = contacts;

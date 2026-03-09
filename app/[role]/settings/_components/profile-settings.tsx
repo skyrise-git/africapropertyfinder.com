@@ -24,7 +24,7 @@ import { ImageEditor } from "@/components/ui/image-editor";
 import { formatFileSize } from "@/lib/utils/image-optimization";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useUploadThing } from "@/lib/utils/uploadthing";
-import { mutate } from "@atechhub/firebase";
+import { createClient } from "@/lib/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Calendar,
@@ -102,27 +102,16 @@ export function ProfileSettings() {
         form.setValue("profilePictureFileKey", fileKey);
         setImagePreview(profilePictureUrl);
 
-        // Auto-save to Firebase
         try {
-          await mutate({
-            action: "update",
-            path: `users/${user.uid}`,
-            data: {
+          const supabase = createClient();
+          await supabase
+            .from("profiles")
+            .update({
               profilePicture: profilePictureUrl,
               profilePictureFileKey: fileKey,
               updatedAt: new Date().toISOString(),
-              updatedBy: {
-                timestamp: new Date().toISOString(),
-                actionBy: "user-profile-picture-update",
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                language: navigator.language,
-                screenResolution: `${screen.width}x${screen.height}`,
-                browser: navigator.userAgent.split(" ")[0],
-              },
-            },
-            actionBy: "user-profile-picture-update",
-          });
+            })
+            .eq("id", user.uid);
 
           // Update local state
           setUser({
@@ -269,27 +258,18 @@ export function ProfileSettings() {
       fileInputRef.current.value = "";
     }
 
-    // Remove from Firebase
+    // Remove from Supabase
     try {
-      await mutate({
-        action: "update",
-        path: `users/${user.uid}`,
-        data: {
+      const { error } = await createClient()
+        .from("profiles")
+        .update({
           profilePicture: null,
           profilePictureFileKey: null,
           updatedAt: new Date().toISOString(),
-          updatedBy: {
-            timestamp: new Date().toISOString(),
-            actionBy: "user-profile-picture-remove",
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            language: navigator.language,
-            screenResolution: `${screen.width}x${screen.height}`,
-            browser: navigator.userAgent.split(" ")[0],
-          },
-        },
-        actionBy: "user-profile-picture-remove",
-      });
+        })
+        .eq("id", user.uid);
+
+      if (error) throw error;
 
       // Update local state
       setUser({
@@ -319,24 +299,15 @@ export function ProfileSettings() {
 
     setIsLoading(true);
     try {
-      await mutate({
-        action: "update",
-        path: `users/${user.uid}`,
-        data: {
+      const { error } = await createClient()
+        .from("profiles")
+        .update({
           name: data.name,
           updatedAt: new Date().toISOString(),
-          updatedBy: {
-            timestamp: new Date().toISOString(),
-            actionBy: "user-profile-update",
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            language: navigator.language,
-            screenResolution: `${screen.width}x${screen.height}`,
-            browser: navigator.userAgent.split(" ")[0],
-          },
-        },
-        actionBy: "user-profile-update",
-      });
+        })
+        .eq("id", user.uid);
+
+      if (error) throw error;
 
       // Update local state
       setUser({

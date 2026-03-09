@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import type {
   Appointment,
   SortOption,
@@ -69,15 +69,12 @@ export default function AppointmentsPage() {
     router.replace(query ? `/appointments?${query}` : "/appointments");
   }, [search, status, tourType, fromDate, toDate, sort, router, searchParams]);
 
-  const { data, loading, error } = useFirebaseRealtime<Appointment>(
+  const { data, loading, error } = useSupabaseRealtime<Appointment>(
     "appointments",
-    {
-      asArray: true,
-      enabled: !!user,
-    },
+    { enabled: !!user }
   );
 
-  const allAppointments = Array.isArray(data) ? data : [];
+  const allAppointments = data ?? [];
 
   const userAppointments = useMemo(
     () => allAppointments.filter((appt) => appt?.requestedBy?.uid === user?.uid),

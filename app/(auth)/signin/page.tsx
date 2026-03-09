@@ -1,39 +1,35 @@
 "use client";
 
-import { firebaseAuth } from "@atechhub/firebase";
+import { createClient } from "@/lib/supabase/client";
 import { AuthForm, type AuthFormData } from "../_components/auth-form";
 
 export default function SignInPage() {
   const handleEmailSignIn = async (data: AuthFormData) => {
     try {
-      await firebaseAuth({
-        action: "login",
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
-    } catch (error) {
-      // Handle specific Firebase errors
-      if (error instanceof Error) {
-        if (
-          error.message.includes("user-not-found") ||
-          error.message.includes("invalid-credential")
-        ) {
+
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
           throw new Error(
-            "Invalid email or password. Please check your credentials.",
+            "Invalid email or password. Please check your credentials."
           );
         }
-        if (error.message.includes("too-many-requests")) {
+        if (error.message.includes("too_many_requests")) {
           throw new Error("Too many failed attempts. Please try again later.");
         }
-        if (error.message.includes("user-disabled")) {
+        if (error.message.includes("user_banned")) {
           throw new Error(
-            "This account has been disabled. Please contact support.",
+            "This account has been disabled. Please contact support."
           );
         }
-        // Re-throw the original error if it has a user-friendly message
-        throw error;
+        throw new Error(error.message);
       }
-
+    } catch (error) {
+      if (error instanceof Error) throw error;
       throw new Error("Failed to sign in. Please check your credentials.");
     }
   };

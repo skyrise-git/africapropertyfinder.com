@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
-import { mutate } from "@atechhub/firebase";
+import { createClient } from "@/lib/supabase/client";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -70,28 +70,26 @@ function PropertyScheduleViewing({
 
       const viewingDateISO = selectedDate.toISOString();
 
-      await mutate({
-        action: "createWithId",
-        path: "appointments",
-        data: {
-          propertyId: property.id,
-          propertyTitle: property.title,
-          date: viewingDateISO,
-          time: effectiveTime,
-          tourType,
-          contactName: property.contactName ?? null,
-          contactEmail: property.contactInfo?.email ?? null,
-          contactPhone: property.contactInfo?.phone ?? null,
-          requestedBy: user
-            ? {
-                uid: user.uid,
-                name: user.name,
-                email: user.email,
-              }
-            : null,
-        },
-        actionBy: user?.uid || "public-viewing-request",
-      });
+      const supabase = createClient();
+      const appointmentData = {
+        propertyId: property.id,
+        propertyTitle: property.title,
+        date: viewingDateISO,
+        time: effectiveTime,
+        tourType,
+        contactName: property.contactName ?? null,
+        contactEmail: property.contactInfo?.email ?? null,
+        contactPhone: property.contactInfo?.phone ?? null,
+        requestedBy: user
+          ? {
+              uid: user.uid,
+              name: user.name,
+              email: user.email,
+            }
+          : null,
+      };
+      const { error } = await supabase.from("appointments").insert(appointmentData);
+      if (error) throw new Error(error.message);
 
       // Show success dialog
       setShowSuccessDialog(true);

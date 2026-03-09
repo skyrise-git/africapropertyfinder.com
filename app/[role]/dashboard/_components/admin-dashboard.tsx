@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import type { Property } from "@/lib/types/property.type";
 import type { User } from "@/lib/types/user.type";
 import { DashboardStats } from "./dashboard-stats";
@@ -39,8 +39,7 @@ export function AdminDashboard() {
     data: propertiesData,
     loading: propertiesLoading,
     error: propertiesError,
-  } = useFirebaseRealtime<PropertyWithMeta>("properties", {
-    asArray: true,
+  } = useSupabaseRealtime<PropertyWithMeta>("properties", {
     sort: (a, b) => parseDate(b.createdAt) - parseDate(a.createdAt),
   });
 
@@ -48,15 +47,10 @@ export function AdminDashboard() {
     data: usersData,
     loading: usersLoading,
     error: usersError,
-  } = useFirebaseRealtime<UserWithMeta>("users", {
-    asArray: true,
-  });
+  } = useSupabaseRealtime<UserWithMeta>("profiles");
 
-  const properties = (
-    Array.isArray(propertiesData) ? propertiesData : []
-  ) as PropertyWithMeta[];
-
-  const users = (Array.isArray(usersData) ? usersData : []) as UserWithMeta[];
+  const properties = propertiesData ?? [];
+  const users = usersData ?? [];
 
   const {
     activeProperties,

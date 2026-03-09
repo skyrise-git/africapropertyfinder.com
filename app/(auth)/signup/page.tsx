@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { firebaseAuth, mutate } from "@atechhub/firebase";
-import { getAuth } from "firebase/auth";
-import { getApp } from "firebase/app";
+import { createClient } from "@/lib/supabase/client";
 import { AuthForm, type AuthFormData } from "../_components/auth-form";
 import {
   Dialog,
@@ -20,71 +18,43 @@ export default function SignUpPage() {
 
   const handleEmailSignUp = async (data: AuthFormData) => {
     try {
-      // Step 1: Create Firebase Auth user
-      const authResponse = await firebaseAuth({
-        action: "signup",
+      const supabase = createClient();
+
+      const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
-      });
-
-      // Step 2: Get the user ID from auth response
-      // @atechhub/firebase returns localId in the response
-      const userId =
-        (authResponse as { localId?: string })?.localId ||
-        (authResponse as { uid?: string })?.uid ||
-        getAuth(getApp()).currentUser?.uid;
-
-      if (!userId) {
-        throw new Error("Failed to get user ID after signup");
-      }
-
-      // Step 3: Save user data to database (name and phone)
-      await mutate({
-        action: "create",
-        path: `users/${userId}`,
-        data: {
-          uid: userId,
-          name: data.name || "",
-          email: data.email,
-          phone: data.phone || "",
-          role: "user",
-          status: "active",
-          createdAt: new Date().toISOString(),
-          createdBy: {
-            timestamp: new Date().toISOString(),
-            actionBy: "user-signup",
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            language: navigator.language,
-            screenResolution: `${screen.width}x${screen.height}`,
-            browser: navigator.userAgent.split(" ")[0],
+        options: {
+          data: {
+            name: data.name || "",
+            phone: data.phone || "",
+            role: "user",
           },
         },
-        actionBy: "user-signup",
       });
 
-      // Step 4: Show success dialog
-      setShowSuccessDialog(true);
-    } catch (error) {
-      // Handle specific Firebase errors
-      if (error instanceof Error) {
-        if (error.message.includes("email-already-in-use")) {
+      if (error) {
+        if (error.message.includes("already registered")) {
           throw new Error(
-            "This email is already registered. Please sign in instead.",
+            "This email is already registered. Please sign in instead."
           );
         }
-        if (error.message.includes("weak-password")) {
+        if (
+          error.message.includes("weak") ||
+          error.message.includes("password")
+        ) {
           throw new Error(
-            "Password is too weak. Please use a stronger password.",
+            "Password is too weak. Please use a stronger password."
           );
         }
-        if (error.message.includes("invalid-email")) {
+        if (error.message.includes("invalid") && error.message.includes("email")) {
           throw new Error("Please enter a valid email address.");
         }
-        // Re-throw the original error if it has a user-friendly message
-        throw error;
+        throw new Error(error.message);
       }
 
+      setShowSuccessDialog(true);
+    } catch (error) {
+      if (error instanceof Error) throw error;
       throw new Error("Failed to create account. Please try again.");
     }
   };

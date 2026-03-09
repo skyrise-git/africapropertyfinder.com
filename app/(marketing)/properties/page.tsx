@@ -5,7 +5,7 @@ import { useQueryState, parseAsString, parseAsArrayOf } from "nuqs";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Home, Filter } from "lucide-react";
 
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import type { Property } from "@/lib/types/property.type";
 import { PropertyCard } from "./_components/property-card";
 import { PropertySortControls } from "./_components/property-sort-controls";
@@ -61,7 +61,7 @@ function calculateDistance(
 const SEARCH_RADIUS_KM = 50; // Default search radius in kilometers
 
 export default function PropertiesPage() {
-  const { data, loading, error } = useFirebaseRealtime<Property>("properties");
+  const { data, loading, error } = useSupabaseRealtime<Property>("properties");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const isMobile = useIsMobile();
   const [search, setSearch] = useQueryState(
@@ -153,7 +153,7 @@ export default function PropertiesPage() {
     }
   }, [propertyType, selectedPropertyTypes, setSelectedPropertyTypes]);
 
-  const properties = (data as Property[]) || [];
+  const properties = data ?? [];
 
   // Reset page to 1 when search, sort, or location change
   useEffect(() => {

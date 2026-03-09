@@ -1,0 +1,21 @@
+Migrate from Firebase to Supabase + add safety intelligence features
+
+Database:
+- Add Supabase migrations for all app tables with RLS policies
+- Add seed data: 8 users, 20 properties, 6 blogs, 78 crime stations
+- Properties mapped to crime station cities for safety badges
+
+Auth:
+- Replace FirebaseProvider with SupabaseProvider
+- Rewrite signin/signup/logout to use Supabase Auth
+
+Data layer:
+- Create useSupabaseRealtime hook with Postgres changes subscription
+- Rewrite all 6 service files to use Supabase client
+- Remove firebase and @atechhub/firebase packages
+
+Safety intelligence:
+- Add /area-safety page with Province > District > Station drill-down
+- Add SafetyBadge component on property cards
+- Add safety filter controls and crime data context provider
+- Add Area Safety link to marketing navbar

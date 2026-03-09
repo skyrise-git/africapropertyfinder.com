@@ -13,7 +13,7 @@ export default function NotFound() {
         404 — Not Found
       </p>
       <h1 className="mt-4 text-center text-3xl font-bold tracking-tight md:text-4xl">
-        Lost in the Firebase Forest
+        Lost in the Cloud
       </h1>
       <p className="mt-3 max-w-xl text-center text-muted-foreground">
         We couldn&apos;t find the route you&apos;re looking for. Explore the

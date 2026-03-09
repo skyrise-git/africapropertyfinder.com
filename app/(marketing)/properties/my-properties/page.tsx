@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Plus, Home, AlertTriangle } from "lucide-react";
 import Link from "next/link";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import type { Property } from "@/lib/types/property.type";
@@ -17,9 +17,9 @@ export default function MyPropertiesPage() {
   const router = useRouter();
   const { user } = useAppStore();
   const isAuthenticated = useRequireAuth("Please sign in to view your properties");
-  const { data, loading, error } = useFirebaseRealtime<Property>("properties");
+  const { data, loading, error } = useSupabaseRealtime<Property>("properties");
 
-  const properties = (data as Property[]) || [];
+  const properties = data ?? [];
   const myProperties = useMemo(
     () => properties.filter((p) => p.userId === user?.uid),
     [properties, user?.uid]

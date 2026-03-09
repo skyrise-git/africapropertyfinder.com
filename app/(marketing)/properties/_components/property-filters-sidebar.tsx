@@ -40,6 +40,7 @@ import {
   ChefHat,
   Flame,
 } from "lucide-react";
+import { SafetyFilterControls } from "@/components/safety/safety-filter-controls";
 import type {
   Property,
   ListingType,
@@ -181,6 +182,22 @@ export function PropertyFiltersSidebar({
     "amenities",
     parseAsArrayOf(parseAsString).withDefault([])
   );
+  const [minSafetyRatingStr, setMinSafetyRatingStr] = useQueryState(
+    "minSafety",
+    parseAsString.withDefault("1")
+  );
+  const [maxCrimeIndexStr, setMaxCrimeIndexStr] = useQueryState(
+    "maxCrime",
+    parseAsString.withDefault("100")
+  );
+  const [improvingOnlyStr, setImprovingOnlyStr] = useQueryState(
+    "improvingOnly",
+    parseAsString.withDefault("false")
+  );
+
+  const minSafetyRating = Number(minSafetyRatingStr) || 1;
+  const maxCrimeIndex = Number(maxCrimeIndexStr) || 100;
+  const improvingOnly = improvingOnlyStr === "true";
 
   // Calculate price range from properties
   const priceRange = useMemo(() => {
@@ -231,6 +248,9 @@ export function PropertyFiltersSidebar({
     setMinBathroomsStr("");
     setSelectedFurnishing("");
     setSelectedAmenities([]);
+    setMinSafetyRatingStr("1");
+    setMaxCrimeIndexStr("100");
+    setImprovingOnlyStr("false");
   };
 
   const hasActiveFilters =
@@ -241,7 +261,10 @@ export function PropertyFiltersSidebar({
     minBedrooms !== null ||
     minBathrooms !== null ||
     selectedFurnishing !== "" ||
-    (selectedAmenities as string[]).length > 0;
+    (selectedAmenities as string[]).length > 0 ||
+    minSafetyRating > 1 ||
+    maxCrimeIndex < 100 ||
+    improvingOnly;
 
   return (
     <motion.div
@@ -458,6 +481,24 @@ export function PropertyFiltersSidebar({
               })}
             </div>
           </div>
+
+          <Separator />
+
+          {/* Area Safety */}
+          <SafetyFilterControls
+            minSafetyRating={minSafetyRating}
+            onMinSafetyRatingChange={(val) =>
+              setMinSafetyRatingStr(val.toString())
+            }
+            maxCrimeIndex={maxCrimeIndex}
+            onMaxCrimeIndexChange={(val) =>
+              setMaxCrimeIndexStr(val.toString())
+            }
+            improvingOnly={improvingOnly}
+            onImprovingOnlyChange={(val) =>
+              setImprovingOnlyStr(val.toString())
+            }
+          />
 
           <Separator />
 

@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { motion } from "motion/react";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtimeSingle } from "@/hooks/use-supabase-realtime";
 import type { Property } from "@/lib/types/property.type";
 import { PropertyHeader } from "./_components/property-header";
 import { PropertyGallery } from "./_components/property-gallery";
@@ -15,12 +15,12 @@ export default function PropertyDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { data, loading, error } = useFirebaseRealtime<Property>(
-    `properties/${id}`,
-    { asArray: false }
+  const { data, loading, error } = useSupabaseRealtimeSingle<Property>(
+    "properties",
+    id
   );
 
-  const property = data ? ({ ...data, id } as Property) : null;
+  const property = data;
 
   const handleShare = async () => {
     if (!property) return;

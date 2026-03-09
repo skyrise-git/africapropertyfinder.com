@@ -91,12 +91,10 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     try {
-      // Import firebaseAuth dynamically to avoid SSR issues
-      const { firebaseAuth } = await import("@atechhub/firebase");
-      await firebaseAuth({
-        action: "logout",
-      });
-      router.push("/");
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/signin");
     } catch (error) {
       console.error("Logout error:", error);
     }

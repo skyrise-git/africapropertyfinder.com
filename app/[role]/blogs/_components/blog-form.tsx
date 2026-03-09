@@ -44,7 +44,6 @@ import { blogService } from "@/lib/services/blog.service";
 import { generateSlug } from "@/lib/utils/blog-utils";
 import type { Blog, BlogCategory, BlogStatus } from "@/lib/types/blog.type";
 import { useAppStore } from "@/hooks/use-app-store";
-import { mutate } from "@atechhub/firebase";
 
 const blogSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -117,18 +116,12 @@ export function BlogForm({ blog }: BlogFormProps) {
         setImagePreview(coverImageUrl);
         setSelectedFile(null);
 
-        // Auto-save to Firebase if blog exists
+        // Auto-save to Supabase if blog exists
         if (blog?.id) {
           try {
-            await mutate({
-              action: "update",
-              path: `blogs/${blog.id}`,
-              data: {
-                coverImage: coverImageUrl,
-                coverImageFileKey: fileKey,
-                updatedAt: new Date().toISOString(),
-              },
-              actionBy: "admin",
+            await blogService.update(blog.id, {
+              coverImage: coverImageUrl,
+              coverImageFileKey: fileKey,
             });
 
             // Clear previous fileKey tracking (old file was already deleted before upload)
@@ -337,18 +330,12 @@ export function BlogForm({ blog }: BlogFormProps) {
     setSelectedFile(null);
     setPreviousFileKey(null);
 
-    // Remove from Firebase if blog exists
+    // Remove from Supabase if blog exists
     if (blog?.id) {
       try {
-        await mutate({
-          action: "update",
-          path: `blogs/${blog.id}`,
-          data: {
-            coverImage: null,
-            coverImageFileKey: null,
-            updatedAt: new Date().toISOString(),
-          },
-          actionBy: "admin",
+        await blogService.update(blog.id, {
+          coverImage: "",
+          coverImageFileKey: "",
         });
 
         // Delete from UploadThing storage using fileKey

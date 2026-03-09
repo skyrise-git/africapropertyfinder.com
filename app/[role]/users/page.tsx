@@ -10,8 +10,7 @@ import {
   Download,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { getArrFromObj } from "@ashirbad/js-core";
-import { mutate } from "@atechhub/firebase";
+import { createClient } from "@/lib/supabase/client";
 import {
   Card,
   CardContent,
@@ -26,12 +25,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { User } from "@/lib/types/user.type";
 
 async function fetchAllUsers(): Promise<User[]> {
-  const data = await mutate({
-    action: "get",
-    path: "users",
-  });
-  const allUsers = getArrFromObj(data || {}) as unknown as User[];
-  return allUsers;
+  const supabase = createClient();
+  const { data, error } = await supabase.from("profiles").select("*");
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => ({
+    ...row,
+    uid: row.uid ?? row.id,
+  })) as unknown as User[];
 }
 
 export default function UsersPage() {
@@ -115,16 +115,17 @@ export default function UsersPage() {
     if (selectedIds.size === 0) return;
     setUpdatingStatus(status);
     try {
-      await Promise.all(
+      const supabase = createClient();
+      const results = await Promise.all(
         Array.from(selectedIds).map((id) =>
-          mutate({
-            action: "update",
-            path: `users/${id}`,
-            data: { status },
-            actionBy: "admin",
-          })
+          supabase
+            .from("profiles")
+            .update({ status, updatedAt: new Date().toISOString() })
+            .eq("id", id)
         )
       );
+      const firstError = results.find((r) => r.error);
+      if (firstError?.error) throw new Error(firstError.error.message);
 
       setUsers((prev) =>
         prev.map((user) =>

@@ -1,5 +1,4 @@
-import { getArrFromObj } from "@ashirbad/js-core";
-import { mutate } from "@atechhub/firebase";
+import { createClient } from "@/lib/supabase/client";
 import type {
   Contact,
   ContactInput,
@@ -8,110 +7,79 @@ import type {
 } from "@/lib/types/contact.type";
 
 class ContactService {
-  /**
-   * Create a new contact submission
-   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private get db(): any {
+    return createClient();
+  }
+
   async create(data: ContactInput): Promise<string> {
     const nowISO = new Date().toISOString();
+    const { data: row, error } = await this.db
+      .from("contacts")
+      .insert({
+        ...data,
+        status: "new",
+        createdAt: nowISO,
+        updatedAt: nowISO,
+      })
+      .select("id")
+      .single();
 
-    const contactData = {
-      ...data,
-      status: "new" as const,
-      createdAt: nowISO,
-      updatedAt: nowISO,
-    };
-
-    const id = await mutate({
-      action: "createWithId",
-      path: "contacts",
-      data: contactData,
-      actionBy: "user",
-    });
-
-    return id;
+    if (error) throw new Error(error.message);
+    return row.id;
   }
 
-  /**
-   * Get all contacts
-   */
   async getAll(): Promise<Contact[]> {
-    const data = await mutate({
-      action: "get",
-      path: "contacts",
-    });
-    const contacts = getArrFromObj(data || {}) as unknown as Contact[];
+    const { data, error } = await this.db
+      .from("contacts")
+      .select("*")
+      .order("createdAt", { ascending: false });
 
-    // Sort by createdAt (newest first)
-    return contacts.sort((a, b) => {
-      const aTime =
-        typeof a.createdAt === "string" ? new Date(a.createdAt).getTime() : 0;
-      const bTime =
-        typeof b.createdAt === "string" ? new Date(b.createdAt).getTime() : 0;
-      return bTime - aTime;
-    });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as Contact[];
   }
 
-  /**
-   * Get contact by ID
-   */
   async getById(id: string): Promise<Contact | null> {
-    const data = await mutate({
-      action: "get",
-      path: `contacts/${id}`,
-    });
-    if (!data) {
-      return null;
-    }
-    return { ...data, id } as Contact;
+    const { data, error } = await this.db
+      .from("contacts")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) return null;
+    return data as unknown as Contact;
   }
 
-  /**
-   * Update contact
-   */
   async update(id: string, data: ContactUpdateInput): Promise<void> {
-    if (!id) {
-      throw new Error("Contact ID is required");
-    }
+    if (!id) throw new Error("Contact ID is required");
 
-    const updateData: Record<string, unknown> = {
-      updatedAt: new Date().toISOString(),
-    };
+    const { error } = await this.db
+      .from("contacts")
+      .update({ ...data, updatedAt: new Date().toISOString() })
+      .eq("id", id);
 
-    // Update all provided fields
-    Object.keys(data).forEach((key) => {
-      const value = data[key as keyof ContactUpdateInput];
-      if (value !== undefined) {
-        updateData[key] = value;
-      }
-    });
-
-    await mutate({
-      action: "update",
-      path: `contacts/${id}`,
-      data: updateData,
-      actionBy: "admin",
-    });
+    if (error) throw new Error(error.message);
   }
 
-  /**
-   * Delete contact
-   */
   async delete(id: string): Promise<void> {
-    await mutate({
-      action: "delete",
-      path: `contacts/${id}`,
-      actionBy: "admin",
-    });
+    const { error } = await this.db
+      .from("contacts")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw new Error(error.message);
   }
 
-  /**
-   * Get contacts by status
-   */
   async getByStatus(status: ContactStatus): Promise<Contact[]> {
-    const contacts = await this.getAll();
-    return contacts.filter((contact) => contact.status === status);
+    const { data, error } = await this.db
+      .from("contacts")
+      .select("*")
+      .eq("status", status)
+      .order("createdAt", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as Contact[];
   }
 }
 
 export const contactService = new ContactService();
-

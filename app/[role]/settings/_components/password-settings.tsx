@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/hooks/use-app-store";
-import { firebaseAuth } from "@atechhub/firebase";
+import { createClient } from "@/lib/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Lock, Shield } from "lucide-react";
 import { useState } from "react";
@@ -69,19 +69,18 @@ export function PasswordSettings() {
 
     setIsLoading(true);
     try {
-      // First, verify the current password by attempting to sign in
-      // This is a security measure to ensure the user knows their current password
-      await firebaseAuth({
-        action: "login",
+      const supabase = createClient();
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: data.currentPassword,
       });
+      if (signInError) throw new Error("wrong-password");
 
-      // If signin is successful, change the password
-      await firebaseAuth({
-        action: "changePassword",
-        newPassword: data.newPassword,
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: data.newPassword,
       });
+      if (updateError) throw new Error(updateError.message);
 
       toast.success("Password changed successfully!");
       form.reset();

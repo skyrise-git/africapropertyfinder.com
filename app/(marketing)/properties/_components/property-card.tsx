@@ -20,6 +20,10 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useMemo } from "react";
+import { SafetyBadge } from "@/components/safety/safety-badge";
+import { matchPropertyToStation } from "@/lib/utils/crime-helpers";
+import { useCrimeData } from "@/contexts/crime-data-context";
 
 interface PropertyCardProps {
   property: Property;
@@ -80,6 +84,12 @@ function formatPrice(property: Property) {
 
 export function PropertyCard({ property, href }: PropertyCardProps) {
   const imageUrl = property.images?.[0]?.url;
+  const { stations } = useCrimeData();
+
+  const safetyStation = useMemo(
+    () => matchPropertyToStation(stations, property.city, property.state, property.address),
+    [stations, property.city, property.state, property.address]
+  );
 
   const content = (
     <motion.div
@@ -138,6 +148,11 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
               {property.state && `, ${property.state}`}
             </span>
           </div>
+          {safetyStation && (
+            <div className="mt-1">
+              <SafetyBadge station={safetyStation} compact />
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="flex flex-1 flex-col gap-2 sm:gap-2.5 px-4 sm:px-5 pb-3 sm:pb-4">

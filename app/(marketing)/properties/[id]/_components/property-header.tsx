@@ -18,7 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAppStore } from "@/hooks/use-app-store";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import { propertyService } from "@/lib/services/property.service";
 import { savedPropertyService } from "@/lib/services/saved-property.service";
 import { toast } from "sonner";
@@ -36,15 +36,12 @@ export function PropertyHeader({ property, onShare }: PropertyHeaderProps) {
   const isOwner = user?.uid === property.userId;
 
   // Get all saved properties for the current user
-  const { data: savedPropertiesData } = useFirebaseRealtime<SavedProperty>(
+  const { data: savedPropertiesData } = useSupabaseRealtime<SavedProperty>(
     "savedProperties",
-    {
-      asArray: true,
-      enabled: !!user,
-    }
+    { enabled: !!user }
   );
 
-  const savedProperties = (savedPropertiesData as SavedProperty[]) || [];
+  const savedProperties = savedPropertiesData ?? [];
 
   // Check if current property is saved
   const isSaved = useMemo(() => {

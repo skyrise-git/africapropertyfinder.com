@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import type { Property } from "@/lib/types/property.type";
 import Link from "next/link";
 
@@ -287,9 +287,9 @@ const FullWidthMarquee = ({
 };
 
 export function FeaturedProperties() {
-  const { data, loading, error } = useFirebaseRealtime<Property>("properties");
+  const { data, loading, error } = useSupabaseRealtime<Property>("properties");
 
-  const properties = (data as Property[]) || [];
+  const properties = data || [];
 
   // Get featured properties with images
   const featuredProperties = properties

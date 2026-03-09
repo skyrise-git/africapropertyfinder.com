@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useFirebaseRealtime } from "@/hooks/use-firebase-realtime";
+import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import { SavedPropertiesList } from "./_components/SavedPropertiesList";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -37,20 +37,18 @@ export default function SavedPropertiesPage() {
     data: savedPropertiesData,
     loading: savedLoading,
     error: savedError,
-  } = useFirebaseRealtime<SavedProperty>("savedProperties", {
-    asArray: true,
+  } = useSupabaseRealtime<SavedProperty>("savedProperties", {
     enabled: !!user,
   });
 
   // Fetch all properties
   const { data: propertiesData, loading: propertiesLoading } =
-    useFirebaseRealtime<Property>("properties", {
-      asArray: true,
+    useSupabaseRealtime<Property>("properties", {
       enabled: !!user,
     });
 
-  const savedProperties = (savedPropertiesData as SavedProperty[]) || [];
-  const allProperties = (propertiesData as Property[]) || [];
+  const savedProperties = savedPropertiesData ?? [];
+  const allProperties = propertiesData ?? [];
 
   // Filter saved properties for current user
   const userSavedProperties = useMemo(
