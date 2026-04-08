@@ -186,6 +186,10 @@ export function PropertyFiltersSidebar({
     "amenities",
     parseAsArrayOf(parseAsString).withDefault([])
   );
+  const [keywordSearch, setKeywordSearch] = useQueryState(
+    "keyword",
+    parseAsString.withDefault("")
+  );
   const [minSafetyRatingStr, setMinSafetyRatingStr] = useQueryState(
     "minSafety",
     parseAsString.withDefault("1")
@@ -420,61 +424,59 @@ export function PropertyFiltersSidebar({
 
           <Separator />
 
-          {/* Bedrooms & Bathrooms */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold flex items-center gap-2">
-              <BedDouble className="h-4 w-4" />
-              Bedrooms & Bathrooms
-            </Label>
-            <div className="space-y-2.5">
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="min-bedrooms"
-                  className="text-xs text-muted-foreground"
+          {/* Bedrooms */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">Beds</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {["", "0", "1", "2", "3", "4", "5"].map((val) => (
+                <Button
+                  key={val}
+                  type="button"
+                  variant={minBedroomsStr === val ? "default" : "outline"}
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                  onClick={() => setMinBedroomsStr(val)}
                 >
-                  Min Bedrooms
-                </Label>
-                <Select
-                  value={minBedroomsStr || undefined}
-                  onValueChange={(value) => setMinBedroomsStr(value || "")}
-                >
-                  <SelectTrigger id="min-bedrooms" className="h-9 text-sm">
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num}+
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="min-bathrooms"
-                  className="text-xs text-muted-foreground"
-                >
-                  Min Bathrooms
-                </Label>
-                <Select
-                  value={minBathroomsStr || undefined}
-                  onValueChange={(value) => setMinBathroomsStr(value || "")}
-                >
-                  <SelectTrigger id="min-bathrooms" className="h-9 text-sm">
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5].map((num) => (
-                      <SelectItem key={num} value={num.toString()}>
-                        {num}+
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  {val === "" ? "Any" : val === "0" ? "Studio" : `${val}+`}
+                </Button>
+              ))}
             </div>
           </div>
+
+          {/* Bathrooms */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">Baths</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {["", "1", "2", "3", "4"].map((val) => (
+                <Button
+                  key={val}
+                  type="button"
+                  variant={minBathroomsStr === val ? "default" : "outline"}
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                  onClick={() => setMinBathroomsStr(val)}
+                >
+                  {val === "" ? "Any" : `${val}+`}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Keyword Search */}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">Keyword</Label>
+            <Input
+              type="text"
+              placeholder="e.g. pool, garden, ocean view"
+              value={keywordSearch}
+              onChange={(e) => setKeywordSearch(e.target.value)}
+              className="h-9 text-sm"
+            />
+          </div>
+
+         
 
           <Separator />
 
@@ -550,6 +552,37 @@ export function PropertyFiltersSidebar({
               })}
             </div>
           </div>
+          <Separator />
+
+          {/* Save Search */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full border-primary/30 text-primary hover:bg-primary/5"
+            onClick={() => {
+              const filters = {
+                country: selectedCountry,
+                listingTypes: selectedListingTypes,
+                propertyTypes: selectedPropertyTypes,
+                minPrice: minPriceStr,
+                maxPrice: maxPriceStr,
+                minBedrooms: minBedroomsStr,
+                minBathrooms: minBathroomsStr,
+                furnishing: selectedFurnishing,
+                amenities: selectedAmenities,
+                keyword: keywordSearch,
+                minSafety: minSafetyRatingStr,
+                maxCrime: maxCrimeIndexStr,
+                improvingOnly: improvingOnlyStr,
+              };
+              const json = JSON.stringify(filters);
+              navigator.clipboard.writeText(window.location.href).then(() => {
+                alert("Search URL copied! Sign in to save searches to your account.");
+              });
+            }}
+          >
+            Save Search
+          </Button>
         </CardContent>
       </Card>
     </motion.div>

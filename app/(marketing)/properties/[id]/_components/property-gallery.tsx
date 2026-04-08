@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Property } from "@/lib/types/property.type";
+import { PropertyStreetView } from "./property-street-view";
 
 type PropertyImage = NonNullable<Property["images"]>[number];
 
@@ -39,6 +40,7 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
   const images: PropertyImage[] = property.images || [];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryTab, setGalleryTab] = useState<"photos" | "streetview">("photos");
   const [zoomLevel, setZoomLevel] = useState(1);
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -312,15 +314,42 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
               {images.length})
             </DialogTitle>
           </DialogHeader>
-          <div className="relative w-full h-full flex items-center justify-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleCloseGallery}
-              className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70 text-white border-0"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+          <div className="relative w-full h-full flex flex-col">
+            {/* Tab bar + close */}
+            <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3">
+              <div className="flex gap-1 bg-black/60 backdrop-blur-sm rounded-lg p-1">
+                <button
+                  onClick={() => setGalleryTab("photos")}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${galleryTab === "photos" ? "bg-white text-black" : "text-white/80 hover:text-white"}`}
+                >
+                  Photos
+                </button>
+                <button
+                  onClick={() => setGalleryTab("streetview")}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${galleryTab === "streetview" ? "bg-white text-black" : "text-white/80 hover:text-white"}`}
+                >
+                  Street View
+                </button>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCloseGallery}
+                className="bg-black/50 hover:bg-black/70 text-white border-0"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {galleryTab === "streetview" ? (
+              <div className="flex-1 pt-14">
+                <PropertyStreetView
+                  lat={property.location?.latitude ?? 0}
+                  lng={property.location?.longitude ?? 0}
+                />
+              </div>
+            ) : (
+            <div className="relative w-full h-full flex items-center justify-center pt-14">
 
             {images.length > 1 && (
               <Button
@@ -442,6 +471,8 @@ export function PropertyGallery({ property }: PropertyGalleryProps) {
                   </button>
                 ))}
               </div>
+            )}
+            </div>
             )}
           </div>
         </DialogContent>

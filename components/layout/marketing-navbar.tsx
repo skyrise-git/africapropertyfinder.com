@@ -30,12 +30,15 @@ export function MarketingNavbar() {
   const marketingNavLinks = user
     ? [
         { label: "Area Safety", href: "/area-safety" },
+        { label: "Blogs", href: "/blogs" },
+        { label: "Feed", href: "/feed" },
         { label: "Appointments", href: "/appointments" },
         { label: "Services", href: "#services" },
       ]
     : [
         { label: "Area Safety", href: "/area-safety" },
         { label: "Blogs", href: "/blogs" },
+        { label: "Feed", href: "/feed" },
         { label: "Services", href: "#services" },
       ];
 
@@ -55,16 +58,20 @@ export function MarketingNavbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2.5 group" title="Go to homepage">
             <Image
-              src="/logo.png"
-              alt={marketingSite.title}
-              width={320}
-              height={64}
-              className="h-16 w-auto transition"
+              src="/logo-icon.png"
+              alt="Africa Property Finder"
+              width={44}
+              height={44}
+              className="h-9 w-9 transition group-hover:scale-105"
               priority
             />
+            <div className="hidden sm:flex flex-col leading-none">
+              <span className="text-[15px] font-bold text-[#1e3a5f] dark:text-gray-100 tracking-tight">Africa</span>
+              <span className="text-[11px] font-medium text-[#1e3a5f]/70 dark:text-gray-400 tracking-tight">Property Finder</span>
+            </div>
           </Link>
 
           <NavigationMenu className="hidden md:flex">

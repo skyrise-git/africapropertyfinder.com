@@ -202,6 +202,29 @@ export interface Database {
         };
         Relationships: [];
       };
+      saved_searches: {
+        Row: {
+          id: string;
+          userId: string;
+          name: string;
+          filters: Json;
+          notifyEmail: boolean;
+          createdAt: string;
+          updatedAt: string | null;
+        };
+        Insert: {
+          userId: string;
+          name?: string;
+          filters: Json;
+          notifyEmail?: boolean;
+        };
+        Update: {
+          name?: string;
+          filters?: Json;
+          notifyEmail?: boolean;
+        };
+        Relationships: [];
+      };
       countries: {
         Row: {
           code: string;

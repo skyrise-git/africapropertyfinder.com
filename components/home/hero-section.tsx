@@ -351,7 +351,7 @@ export function HeroSection() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary rounded-full shadow-lg"></div>
                     <span className="whitespace-nowrap">
-                      10,000+ Properties
+                      {stats.propertiesListed}+ Properties
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -379,9 +379,9 @@ export function HeroSection() {
         <div className="mx-auto max-w-5xl px-4">
           <div className="grid grid-cols-4 gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-t-xl shadow-lg border border-white/20 px-4 py-3">
             {[
-              { value: stats.propertiesListed > 0 ? `${stats.propertiesListed}+` : "1000+", label: "Properties" },
-              { value: stats.happyClients > 0 ? `${stats.happyClients}+` : "500+", label: "Clients" },
-              { value: stats.citiesCovered > 0 ? `${stats.citiesCovered}+` : "50+", label: "Cities" },
+              { value: `${stats.propertiesListed}+`, label: "Properties" },
+              { value: `${stats.happyClients}+`, label: "Clients" },
+              { value: `${stats.citiesCovered}+`, label: "Cities" },
               { value: `${stats.expertAgents}+`, label: "Agents" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
