@@ -8,7 +8,7 @@ interface GoogleMapsLoaderProps {
 }
 
 export function GoogleMapsLoader({ onLoad }: GoogleMapsLoaderProps) {
-  const apiKey = env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 
   return (
     <Script
