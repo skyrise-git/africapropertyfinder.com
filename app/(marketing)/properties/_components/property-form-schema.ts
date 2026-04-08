@@ -35,6 +35,7 @@ const basePropertySchema = z.object({
   area: z.number().positive("Area must be positive").optional(),
   floorNumber: z.number().int().min(0).optional(),
   totalFloors: z.number().int().min(0).optional(),
+  country: z.string().min(1, "Country is required").default("South Africa"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
