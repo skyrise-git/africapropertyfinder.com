@@ -122,6 +122,17 @@ export default function PropertiesPage() {
     "amenities",
     parseAsArrayOf(parseAsString).withDefault([])
   );
+  const [selectedCity] = useQueryState("city", parseAsString.withDefault(""));
+  const [selectedProvince] = useQueryState("province", parseAsString.withDefault(""));
+  const [minAreaStr, setMinAreaStr] = useQueryState("minArea", parseAsString.withDefault(""));
+  const [maxAreaStr, setMaxAreaStr] = useQueryState("maxArea", parseAsString.withDefault(""));
+  const [petsAllowed] = useQueryState("pets", parseAsString.withDefault(""));
+  const [smokingAllowed] = useQueryState("smoking", parseAsString.withDefault(""));
+  const [guestsAllowed] = useQueryState("guests", parseAsString.withDefault(""));
+  const [nearTransit] = useQueryState("transit", parseAsString.withDefault(""));
+  const [featuredOnly] = useQueryState("featured", parseAsString.withDefault(""));
+  const [dateListed] = useQueryState("listed", parseAsString.withDefault(""));
+  const [keywordSearch] = useQueryState("keyword", parseAsString.withDefault(""));
 
   // Convert string filters to numbers
   const minPrice = minPriceStr ? Number(minPriceStr) : null;
@@ -174,6 +185,17 @@ export default function PropertiesPage() {
     minBathrooms,
     selectedFurnishing,
     selectedAmenities,
+    selectedCity,
+    selectedProvince,
+    minAreaStr,
+    maxAreaStr,
+    petsAllowed,
+    smokingAllowed,
+    guestsAllowed,
+    nearTransit,
+    featuredOnly,
+    dateListed,
+    keywordSearch,
   ]);
 
   const { filteredSorted, paginated, totalPages } = useMemo(() => {
@@ -256,6 +278,55 @@ export default function PropertiesPage() {
       // Filter by furnishing
       if (selectedFurnishing && property.furnishing !== selectedFurnishing) {
         return false;
+      }
+
+      // Filter by city
+      if (selectedCity && property.city !== selectedCity) return false;
+
+      // Filter by province
+      if (selectedProvince && property.state !== selectedProvince) return false;
+
+      // Filter by area/size
+      const minArea = minAreaStr ? Number(minAreaStr) : null;
+      const maxArea = maxAreaStr ? Number(maxAreaStr) : null;
+      if (minArea != null && (property.area ?? 0) < minArea) return false;
+      if (maxArea != null && (property.area ?? Infinity) > maxArea) return false;
+
+      // Filter by policies
+      if (petsAllowed === "true" && !property.petsAllowed) return false;
+      if (smokingAllowed === "true" && !property.smokingAllowed) return false;
+      if (guestsAllowed === "true" && !property.guestsAllowed) return false;
+
+      // Filter by near transit
+      if (nearTransit === "true" && !property.nearbyTransit) return false;
+
+      // Filter by featured
+      if (featuredOnly === "true" && !property.featured) return false;
+
+      // Filter by date listed
+      if (dateListed) {
+        const days = Number(dateListed);
+        if (days > 0 && property.createdAt) {
+          const cutoff = Date.now() - days * 86_400_000;
+          if (new Date(property.createdAt).getTime() < cutoff) return false;
+        }
+      }
+
+      // Filter by keyword (from sidebar)
+      if (keywordSearch) {
+        const kw = keywordSearch.trim().toLowerCase();
+        const haystack = [
+          property.title,
+          property.address,
+          property.city,
+          property.state,
+          property.otherAmenities,
+          property.nearbyTransit,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(kw)) return false;
       }
 
       // Filter by amenities
@@ -374,6 +445,17 @@ export default function PropertiesPage() {
     minBathrooms,
     selectedFurnishing,
     selectedAmenities,
+    selectedCity,
+    selectedProvince,
+    minAreaStr,
+    maxAreaStr,
+    petsAllowed,
+    smokingAllowed,
+    guestsAllowed,
+    nearTransit,
+    featuredOnly,
+    dateListed,
+    keywordSearch,
   ]);
 
   const handlePageChange = (newPage: number) => {
@@ -514,6 +596,54 @@ export default function PropertiesPage() {
             },
           },
         ]
+      : []),
+    // Province
+    ...(selectedProvince
+      ? [{ id: "province", label: "Province", value: selectedProvince, onRemove: () => {} }]
+      : []),
+    // City
+    ...(selectedCity
+      ? [{ id: "city", label: "City", value: selectedCity, onRemove: () => {} }]
+      : []),
+    // Area
+    ...(minAreaStr || maxAreaStr
+      ? [{
+          id: "area",
+          label: "Area",
+          value: `${minAreaStr || "0"} – ${maxAreaStr || "∞"} m²`,
+          onRemove: () => { setMinAreaStr(""); setMaxAreaStr(""); },
+        }]
+      : []),
+    // Policies
+    ...(petsAllowed === "true"
+      ? [{ id: "pets", label: "Policy", value: "Pets allowed", onRemove: () => {} }]
+      : []),
+    ...(smokingAllowed === "true"
+      ? [{ id: "smoking", label: "Policy", value: "Smoking allowed", onRemove: () => {} }]
+      : []),
+    ...(guestsAllowed === "true"
+      ? [{ id: "guests", label: "Policy", value: "Guests allowed", onRemove: () => {} }]
+      : []),
+    // Transit
+    ...(nearTransit === "true"
+      ? [{ id: "transit", label: "Location", value: "Near transit", onRemove: () => {} }]
+      : []),
+    // Featured
+    ...(featuredOnly === "true"
+      ? [{ id: "featured", label: "Listing", value: "Featured only", onRemove: () => {} }]
+      : []),
+    // Date listed
+    ...(dateListed
+      ? [{
+          id: "dateListed",
+          label: "Listed",
+          value: `Last ${dateListed} days`,
+          onRemove: () => {},
+        }]
+      : []),
+    // Keyword
+    ...(keywordSearch
+      ? [{ id: "keyword", label: "Keyword", value: keywordSearch, onRemove: () => {} }]
       : []),
     // Amenities
     ...(selectedAmenities as string[]).map((amenity) => {

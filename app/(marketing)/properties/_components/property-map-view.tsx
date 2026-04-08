@@ -3,7 +3,8 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import {
   GoogleMap,
-  MarkerF,
+  OverlayViewF,
+  OverlayView,
   InfoWindowF,
   useJsApiLoader,
 } from "@react-google-maps/api";
@@ -23,153 +24,50 @@ interface PropertyMapViewProps {
   onPropertySelect?: (id: string | null) => void;
 }
 
-const defaultCenter = {
-  lat: 28.6139,
-  lng: 77.209,
-};
+const defaultCenter = { lat: -29.0, lng: 25.0 };
 
-const containerStyle: {
-  width: string;
-  height: string;
-} = {
-  width: "100%",
-  height: "100%",
-};
+const containerStyle = { width: "100%", height: "100%" };
 
-// Create custom SVG marker icon
-function createCustomMarkerIcon(
-  property: Property,
-  isActive: boolean = false
-): google.maps.Icon {
-  const size = isActive ? 48 : 40;
-  const iconSize = isActive ? 24 : 20;
-  const strokeWidth = isActive ? 3 : 2;
-  
-  // Color based on listing type
-  const getColors = () => {
-    switch (property.listingType) {
-      case "sale":
-        return {
-          fill: "#22c55e", // green
-          stroke: "#ffffff",
-          shadow: "rgba(34, 197, 94, 0.4)",
-        };
-      case "rent":
-        return {
-          fill: "#3b82f6", // blue
-          stroke: "#ffffff",
-          shadow: "rgba(59, 130, 246, 0.4)",
-        };
-      case "student-housing":
-        return {
-          fill: "#a855f7", // purple
-          stroke: "#ffffff",
-          shadow: "rgba(168, 85, 247, 0.4)",
-        };
-      default:
-        return {
-          fill: "#64748b", // gray
-          stroke: "#ffffff",
-          shadow: "rgba(100, 116, 139, 0.4)",
-        };
-    }
-  };
+function formatShortPrice(n: number | undefined | null): string {
+  if (n == null || n === 0) return "?";
+  if (n >= 1_000_000) return `R${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `R${(n / 1_000).toFixed(0)}K`;
+  return `R${n}`;
+}
 
-  const colors = getColors();
-  
-  // Icon paths based on property type (24x24 viewBox)
-  const getIconPaths = () => {
-    switch (property.propertyType) {
-      case "house":
-        // House icon with roof
-        return `
-          <path d="M3 12L12 3L21 12V20C21 20.5523 20.5523 21 20 21H15V15C15 14.4477 14.5523 14 14 14H10C9.44772 14 9 14.4477 9 15V21H4C3.44772 21 3 20.5523 3 20V12Z" fill="${colors.stroke}" stroke="${colors.stroke}" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M9 21V15H15V21" stroke="${colors.fill}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        `;
-      case "apartment":
-      case "condo":
-        // Building/apartment icon
-        return `
-          <path d="M4 21V9L12 3L20 9V21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M9 21V13H15V21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M4 13H20" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <path d="M4 17H20" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-        `;
-      case "townhouse":
-        // Townhouse icon (multiple units)
-        return `
-          <path d="M3 21V9L12 3L21 9V21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M9 21V13H15V21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M3 13H9" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <path d="M15 13H21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <path d="M3 17H9" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <path d="M15 17H21" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-        `;
-      case "studio":
-        // Small building icon
-        return `
-          <rect x="6" y="10" width="12" height="11" rx="1" stroke="${colors.stroke}" stroke-width="1.5" fill="none"/>
-          <path d="M12 10V6L9 4L6 6V10" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M9 14H15" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <path d="M9 18H15" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-        `;
-      case "room":
-        // Room icon
-        return `
-          <rect x="4" y="6" width="16" height="15" rx="1" stroke="${colors.stroke}" stroke-width="1.5" fill="none"/>
-          <path d="M4 10H20" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <path d="M8 14H16" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-          <path d="M8 18H16" stroke="${colors.stroke}" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-        `;
-      default:
-        // Default location pin icon
-        return `
-          <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="${colors.stroke}" stroke="${colors.stroke}" stroke-width="1.5"/>
-          <circle cx="12" cy="9" r="2.5" fill="${colors.fill}"/>
-        `;
-    }
-  };
+function PriceMarker({
+  property,
+  isActive,
+  onClick,
+}: {
+  property: Property;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  const price =
+    property.listingType === "sale" ? property.price : property.rent;
+  const label = formatShortPrice(price);
+  const suffix = property.listingType !== "sale" ? "/mo" : "";
 
-  const iconPaths = getIconPaths();
+  const bg = isActive
+    ? "bg-primary text-white shadow-lg scale-110"
+    : "bg-white text-slate-800 shadow-md hover:shadow-lg hover:scale-105 border border-gray-200";
 
-  // Create complete SVG string with marker pin shape
-  const svg = `
-    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="shadow-${property.id}" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-          <feOffset dx="0" dy="2" result="offsetblur"/>
-          <feComponentTransfer>
-            <feFuncA type="linear" slope="0.3"/>
-          </feComponentTransfer>
-          <feMerge>
-            <feMergeNode/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
-      <!-- Pin background circle -->
-      <circle 
-        cx="${size / 2}" 
-        cy="${size / 2}" 
-        r="${size / 2 - strokeWidth}" 
-        fill="${colors.fill}" 
-        stroke="${colors.stroke}" 
-        stroke-width="${strokeWidth}"
-        filter="url(#shadow-${property.id})"
-      />
-      <!-- Property type icon -->
-      <g transform="translate(${(size - iconSize) / 2}, ${(size - iconSize) / 2}) scale(${iconSize / 24})">
-        ${iconPaths}
-      </g>
-    </svg>
-  `;
-
-  return {
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-    scaledSize: new google.maps.Size(size, size),
-    anchor: new google.maps.Point(size / 2, size),
-  };
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap
+        transition-all duration-200 cursor-pointer select-none
+        ${bg}
+      `}
+      style={{ transform: "translate(-50%, -100%)" }}
+    >
+      {label}
+      {suffix && <span className="font-normal opacity-70">{suffix}</span>}
+    </button>
+  );
 }
 
 export function PropertyMapView({
@@ -180,18 +78,16 @@ export function PropertyMapView({
 }: PropertyMapViewProps) {
   const [lat] = useQueryState("lat", parseAsString.withDefault(""));
   const [lng] = useQueryState("lng", parseAsString.withDefault(""));
-  const [internalSelectedId, setInternalSelectedId] =
-    useState<string | null>(null);
+  const [selectedCity] = useQueryState("city", parseAsString.withDefault(""));
+  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const boundaryRef = useRef<google.maps.Polygon | null>(null);
 
-  // Use external selectedId if provided, otherwise use internal state
   const selectedId =
     externalSelectedId !== undefined ? externalSelectedId : internalSelectedId;
 
-  // Pan map to selected property when selection changes
   useEffect(() => {
     if (!mapRef.current || !selectedId) return;
-
     const property = properties.find((p) => p.id === selectedId);
     if (
       property?.location &&
@@ -204,6 +100,58 @@ export function PropertyMapView({
       });
     }
   }, [selectedId, properties]);
+
+  useEffect(() => {
+    if (boundaryRef.current) {
+      boundaryRef.current.setMap(null);
+      boundaryRef.current = null;
+    }
+
+    if (!mapRef.current || !selectedCity || !properties.length) return;
+
+    const cityProps = properties.filter(
+      (p) =>
+        p.city === selectedCity &&
+        p.location &&
+        typeof p.location.latitude === "number" &&
+        typeof p.location.longitude === "number",
+    );
+
+    if (cityProps.length < 2) return;
+
+    const lats = cityProps.map((p) => p.location.latitude);
+    const lngs = cityProps.map((p) => p.location.longitude);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+
+    const padLat = (maxLat - minLat) * 0.15 || 0.01;
+    const padLng = (maxLng - minLng) * 0.15 || 0.01;
+
+    const bounds = [
+      { lat: minLat - padLat, lng: minLng - padLng },
+      { lat: minLat - padLat, lng: maxLng + padLng },
+      { lat: maxLat + padLat, lng: maxLng + padLng },
+      { lat: maxLat + padLat, lng: minLng - padLng },
+    ];
+
+    const poly = new google.maps.Polygon({
+      paths: bounds,
+      strokeColor: "#7c3aed",
+      strokeOpacity: 0.6,
+      strokeWeight: 2,
+      fillColor: "#7c3aed",
+      fillOpacity: 0.06,
+    });
+
+    poly.setMap(mapRef.current);
+    boundaryRef.current = poly;
+
+    const mapBounds = new google.maps.LatLngBounds();
+    bounds.forEach((b) => mapBounds.extend(b));
+    mapRef.current.fitBounds(mapBounds, 40);
+  }, [selectedCity, properties]);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
@@ -228,11 +176,13 @@ export function PropertyMapView({
     );
 
     if (withLocation.length > 0) {
-      const first = withLocation[0].location;
-      return {
-        lat: first.latitude,
-        lng: first.longitude,
-      };
+      const avgLat =
+        withLocation.reduce((s, p) => s + p.location.latitude, 0) /
+        withLocation.length;
+      const avgLng =
+        withLocation.reduce((s, p) => s + p.location.longitude, 0) /
+        withLocation.length;
+      return { lat: avgLat, lng: avgLng };
     }
 
     return defaultCenter;
@@ -240,28 +190,16 @@ export function PropertyMapView({
 
   const handleMarkerClick = useCallback(
     (id: string) => {
-      if (onMarkerClick) {
-        onMarkerClick(id);
-      }
-      if (onPropertySelect) {
-        onPropertySelect(id);
-      }
-      // Only update internal state if not controlled externally
-      if (externalSelectedId === undefined) {
-        setInternalSelectedId(id);
-      }
+      if (onMarkerClick) onMarkerClick(id);
+      if (onPropertySelect) onPropertySelect(id);
+      if (externalSelectedId === undefined) setInternalSelectedId(id);
     },
-    [onMarkerClick, onPropertySelect, externalSelectedId]
+    [onMarkerClick, onPropertySelect, externalSelectedId],
   );
 
   const handleInfoWindowClose = useCallback(() => {
-    if (onPropertySelect) {
-      onPropertySelect(null);
-    }
-    // Only update internal state if not controlled externally
-    if (externalSelectedId === undefined) {
-      setInternalSelectedId(null);
-    }
+    if (onPropertySelect) onPropertySelect(null);
+    if (externalSelectedId === undefined) setInternalSelectedId(null);
   }, [onPropertySelect, externalSelectedId]);
 
   if (loadError) {
@@ -291,9 +229,25 @@ export function PropertyMapView({
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
-        zoom={13}
+        zoom={11}
         onLoad={(map) => {
           mapRef.current = map;
+          if (properties.length > 1) {
+            const bounds = new google.maps.LatLngBounds();
+            properties.forEach((p) => {
+              if (
+                p.location &&
+                typeof p.location.latitude === "number" &&
+                typeof p.location.longitude === "number"
+              ) {
+                bounds.extend({
+                  lat: p.location.latitude,
+                  lng: p.location.longitude,
+                });
+              }
+            });
+            map.fitBounds(bounds, 60);
+          }
         }}
         options={{
           disableDefaultUI: false,
@@ -309,23 +263,23 @@ export function PropertyMapView({
             !loc ||
             typeof loc.latitude !== "number" ||
             typeof loc.longitude !== "number"
-          ) {
+          )
             return null;
-          }
 
           const isActive = selectedId === property.id;
 
           return (
-            <MarkerF
+            <OverlayViewF
               key={property.id}
-              position={{
-                lat: loc.latitude,
-                lng: loc.longitude,
-              }}
-              icon={createCustomMarkerIcon(property, isActive)}
-              onClick={() => handleMarkerClick(property.id)}
-              animation={isActive ? google.maps.Animation.BOUNCE : undefined}
-            />
+              position={{ lat: loc.latitude, lng: loc.longitude }}
+              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+            >
+              <PriceMarker
+                property={property}
+                isActive={isActive}
+                onClick={() => handleMarkerClick(property.id)}
+              />
+            </OverlayViewF>
           );
         })}
 
@@ -336,6 +290,7 @@ export function PropertyMapView({
               lng: selectedProperty.location.longitude,
             }}
             onCloseClick={handleInfoWindowClose}
+            options={{ pixelOffset: new google.maps.Size(0, -30) }}
           >
             <div className="w-[260px] space-y-2">
               <div className="flex items-start gap-2">
@@ -354,8 +309,12 @@ export function PropertyMapView({
           </InfoWindowF>
         )}
       </GoogleMap>
+
+      {selectedCity && (
+        <div className="absolute top-3 left-3 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md border text-xs font-medium text-primary">
+          Showing: {selectedCity}
+        </div>
+      )}
     </div>
   );
 }
-
-

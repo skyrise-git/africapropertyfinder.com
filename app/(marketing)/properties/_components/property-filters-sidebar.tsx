@@ -21,7 +21,6 @@ import {
   Building,
   GraduationCap,
   DollarSign,
-  BedDouble,
   Sofa,
   Building2,
   DoorOpen,
@@ -39,6 +38,14 @@ import {
   Sprout,
   ChefHat,
   Flame,
+  MapPin,
+  Ruler,
+  PawPrint,
+  Cigarette,
+  Users,
+  Train,
+  Star,
+  CalendarClock,
 } from "lucide-react";
 import { SafetyFilterControls } from "@/components/safety/safety-filter-controls";
 import type {
@@ -190,6 +197,46 @@ export function PropertyFiltersSidebar({
     "keyword",
     parseAsString.withDefault("")
   );
+  const [selectedCity, setSelectedCity] = useQueryState(
+    "city",
+    parseAsString.withDefault("")
+  );
+  const [selectedProvince, setSelectedProvince] = useQueryState(
+    "province",
+    parseAsString.withDefault("")
+  );
+  const [minAreaStr, setMinAreaStr] = useQueryState(
+    "minArea",
+    parseAsString.withDefault("")
+  );
+  const [maxAreaStr, setMaxAreaStr] = useQueryState(
+    "maxArea",
+    parseAsString.withDefault("")
+  );
+  const [petsAllowed, setPetsAllowed] = useQueryState(
+    "pets",
+    parseAsString.withDefault("")
+  );
+  const [smokingAllowed, setSmokingAllowed] = useQueryState(
+    "smoking",
+    parseAsString.withDefault("")
+  );
+  const [guestsAllowed, setGuestsAllowed] = useQueryState(
+    "guests",
+    parseAsString.withDefault("")
+  );
+  const [nearTransit, setNearTransit] = useQueryState(
+    "transit",
+    parseAsString.withDefault("")
+  );
+  const [featuredOnly, setFeaturedOnly] = useQueryState(
+    "featured",
+    parseAsString.withDefault("")
+  );
+  const [dateListed, setDateListed] = useQueryState(
+    "listed",
+    parseAsString.withDefault("")
+  );
   const [minSafetyRatingStr, setMinSafetyRatingStr] = useQueryState(
     "minSafety",
     parseAsString.withDefault("1")
@@ -207,7 +254,18 @@ export function PropertyFiltersSidebar({
   const maxCrimeIndex = Number(maxCrimeIndexStr) || 100;
   const improvingOnly = improvingOnlyStr === "true";
 
-  // Calculate price range from properties
+  const provinces = useMemo(() => {
+    const s = new Set(properties.map((p) => p.state).filter(Boolean));
+    return [...s].sort();
+  }, [properties]);
+
+  const cities = useMemo(() => {
+    let pool = properties;
+    if (selectedProvince) pool = pool.filter((p) => p.state === selectedProvince);
+    const s = new Set(pool.map((p) => p.city).filter(Boolean));
+    return [...s].sort();
+  }, [properties, selectedProvince]);
+
   const priceRange = useMemo(() => {
     const prices = properties
       .map((p) => (p.listingType === "sale" ? p.price : p.rent))
@@ -248,6 +306,7 @@ export function PropertyFiltersSidebar({
   };
 
   const handleResetFilters = () => {
+    setSelectedCountry("");
     setSelectedListingTypes([]);
     setSelectedPropertyTypes([]);
     setMinPriceStr("");
@@ -256,12 +315,24 @@ export function PropertyFiltersSidebar({
     setMinBathroomsStr("");
     setSelectedFurnishing("");
     setSelectedAmenities([]);
+    setKeywordSearch("");
+    setSelectedCity("");
+    setSelectedProvince("");
+    setMinAreaStr("");
+    setMaxAreaStr("");
+    setPetsAllowed("");
+    setSmokingAllowed("");
+    setGuestsAllowed("");
+    setNearTransit("");
+    setFeaturedOnly("");
+    setDateListed("");
     setMinSafetyRatingStr("1");
     setMaxCrimeIndexStr("100");
     setImprovingOnlyStr("false");
   };
 
   const hasActiveFilters =
+    selectedCountry !== "" ||
     (selectedListingTypes as string[]).length > 0 ||
     (selectedPropertyTypes as string[]).length > 0 ||
     minPrice !== null ||
@@ -270,6 +341,17 @@ export function PropertyFiltersSidebar({
     minBathrooms !== null ||
     selectedFurnishing !== "" ||
     (selectedAmenities as string[]).length > 0 ||
+    keywordSearch !== "" ||
+    selectedCity !== "" ||
+    selectedProvince !== "" ||
+    minAreaStr !== "" ||
+    maxAreaStr !== "" ||
+    petsAllowed === "true" ||
+    smokingAllowed === "true" ||
+    guestsAllowed === "true" ||
+    nearTransit === "true" ||
+    featuredOnly === "true" ||
+    dateListed !== "" ||
     minSafetyRating > 1 ||
     maxCrimeIndex < 100 ||
     improvingOnly;
@@ -316,6 +398,50 @@ export function PropertyFiltersSidebar({
                 <SelectItem value="all">All Countries</SelectItem>
                 <SelectItem value="South Africa">South Africa</SelectItem>
                 <SelectItem value="Zimbabwe">Zimbabwe</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Province */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Province / Region
+            </Label>
+            <Select
+              value={selectedProvince || "all"}
+              onValueChange={(val) => {
+                setSelectedProvince(val === "all" ? "" : val);
+                if (val === "all") setSelectedCity("");
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All Provinces" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Provinces</SelectItem>
+                {provinces.map((p) => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* City */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold">City / Town</Label>
+            <Select
+              value={selectedCity || "all"}
+              onValueChange={(val) => setSelectedCity(val === "all" ? "" : val)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All Cities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cities</SelectItem>
+                {cities.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -476,7 +602,137 @@ export function PropertyFiltersSidebar({
             />
           </div>
 
-         
+          <Separator />
+
+          {/* Area / Size */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <Ruler className="h-4 w-4" />
+              Area (m²)
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="min-area" className="text-xs text-muted-foreground">Min</Label>
+                <Input
+                  id="min-area"
+                  type="number"
+                  placeholder="0"
+                  value={minAreaStr}
+                  onChange={(e) => setMinAreaStr(e.target.value || "")}
+                  className="h-9 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="max-area" className="text-xs text-muted-foreground">Max</Label>
+                <Input
+                  id="max-area"
+                  type="number"
+                  placeholder="Any"
+                  value={maxAreaStr}
+                  onChange={(e) => setMaxAreaStr(e.target.value || "")}
+                  className="h-9 text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Policies */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold">Policies</Label>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant={petsAllowed === "true" ? "default" : "outline"}
+                size="sm"
+                className="h-9 flex items-center gap-2"
+                onClick={() => setPetsAllowed(petsAllowed === "true" ? "" : "true")}
+              >
+                <PawPrint className="h-4 w-4" />
+                Pets OK
+              </Button>
+              <Button
+                type="button"
+                variant={smokingAllowed === "true" ? "default" : "outline"}
+                size="sm"
+                className="h-9 flex items-center gap-2"
+                onClick={() => setSmokingAllowed(smokingAllowed === "true" ? "" : "true")}
+              >
+                <Cigarette className="h-4 w-4" />
+                Smoking OK
+              </Button>
+              <Button
+                type="button"
+                variant={guestsAllowed === "true" ? "default" : "outline"}
+                size="sm"
+                className="h-9 flex items-center gap-2"
+                onClick={() => setGuestsAllowed(guestsAllowed === "true" ? "" : "true")}
+              >
+                <Users className="h-4 w-4" />
+                Guests OK
+              </Button>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Near Transit */}
+          <div className="space-y-3">
+            <Button
+              type="button"
+              variant={nearTransit === "true" ? "default" : "outline"}
+              size="sm"
+              className="h-9 flex items-center gap-2 w-full justify-start"
+              onClick={() => setNearTransit(nearTransit === "true" ? "" : "true")}
+            >
+              <Train className="h-4 w-4" />
+              Near transit / transport
+            </Button>
+          </div>
+
+          {/* Featured Only */}
+          <div className="space-y-3">
+            <Button
+              type="button"
+              variant={featuredOnly === "true" ? "default" : "outline"}
+              size="sm"
+              className="h-9 flex items-center gap-2 w-full justify-start"
+              onClick={() => setFeaturedOnly(featuredOnly === "true" ? "" : "true")}
+            >
+              <Star className="h-4 w-4" />
+              Featured listings only
+            </Button>
+          </div>
+
+          <Separator />
+
+          {/* Date Listed */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <CalendarClock className="h-4 w-4" />
+              Date listed
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { value: "", label: "Any" },
+                { value: "7", label: "Last 7 days" },
+                { value: "30", label: "Last 30 days" },
+                { value: "90", label: "Last 90 days" },
+              ].map((opt) => (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  variant={dateListed === opt.value ? "default" : "outline"}
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                  onClick={() => setDateListed(opt.value)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
 
           <Separator />
 
