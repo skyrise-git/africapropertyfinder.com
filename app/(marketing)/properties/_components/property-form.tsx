@@ -169,6 +169,7 @@ export const PropertyForm = forwardRef<
         area: formData.area ?? undefined,
         floorNumber: formData.floorNumber ?? undefined,
         totalFloors: formData.totalFloors ?? undefined,
+        country: (formData as any).country || "South Africa",
         price: (formData as any).price ?? undefined,
         rent: (formData as any).rent ?? undefined,
         securityDeposit: (formData as any).securityDeposit ?? undefined,
