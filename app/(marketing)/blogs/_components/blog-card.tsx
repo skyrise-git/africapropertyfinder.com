@@ -57,7 +57,7 @@ export function BlogCard({ blog }: BlogCardProps) {
           <CardHeader className="flex-1 flex flex-col gap-2">
             <div className="flex items-start justify-between gap-2">
               <motion.h3
-                className="font-bold text-xl leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300"
+                className="font-medium text-xl leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300"
                 whileHover={{ x: 2 }}
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               >

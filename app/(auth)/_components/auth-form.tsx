@@ -128,7 +128,7 @@ export function AuthForm({
         }}
       />
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
+        <CardTitle className="text-2xl font-medium">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>

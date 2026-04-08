@@ -95,7 +95,7 @@ export default function SavedPropertiesPage() {
       className="container mx-auto max-w-7xl p-4 md:p-6 space-y-6"
     >
       <div className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl md:text-3xl font-light tracking-tight">
           Saved Properties
         </h1>
         <p className="text-sm text-muted-foreground">

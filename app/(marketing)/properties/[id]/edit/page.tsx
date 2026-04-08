@@ -215,7 +215,7 @@ export default function EditPropertyPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Edit Property</h1>
+        <h1 className="text-3xl font-light tracking-tight">Edit Property</h1>
         <p className="text-muted-foreground">
           Update your property listing information below.
         </p>

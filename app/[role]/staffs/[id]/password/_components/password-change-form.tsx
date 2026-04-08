@@ -166,7 +166,7 @@ export function PasswordChangeForm({ staffId }: PasswordChangeFormProps) {
             Back to Staffs
           </Button>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Change Password</h1>
+        <h1 className="text-3xl font-light tracking-tight">Change Password</h1>
         <p className="text-muted-foreground">
           Update the password for {staff?.name}.
         </p>

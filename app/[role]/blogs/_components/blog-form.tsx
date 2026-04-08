@@ -392,7 +392,7 @@ export function BlogForm({ blog }: BlogFormProps) {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-3xl font-light tracking-tight">
           {blog ? "Edit Blog" : "Create Blog"}
         </h1>
         <p className="text-muted-foreground">

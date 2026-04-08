@@ -9,7 +9,7 @@ export default function SettingsPage() {
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-4xl">
       <div className="space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-light tracking-tight">
           Settings
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground">

@@ -158,7 +158,7 @@ export default function BlogDetailPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight"
           >
             {blog.title}
           </motion.h1>
@@ -226,7 +226,7 @@ export default function BlogDetailPage() {
           transition={{ delay: 0.6 }}
           className="space-y-4"
         >
-          <h2 className="text-2xl md:text-3xl font-bold">Related Blogs</h2>
+          <h2 className="text-2xl md:text-3xl font-light">Related Blogs</h2>
           <motion.div
             initial="hidden"
             animate="visible"

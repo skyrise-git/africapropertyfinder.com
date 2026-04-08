@@ -34,7 +34,7 @@ export function MarketingFooter() {
         <div className="mx-auto max-w-7xl px-4 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-foreground">
+              <h3 className="text-2xl font-medium text-slate-700 dark:text-gray-100">
                 {marketingSite.footer.newsletter.title}
               </h3>
               <p className="text-sm text-muted-foreground">
@@ -73,9 +73,9 @@ export function MarketingFooter() {
                 <Image
                   src="/logo.png"
                   alt={marketingSite.title}
-                  width={200}
-                  height={44}
-                  className="h-10 w-auto transition"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto transition dark:invert dark:brightness-0"
                 />
               </Link>
               <div className="space-y-3 text-sm text-muted-foreground">
@@ -109,7 +109,7 @@ export function MarketingFooter() {
 
             {/* Properties */}
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-4">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-gray-100 mb-4">
                 Properties
               </h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
@@ -128,7 +128,7 @@ export function MarketingFooter() {
 
             {/* Categories */}
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-4">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-gray-100 mb-4">
                 Categories
               </h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
@@ -147,7 +147,7 @@ export function MarketingFooter() {
 
             {/* Company */}
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-4">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-gray-100 mb-4">
                 Company
               </h4>
               <ul className="space-y-3 text-sm text-muted-foreground">
@@ -166,7 +166,7 @@ export function MarketingFooter() {
 
             {/* Resources */}
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-4">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-gray-100 mb-4">
                 Resources
               </h4>
               <ul className="space-y-3 text-sm text-muted-foreground">

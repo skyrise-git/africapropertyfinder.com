@@ -212,7 +212,7 @@ export default function BlogsPage() {
           />
           {/* Title with gradient text */}
           <motion.h1
-            className="relative text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent"
+            className="relative text-5xl md:text-6xl font-light tracking-tight bg-gradient-to-r from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}

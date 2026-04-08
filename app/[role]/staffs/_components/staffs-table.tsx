@@ -162,7 +162,7 @@ export function StaffsTable({ staffs, onRefresh }: StaffsTableProps) {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-light tracking-tight">
             Staffs
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground">

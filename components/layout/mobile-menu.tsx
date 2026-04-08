@@ -101,7 +101,7 @@ export function MobileMenu({
             <div className="flex h-full flex-col">
               {/* Header */}
               <div className="flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4">
-                <span className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                <span className="text-base font-semibold text-slate-700 dark:text-gray-100">
                   Menu
                 </span>
                 <Button
@@ -120,7 +120,7 @@ export function MobileMenu({
                   {/* Properties Dropdown */}
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="properties" className="border-none">
-                      <AccordionTrigger className="py-3 text-sm font-medium text-gray-900 dark:text-gray-100 hover:no-underline">
+                      <AccordionTrigger className="py-3 text-sm font-medium text-slate-700 dark:text-gray-100 hover:no-underline">
                         Properties
                       </AccordionTrigger>
                       <AccordionContent className="pb-2">
@@ -161,7 +161,7 @@ export function MobileMenu({
                                   )}
                                   <div className="flex flex-1 flex-col gap-1">
                                     <div className="flex items-center gap-2">
-                                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                      <span className="text-sm font-medium text-slate-700 dark:text-gray-100">
                                         {item.label}
                                       </span>
                                       {item.featured && (
@@ -202,7 +202,7 @@ export function MobileMenu({
                             value="services"
                             className="border-none"
                           >
-                            <AccordionTrigger className="py-3 text-sm font-medium text-gray-900 dark:text-gray-100 hover:no-underline">
+                            <AccordionTrigger className="py-3 text-sm font-medium text-slate-700 dark:text-gray-100 hover:no-underline">
                               {link.label}
                             </AccordionTrigger>
                             <AccordionContent className="pb-2">
@@ -246,7 +246,7 @@ export function MobileMenu({
                                         )}
                                         <div className="flex flex-1 flex-col gap-1">
                                           <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            <span className="text-sm font-medium text-slate-700 dark:text-gray-100">
                                               {item.label}
                                             </span>
                                             {item.featured && (
@@ -289,7 +289,7 @@ export function MobileMenu({
                         <Link
                           href={link.href}
                           onClick={onClose}
-                          className="block rounded-md px-3 py-3 text-sm font-medium text-gray-900 dark:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="block rounded-md px-3 py-3 text-sm font-medium text-slate-700 dark:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
                         >
                           {link.label}
                         </Link>
@@ -311,7 +311,7 @@ export function MobileMenu({
                       toggleTheme();
                     }
                   }}
-                  className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
                 >
                   <div onClick={(e) => e.stopPropagation()}>
                     <ThemeToggle />

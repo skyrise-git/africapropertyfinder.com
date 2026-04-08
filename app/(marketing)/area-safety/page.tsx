@@ -109,7 +109,7 @@ export default function AreaSafetyPage() {
           <Shield className="h-3.5 w-3.5" />
           Safety Intelligence
         </div>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <h1 className="text-3xl font-light tracking-tight sm:text-4xl">
           Area Safety Ratings
         </h1>
         <p className="text-muted-foreground max-w-xl mx-auto">

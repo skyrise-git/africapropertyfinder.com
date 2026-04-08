@@ -89,7 +89,7 @@ export function StaffForm() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Create Staff</h1>
+        <h1 className="text-3xl font-light tracking-tight">Create Staff</h1>
         <p className="text-muted-foreground">
           Add a new staff to the platform. This will create both a database
           record and auth account.
