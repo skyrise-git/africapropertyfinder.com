@@ -145,6 +145,82 @@ export interface Database {
         };
         Relationships: [];
       };
+      price_estimates: {
+        Row: {
+          id: string;
+          propertyId: string | null;
+          city: string | null;
+          province: string | null;
+          country: string;
+          propertyType: string | null;
+          estimateLow: number;
+          estimateMid: number;
+          estimateHigh: number;
+          yoyGrowthPct: number;
+          demandLevel: string;
+          avgPricePerSqm: number | null;
+          comparableCount: number;
+          priceTrend: Json;
+          source: string;
+          notes: string | null;
+          createdAt: string;
+          updatedAt: string | null;
+        };
+        Insert: {
+          propertyId?: string | null;
+          city?: string | null;
+          province?: string | null;
+          country?: string;
+          propertyType?: string | null;
+          estimateLow: number;
+          estimateMid: number;
+          estimateHigh: number;
+          yoyGrowthPct?: number;
+          demandLevel?: string;
+          avgPricePerSqm?: number | null;
+          comparableCount?: number;
+          priceTrend?: Json;
+          source?: string;
+          notes?: string | null;
+        };
+        Update: {
+          propertyId?: string | null;
+          city?: string | null;
+          province?: string | null;
+          country?: string;
+          propertyType?: string | null;
+          estimateLow?: number;
+          estimateMid?: number;
+          estimateHigh?: number;
+          yoyGrowthPct?: number;
+          demandLevel?: string;
+          avgPricePerSqm?: number | null;
+          comparableCount?: number;
+          priceTrend?: Json;
+          source?: string;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
+      countries: {
+        Row: {
+          code: string;
+          name: string;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          code: string;
+          name: string;
+          active?: boolean;
+        };
+        Update: {
+          code?: string;
+          name?: string;
+          active?: boolean;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
