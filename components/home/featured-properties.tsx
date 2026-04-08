@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -50,7 +50,7 @@ const PropertyCard = ({
 
   return (
     <div
-      className="group relative w-[240px] sm:w-[260px] md:w-[280px] lg:w-80 h-[400px] sm:h-[440px] md:h-[480px] lg:h-[520px] flex-shrink-0 mx-2 sm:mx-3 md:mx-4"
+      className="group relative h-[440px] md:h-[480px] lg:h-[500px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -222,66 +222,18 @@ const PropertyCard = ({
   );
 };
 
-const FullWidthMarquee = ({
-  properties,
-  speed = 50,
-}: {
-  properties: Property[];
-  speed?: number;
-}) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Duplicate properties multiple times for seamless infinite scroll
-  const duplicatedProperties = useMemo(
-    () => [...properties, ...properties, ...properties],
-    [properties],
-  );
-
-  // Calculate the width of one set of properties
-  // Using average: mobile ~296px (280px + 16px gap), desktop ~352px (320px + 32px gap)
-  const cardWidth = 320; // Base width for calculation
-  const gap = 16; // Base gap
-  const oneSetWidth = properties.length * (cardWidth + gap * 2);
-
+const PropertyGrid = ({ properties }: { properties: Property[] }) => {
   return (
-    <div
-      className="relative w-full max-w-full overflow-x-hidden overflow-y-visible h-[400px] sm:h-[440px] md:h-[480px] lg:h-[520px]"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Left fade gradient */}
-      <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 bg-gradient-to-r from-background via-background/80 to-transparent z-20 pointer-events-none" />
-      
-      {/* Right fade gradient */}
-      <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 bg-gradient-to-l from-background via-background/80 to-transparent z-20 pointer-events-none" />
-
-      <motion.div
-        className="flex will-change-transform h-full overflow-visible"
-        animate={{
-          x: [0, -oneSetWidth],
-        }}
-        transition={{
-          x: {
-            repeat: Infinity,
-            repeatType: "loop",
-            duration: speed,
-            ease: "linear",
-          },
-        }}
-        style={{
-          animationPlayState: isHovered ? "paused" : "running",
-        }}
-      >
-        {duplicatedProperties.map((property, index) => (
-          <Link
-            key={`${property.id}-${index}`}
-            href={`/properties/${property.id}`}
-            className="block h-full"
-          >
-            <PropertyCard property={property} index={index} />
-          </Link>
-        ))}
-      </motion.div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {properties.map((property, index) => (
+        <Link
+          key={property.id}
+          href={`/properties/${property.id}`}
+          className="block"
+        >
+          <PropertyCard property={property} index={index} />
+        </Link>
+      ))}
     </div>
   );
 };
@@ -298,7 +250,7 @@ export function FeaturedProperties() {
 
   if (loading) {
     return (
-      <section className="relative py-10 sm:py-12 md:py-20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/15 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 overflow-hidden w-full max-w-full">
+      <section className="relative py-10 sm:py-12 md:py-20 bg-white dark:bg-gray-950 overflow-hidden w-full max-w-full">
         <div className="mx-auto max-w-7xl px-3 sm:px-4 md:px-6 space-y-6 sm:space-y-8 md:space-y-12 w-full">
           <div className="text-center space-y-3 sm:space-y-4">
             <div className="h-7 sm:h-8 md:h-12 bg-gray-200 dark:bg-gray-800 animate-pulse rounded w-56 sm:w-64 md:w-80 mx-auto" />
@@ -322,13 +274,7 @@ export function FeaturedProperties() {
   }
 
   return (
-    <section className="relative py-6 sm:py-8 md:py-10 lg:py-12 xl:py-20 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/15 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 overflow-hidden w-full max-w-full">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,theme(colors.primary)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.primary)_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-5" />
-
-      {/* Floating gradient orbs */}
-      <div className="absolute top-20 left-1/4 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-96 lg:h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-1/4 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-96 lg:h-96 bg-primary/15 rounded-full blur-3xl animate-pulse delay-1000" />
+    <section className="relative py-6 sm:py-8 md:py-10 lg:py-12 xl:py-20 bg-white dark:bg-gray-950 overflow-hidden w-full max-w-full">
 
       {/* Header */}
       <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-4 md:px-5 lg:px-6 mb-4 sm:mb-6 md:mb-8 lg:mb-16 w-full">
@@ -355,12 +301,9 @@ export function FeaturedProperties() {
         </motion.div>
       </div>
 
-      {/* Full Width Marquee */}
-      <div className="relative z-10 w-full max-w-full overflow-x-hidden">
-        <FullWidthMarquee
-          properties={featuredProperties}
-          speed={60}
-        />
+      {/* Property Grid */}
+      <div className="relative z-10 mx-auto max-w-7xl px-3 sm:px-4 md:px-5 lg:px-6 w-full">
+        <PropertyGrid properties={featuredProperties.slice(0, 8)} />
       </div>
 
       {/* Call to Action */}
@@ -385,8 +328,6 @@ export function FeaturedProperties() {
         </motion.div>
       </div>
 
-      {/* Bottom fade effect */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent" />
     </section>
   );
 }
