@@ -11,7 +11,7 @@ const envSchema = z.object({
   // Google Maps Configuration
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z
     .string()
-    .min(1, "Google Maps API Key is required"),
+    .optional(),
   // UploadThing Configuration (server-only, optional)
   UPLOADTHING_TOKEN: z.string().min(1).optional(),
 });

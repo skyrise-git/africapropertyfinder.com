@@ -1,10 +1,7 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 
-// Validate UploadThing token is present (server-side only)
-if (!process.env.UPLOADTHING_TOKEN) {
-  throw new Error(
-    "UPLOADTHING_TOKEN is required. Please add it to your .env.local file.",
-  );
+if (!process.env.UPLOADTHING_TOKEN && process.env.NODE_ENV === "production") {
+  console.warn("UPLOADTHING_TOKEN is not set. File uploads will not work.");
 }
 
 const f = createUploadthing();

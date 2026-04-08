@@ -3,13 +3,13 @@ import type { UserRole } from "@/lib/types/user.type";
 import { AdminDashboard } from "./_components/admin-dashboard";
 
 interface DashboardPageProps {
-  params: {
+  params: Promise<{
     role: UserRole;
-  };
+  }>;
 }
 
-export default function DashboardPage({ params }: DashboardPageProps) {
-  const role = params.role;
+export default async function DashboardPage({ params }: DashboardPageProps) {
+  const { role } = await params;
 
   if (role !== "admin") {
     redirect("/");
