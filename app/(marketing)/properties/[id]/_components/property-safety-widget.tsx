@@ -52,7 +52,7 @@ function SafetyCard({ station }: { station: CrimeStation }) {
 
   return (
     <Link href="/area-safety" className="block">
-      <Card className={`hover:shadow-md transition-shadow ${config.borderColor} border`}>
+      <Card className={`hover:shadow-md transition-shadow ${config.borderColor} border h-full`}>
         <CardContent className="p-4">
           <div className="flex items-center gap-3 mb-3">
             <div className={`p-2 rounded-lg ${config.bgColor}`}>
@@ -108,11 +108,14 @@ export function PropertySafetyWidget({ property }: { property: Property }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
+      className="flex flex-col h-full"
     >
       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
         Area Insights
       </h3>
-      <SafetyCard station={station} />
+      <div className="flex-1">
+        <SafetyCard station={station} />
+      </div>
     </motion.div>
   );
 }

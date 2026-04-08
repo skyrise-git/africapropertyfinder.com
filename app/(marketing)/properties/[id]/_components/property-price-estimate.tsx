@@ -149,11 +149,12 @@ export function PropertyPriceEstimate({ property }: { property: Property }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
+      className="flex flex-col h-full"
     >
       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
         APF Price Estimate
       </h3>
-      <Card className="border border-gray-200 dark:border-gray-800">
+      <Card className="border border-gray-200 dark:border-gray-800 flex-1">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-2 rounded-lg bg-primary/10">

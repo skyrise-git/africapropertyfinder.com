@@ -68,9 +68,9 @@ export default function PropertyDetailPage() {
         <PropertyContactAndSchedule property={property} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <PropertySafetyWidget property={property} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
         <PropertyPriceEstimate property={property} />
+        <PropertySafetyWidget property={property} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

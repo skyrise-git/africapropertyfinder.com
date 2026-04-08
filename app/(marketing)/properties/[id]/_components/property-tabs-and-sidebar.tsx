@@ -291,7 +291,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                       <div className="text-sm text-muted-foreground">
                         {property.listingType === "sale" ? "Sale Price" : "Monthly Rent"}
                       </div>
-                      <div className="text-xl font-medium text-primary">
+                      <div className="font-medium text-primary">
                         {formatPrice(property)}
                       </div>
                     </div>

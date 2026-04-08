@@ -156,7 +156,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[60dvh] max-h-[75dvh] flex items-center justify-center overflow-hidden w-full max-w-full">
+    <section className="relative min-h-[55dvh] flex items-center justify-center overflow-hidden w-full max-w-full pb-16">
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
