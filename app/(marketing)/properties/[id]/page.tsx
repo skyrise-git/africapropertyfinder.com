@@ -10,6 +10,7 @@ import { PropertyContactAndSchedule } from "./_components/property-contact-and-s
 import { PropertyTabsAndSidebar } from "./_components/property-tabs-and-sidebar";
 import { PropertyDetailLoading } from "./_components/property-detail-loading";
 import { PropertyDetailError } from "./_components/property-detail-error";
+import { PropertySafetyWidget } from "./_components/property-safety-widget";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -63,7 +64,10 @@ export default function PropertyDetailPage() {
         <div className="lg:col-span-2 space-y-3">
           <PropertyGallery property={property} />
         </div>
-        <PropertyContactAndSchedule property={property} />
+        <div className="space-y-4">
+          <PropertyContactAndSchedule property={property} />
+          <PropertySafetyWidget property={property} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
