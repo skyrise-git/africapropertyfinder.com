@@ -125,7 +125,7 @@ export function PropertyPriceEstimate({ property }: { property: Property }) {
           .neq("id", property.id)
           .limit(20);
 
-        setComparables((comps ?? []) as Property[]);
+        setComparables((comps ?? []) as unknown as Property[]);
       }
       setLoaded(true);
     };
