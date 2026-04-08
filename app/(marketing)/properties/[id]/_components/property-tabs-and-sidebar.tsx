@@ -286,7 +286,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="text-3xl font-bold">
+                  <div className="text-3xl font-light text-slate-700 dark:text-gray-100">
                     {formatPrice(property)}
                   </div>
                   {property.securityDeposit && (

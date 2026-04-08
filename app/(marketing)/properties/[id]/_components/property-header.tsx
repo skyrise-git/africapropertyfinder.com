@@ -105,7 +105,7 @@ export function PropertyHeader({ property, onShare }: PropertyHeaderProps) {
             Back to Properties
           </Button>
         </Link>
-        <h1 className="text-2xl md:text-3xl font-bold">{property.title}</h1>
+        <h1 className="text-2xl md:text-3xl font-light text-slate-700 dark:text-gray-100">{property.title}</h1>
       </div>
       <div className="flex items-center gap-2">
         {isOwner && (

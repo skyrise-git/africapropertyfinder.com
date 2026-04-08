@@ -11,6 +11,7 @@ import { PropertyTabsAndSidebar } from "./_components/property-tabs-and-sidebar"
 import { PropertyDetailLoading } from "./_components/property-detail-loading";
 import { PropertyDetailError } from "./_components/property-detail-error";
 import { PropertySafetyWidget } from "./_components/property-safety-widget";
+import { PropertyPriceEstimate } from "./_components/property-price-estimate";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -67,6 +68,7 @@ export default function PropertyDetailPage() {
         <div className="space-y-4">
           <PropertyContactAndSchedule property={property} />
           <PropertySafetyWidget property={property} />
+          <PropertyPriceEstimate property={property} />
         </div>
       </div>
 

@@ -5,108 +5,82 @@ import { motion } from "motion/react";
 import {
   ShieldCheck,
   ShieldAlert,
-  ShieldX,
+  Shield,
   TrendingDown,
   TrendingUp,
   Minus,
   MapPin,
-  BarChart3,
+  Info,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCrimeData } from "@/contexts/crime-data-context";
 import { matchPropertyToStation } from "@/lib/utils/crime-helpers";
-import { getSafetyColorClasses } from "@/lib/utils/crime-helpers";
 import { TREND_CONFIG } from "@/lib/types/crime.type";
 import type { Property } from "@/lib/types/property.type";
-import type { CrimeStation } from "@/lib/types/crime.type";
+import type { CrimeStation, SafetyRating } from "@/lib/types/crime.type";
 
-function getShieldIcon(rating: number, className = "h-5 w-5") {
-  if (rating >= 4) return <ShieldCheck className={className} />;
-  if (rating === 3) return <ShieldAlert className={className} />;
-  return <ShieldX className={className} />;
+const RATING_CONFIG: Record<SafetyRating, { label: string; color: string; bgColor: string; borderColor: string }> = {
+  5: { label: "Very Safe", color: "text-emerald-600", bgColor: "bg-emerald-50", borderColor: "border-emerald-200" },
+  4: { label: "Safe", color: "text-emerald-600", bgColor: "bg-emerald-50", borderColor: "border-emerald-200" },
+  3: { label: "Moderate", color: "text-amber-600", bgColor: "bg-amber-50", borderColor: "border-amber-200" },
+  2: { label: "Average", color: "text-orange-500", bgColor: "bg-orange-50", borderColor: "border-orange-200" },
+  1: { label: "Below Average", color: "text-orange-500", bgColor: "bg-orange-50", borderColor: "border-orange-200" },
+};
+
+function getShieldIcon(rating: number) {
+  if (rating >= 4) return <ShieldCheck className="h-4 w-4" />;
+  if (rating === 3) return <ShieldAlert className="h-4 w-4" />;
+  return <Shield className="h-4 w-4" />;
+}
+
+function getTrendLabel(trend: string) {
+  if (trend === "Improving") return "Getting safer";
+  if (trend === "Worsening") return "Increasing activity";
+  return "Stable area";
 }
 
 function getTrendIcon(trend: string) {
-  if (trend === "Improving") return <TrendingDown className="h-4 w-4" />;
-  if (trend === "Worsening") return <TrendingUp className="h-4 w-4" />;
-  return <Minus className="h-4 w-4" />;
+  if (trend === "Improving") return <TrendingDown className="h-3.5 w-3.5" />;
+  if (trend === "Worsening") return <TrendingUp className="h-3.5 w-3.5" />;
+  return <Minus className="h-3.5 w-3.5" />;
 }
 
-function SafetyGauge({ station }: { station: CrimeStation }) {
-  const colors = getSafetyColorClasses(station.safety_rating);
+function SafetyCard({ station }: { station: CrimeStation }) {
+  const config = RATING_CONFIG[station.safety_rating];
   const trend = TREND_CONFIG[station.trend];
-  const diff = station.total_serious_crimes_q1_2025 - station.total_serious_crimes_q1_2024;
-  const pct = station.total_serious_crimes_q1_2024 > 0
-    ? Math.abs(Math.round((diff / station.total_serious_crimes_q1_2024) * 100))
-    : 0;
 
   return (
     <Link href="/area-safety" className="block">
-      <Card className="hover:shadow-md transition-shadow border-l-4" style={{ borderLeftColor: "var(--border-accent)" }}>
+      <Card className={`hover:shadow-md transition-shadow ${config.borderColor} border`}>
         <CardContent className="p-4">
-          <div className="flex items-start gap-4">
-            {/* Rating circle */}
-            <div className={`flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-full border-3 ${colors.border} ${colors.bg}`}>
-              <span className={`text-xl font-extrabold leading-none ${colors.text}`}>
-                {station.safety_rating}
-              </span>
-              <span className="text-[10px] text-muted-foreground">/5</span>
+          <div className="flex items-center gap-3 mb-3">
+            <div className={`p-2 rounded-lg ${config.bgColor}`}>
+              <div className={config.color}>{getShieldIcon(station.safety_rating)}</div>
             </div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge
-                  variant="outline"
-                  className={`${colors.text} ${colors.bg} ${colors.border} gap-1`}
-                >
-                  {getShieldIcon(station.safety_rating, "h-3.5 w-3.5")}
-                  {station.safety_label}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className={`${trend.color} gap-1`}
-                >
-                  {getTrendIcon(station.trend)}
-                  {station.trend}
-                  {pct > 0 && ` ${pct}%`}
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className={`${config.color} ${config.bgColor} ${config.borderColor} text-xs`}>
+                  {config.label} &middot; {station.safety_rating}/5
                 </Badge>
               </div>
-
-              <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">
-                  {station.station} Station &middot; {station.district}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div>
-                  <div className="text-lg font-bold">{station.crime_index.toFixed(0)}</div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Crime Index</div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold">{station.total_serious_crimes_q1_2025.toLocaleString()}</div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Crimes Q1 '25</div>
-                </div>
-                <div>
-                  <div className={`text-lg font-bold flex items-center justify-center gap-1 ${trend.color}`}>
-                    {getTrendIcon(station.trend)}
-                    {pct > 0 ? `${pct}%` : "0%"}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wide">YoY Change</div>
-                </div>
+              <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3" />
+                {station.station} area
               </div>
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t flex items-center justify-between">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <BarChart3 className="h-3 w-3" />
-              Based on SAPS Q1 2025 crime statistics
+          <div className="flex items-center gap-2 mb-3">
+            <div className={`flex items-center gap-1 text-xs font-medium ${trend.color}`}>
+              {getTrendIcon(station.trend)}
+              {getTrendLabel(station.trend)}
             </div>
-            <span className="text-xs text-primary font-medium">View full report &rarr;</span>
+          </div>
+
+          <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground leading-relaxed">
+            <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
+            <span>Safety insights based on SAPS quarterly statistics. <span className="text-primary font-medium">Learn more &rarr;</span></span>
           </div>
         </CardContent>
       </Card>
@@ -134,10 +108,10 @@ export function PropertySafetyWidget({ property }: { property: Property }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-        Area Safety Score
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+        Area Insights
       </h3>
-      <SafetyGauge station={station} />
+      <SafetyCard station={station} />
     </motion.div>
   );
 }

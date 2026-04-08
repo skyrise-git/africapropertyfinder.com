@@ -73,9 +73,9 @@ export function MarketingFooter() {
                 <Image
                   src="/logo.png"
                   alt={marketingSite.title}
-                  width={180}
-                  height={40}
-                  className="h-9 w-auto transition"
+                  width={200}
+                  height={44}
+                  className="h-10 w-auto transition"
                 />
               </Link>
               <div className="space-y-3 text-sm text-muted-foreground">

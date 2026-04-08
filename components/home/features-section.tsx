@@ -137,8 +137,8 @@ export function FeaturesSection() {
           transition={{ duration: 0.5 }}
           className="mb-4 sm:mb-6 md:mb-8 lg:mb-12 text-center w-full"
         >
-          <h2 className="text-foreground mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold tracking-tight px-1 sm:px-2 break-words leading-tight">
-            Why Choose Africa Property Finder?
+          <h2 className="text-slate-700 dark:text-gray-100 mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-light tracking-tight px-1 sm:px-2 break-words leading-tight">
+            Why Choose <span className="text-primary font-medium">Africa Property Finder</span>?
           </h2>
           <p className="text-muted-foreground mx-auto max-w-2xl text-xs sm:text-sm md:text-base lg:text-lg px-1 sm:px-2 break-words leading-snug sm:leading-relaxed">
             Comprehensive real estate services designed to meet all your

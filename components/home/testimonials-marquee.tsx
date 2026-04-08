@@ -244,8 +244,8 @@ export function TestimonialsMarquee() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-foreground mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 text-center text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl leading-[1.2] font-bold tracking-tighter px-1 sm:px-2">
-          What Our Users Are Saying
+        <h2 className="text-slate-700 dark:text-gray-100 mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 text-center text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl leading-[1.2] font-light tracking-tight px-1 sm:px-2">
+          What Our Users Are <span className="text-primary font-medium">Saying</span>
         </h2>
         <h3 className="text-muted-foreground mx-auto mb-4 sm:mb-5 md:mb-6 lg:mb-8 max-w-lg text-center text-[10px] sm:text-xs md:text-sm lg:text-base xl:text-lg font-medium tracking-tight text-balance px-1 sm:px-2">
           Don&apos;t just take our word for it. Here&apos;s what{" "}

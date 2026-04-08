@@ -65,7 +65,7 @@ const PropertyCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Card className="overflow-hidden h-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-blue-200 dark:group-hover:border-blue-800 flex flex-col rounded-xl">
+      <Card className="overflow-hidden h-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-primary/30 flex flex-col rounded-xl">
         <div className="relative h-52 md:h-56 overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
           {property.images && property.images[0] ? (
             <>
@@ -91,7 +91,7 @@ const PropertyCard = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-            <Badge className="bg-blue-600 text-white font-medium border-0 shadow-sm text-[10px] px-2 py-0.5 rounded-md">
+            <Badge className="bg-primary text-white font-medium border-0 shadow-sm text-[10px] px-2 py-0.5 rounded-md">
               {property.listingType === "sale"
                 ? "For Sale"
                 : property.listingType === "rent"
@@ -150,12 +150,12 @@ const PropertyCard = ({
         </div>
 
         <CardContent className="p-4 bg-white dark:bg-gray-900 flex flex-col flex-1">
-          <h3 className="font-semibold text-[15px] text-slate-800 dark:text-gray-100 leading-snug line-clamp-2 mb-2 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="font-medium text-[15px] text-slate-700 dark:text-gray-100 leading-snug line-clamp-2 mb-2 group-hover:text-primary transition-colors">
             {property.title || "Property Listing"}
           </h3>
 
           <div className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400 text-xs mb-3">
-            <MapPin className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
+            <MapPin className="h-3.5 w-3.5 text-primary/60 flex-shrink-0" />
             <span className="line-clamp-1">
               {property.address && property.city
                 ? `${property.address}, ${property.city}`
@@ -241,13 +241,13 @@ export function FeaturedProperties() {
           className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10"
         >
           <div className="space-y-2">
-            <p className="text-sm font-medium text-blue-600 dark:text-blue-400 tracking-wide uppercase">
+            <p className="text-sm font-semibold text-primary tracking-wide uppercase">
               Featured Listings
             </p>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-800 dark:text-gray-100 tracking-tight">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-slate-700 dark:text-gray-100 tracking-tight">
               Discover Your Next Home
             </h2>
-            <p className="text-slate-500 dark:text-gray-400 text-sm md:text-base max-w-lg">
+            <p className="text-slate-400 dark:text-gray-400 text-sm md:text-base max-w-lg">
               Handpicked properties across South Africa, each with safety insights and premium features.
             </p>
           </div>
@@ -255,7 +255,7 @@ export function FeaturedProperties() {
           <Button
             asChild
             variant="outline"
-            className="group border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 self-start sm:self-auto"
+            className="group border-primary/30 text-primary hover:bg-primary/5 self-start sm:self-auto"
           >
             <Link href="/properties">
               View All Properties
