@@ -89,7 +89,7 @@ export default function ContactPage() {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="space-y-3 text-center"
       >
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-light text-slate-700 dark:text-gray-100 tracking-tight">
           Contact Us
         </h1>
         <p className="text-sm text-muted-foreground sm:text-base max-w-2xl mx-auto">

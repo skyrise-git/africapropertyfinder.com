@@ -118,7 +118,7 @@ export default function BlogsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-3xl font-bold tracking-tight">Blog Management</h1>
+        <h1 className="text-2xl md:text-3xl font-light text-slate-700 dark:text-gray-100 tracking-tight">Blog Management</h1>
         <p className="text-muted-foreground">
           Create, edit, and manage your blog posts
         </p>

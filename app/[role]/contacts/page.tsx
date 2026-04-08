@@ -181,7 +181,7 @@ export default function ContactsPage() {
   return (
     <div className="container mx-auto max-w-7xl space-y-8 p-4 md:p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Contacts</h1>
+        <h1 className="text-2xl md:text-3xl font-light text-slate-700 dark:text-gray-100 tracking-tight">Contacts</h1>
         <p className="text-muted-foreground">
           Manage and respond to contact form submissions
         </p>

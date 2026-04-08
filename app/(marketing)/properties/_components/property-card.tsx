@@ -128,7 +128,7 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
         )}
 
         <CardHeader className="space-y-1.5 sm:space-y-2 px-4 sm:px-5 pt-3 sm:pt-4">
-          <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold tracking-tight leading-tight">
+          <CardTitle className="line-clamp-2 text-base sm:text-lg font-medium text-slate-700 dark:text-gray-100 tracking-tight leading-tight">
             {property.title}
           </CardTitle>
 

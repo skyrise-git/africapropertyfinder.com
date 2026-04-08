@@ -584,7 +584,7 @@ export default function PropertiesPage() {
             <Home className="h-3.5 w-3.5" />
             Live properties from Realtime Database
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-light text-slate-700 dark:text-gray-100 tracking-tight">
             Find your next home
           </h1>
           <p className="text-sm text-muted-foreground sm:text-base">

@@ -12,7 +12,7 @@ export default function NotFound() {
       <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary/80">
         404 — Not Found
       </p>
-      <h1 className="mt-4 text-center text-3xl font-bold tracking-tight md:text-4xl">
+      <h1 className="mt-4 text-center text-2xl md:text-3xl font-light text-slate-700 dark:text-gray-100 tracking-tight">
         Lost in the Cloud
       </h1>
       <p className="mt-3 max-w-xl text-center text-muted-foreground">
