@@ -156,7 +156,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden w-full max-w-full">
+    <section className="relative min-h-[60dvh] max-h-[75dvh] flex items-center justify-center overflow-hidden w-full max-w-full">
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -180,15 +180,15 @@ export function HeroSection() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-full px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 py-4 sm:py-6 md:py-8 lg:py-12 xl:py-16">
+      <div className="relative z-10 w-full max-w-full px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 py-4 sm:py-5 md:py-6 lg:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 xl:space-y-8 w-full"
+          className="text-center space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-5 w-full"
         >
           {/* Hero Text */}
-          <div className="space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
+          <div className="space-y-2 sm:space-y-3 md:space-y-3">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -205,7 +205,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white leading-tight px-1 sm:px-2 break-words drop-shadow-2xl"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight px-1 sm:px-2 break-words drop-shadow-2xl"
             >
               Africa Property Finder
             </motion.h1>
@@ -367,109 +367,31 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Stats Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            className="max-w-7xl mx-auto w-full mt-8 sm:mt-10 md:mt-12"
-          >
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.8 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl rounded-2xl overflow-hidden">
-                  <CardContent className="p-6 sm:p-8 text-center">
-                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
-                      {stats.propertiesListed > 0
-                        ? `${stats.propertiesListed}+`
-                        : "1000+"}
-                    </div>
-                    <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium">
-                      Properties Listed
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.9 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl rounded-2xl overflow-hidden">
-                  <CardContent className="p-6 sm:p-8 text-center">
-                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
-                      {stats.happyClients > 0
-                        ? `${stats.happyClients}+`
-                        : "500+"}
-                    </div>
-                    <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium">
-                      Happy Clients
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 1 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl rounded-2xl overflow-hidden">
-                  <CardContent className="p-6 sm:p-8 text-center">
-                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
-                      {stats.citiesCovered > 0
-                        ? `${stats.citiesCovered}+`
-                        : "50+"}
-                    </div>
-                    <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium">
-                      Cities Covered
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 1.1 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl rounded-2xl overflow-hidden">
-                  <CardContent className="p-6 sm:p-8 text-center">
-                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2">
-                      {stats.expertAgents}+
-                    </div>
-                    <p className="text-sm sm:text-base md:text-lg text-white/90 font-medium">
-                      Expert Agents
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* CTA Text */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-white/90 dark:text-white/80 text-sm sm:text-base md:text-lg max-w-xl mx-auto px-2 sm:px-4 mt-6 sm:mt-8"
-          >
-            Join thousands of satisfied customers who found their dream homes
-            with us
-          </motion.p>
+          
         </motion.div>
       </div>
 
       {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/80 to-transparent dark:from-gray-900/80 backdrop-blur-sm" />
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white/80 to-transparent dark:from-gray-900/80" />
+
+      {/* Stats Bar */}
+      <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="grid grid-cols-4 gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-t-xl shadow-lg border border-white/20 px-4 py-3">
+            {[
+              { value: stats.propertiesListed > 0 ? `${stats.propertiesListed}+` : "1000+", label: "Properties" },
+              { value: stats.happyClients > 0 ? `${stats.happyClients}+` : "500+", label: "Clients" },
+              { value: stats.citiesCovered > 0 ? `${stats.citiesCovered}+` : "50+", label: "Cities" },
+              { value: `${stats.expertAgents}+`, label: "Agents" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-lg sm:text-xl md:text-2xl font-semibold text-primary">{stat.value}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
