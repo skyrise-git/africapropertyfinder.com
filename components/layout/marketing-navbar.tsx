@@ -60,9 +60,9 @@ export function MarketingNavbar() {
             <Image
               src="/logo.png"
               alt={marketingSite.title}
-              width={120}
+              width={180}
               height={40}
-              className="h-8 w-auto transition dark:invert dark:brightness-0"
+              className="h-9 w-auto transition"
               priority
             />
           </Link>
