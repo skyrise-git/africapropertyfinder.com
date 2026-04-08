@@ -6,6 +6,10 @@ import {
   Clock,
   FileText,
   MessageSquare,
+  Building2,
+  CalendarDays,
+  Shield,
+  LineChart,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/user.type";
 
@@ -22,6 +26,30 @@ export function useMenuItems() {
       title: "Dashboard",
       url: "/dashboard",
       icon: Home,
+      roles: ["admin", "staff"],
+    },
+    {
+      title: "Properties",
+      url: "/properties",
+      icon: Building2,
+      roles: ["admin", "staff"],
+    },
+    {
+      title: "Appointments",
+      url: "/appointments",
+      icon: CalendarDays,
+      roles: ["admin", "staff"],
+    },
+    {
+      title: "Area safety",
+      url: "/area-safety",
+      icon: Shield,
+      roles: ["admin", "staff"],
+    },
+    {
+      title: "Price estimates",
+      url: "/price-estimates",
+      icon: LineChart,
       roles: ["admin", "staff"],
     },
     {

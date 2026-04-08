@@ -7,11 +7,11 @@ import type { Property } from "@/lib/types/property.type";
 import { PropertyHeader } from "./_components/property-header";
 import { PropertyGallery } from "./_components/property-gallery";
 import { PropertyContactAndSchedule } from "./_components/property-contact-and-schedule";
+import { PropertyPriceEstimate } from "./_components/property-price-estimate";
 import { PropertyTabsAndSidebar } from "./_components/property-tabs-and-sidebar";
 import { PropertyDetailLoading } from "./_components/property-detail-loading";
 import { PropertyDetailError } from "./_components/property-detail-error";
 import { PropertySafetyWidget } from "./_components/property-safety-widget";
-import { PropertyPriceEstimate } from "./_components/property-price-estimate";
 
 export default function PropertyDetailPage() {
   const params = useParams();

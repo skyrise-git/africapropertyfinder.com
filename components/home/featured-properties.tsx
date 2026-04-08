@@ -122,9 +122,9 @@ const PropertyCard = ({
             </motion.div>
           </div>
 
-          <div className="absolute bottom-3 left-3">
-            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md">
-              <span className="text-base font-semibold text-slate-700 dark:text-white">
+          <div className="absolute bottom-2 sm:bottom-2.5 md:bottom-3 left-2 sm:left-2.5 md:left-3">
+            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-md sm:rounded-lg px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 shadow-lg border border-white/20">
+              <span className="text-sm sm:text-base md:text-lg font-semibold text-slate-700 dark:text-white">
                 {displayPrice}
               </span>
             </div>
@@ -149,10 +149,12 @@ const PropertyCard = ({
           </motion.div>
         </div>
 
-        <CardContent className="p-4 bg-white dark:bg-gray-900 flex flex-col flex-1">
-          <h3 className="font-medium text-[15px] text-slate-700 dark:text-gray-100 leading-snug line-clamp-2 mb-2 group-hover:text-primary transition-colors">
-            {property.title || "Property Listing"}
-          </h3>
+        <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-5 bg-white dark:bg-gray-900 flex flex-col flex-1 min-h-0">
+          <div className="h-10 sm:h-12 md:h-14 mb-1.5 sm:mb-2 md:mb-3 flex-shrink-0">
+            <h3 className="font-medium text-sm sm:text-base md:text-lg text-slate-700 dark:text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300">
+              {property.title || "Property Listing"}
+            </h3>
+          </div>
 
           <div className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400 text-xs mb-3">
             <MapPin className="h-3.5 w-3.5 text-primary/60 flex-shrink-0" />

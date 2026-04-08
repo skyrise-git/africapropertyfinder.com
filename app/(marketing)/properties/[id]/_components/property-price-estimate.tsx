@@ -102,7 +102,7 @@ export function PropertyPriceEstimate({ property }: { property: Property }) {
       const { data: manualEst } = await supabase
         .from("price_estimates")
         .select("*")
-        .eq("propertyId", property.id)
+        .eq("city", property.city)
         .maybeSingle();
 
       if (manualEst) {
@@ -112,9 +112,9 @@ export function PropertyPriceEstimate({ property }: { property: Property }) {
           high: Number(manualEst.estimateHigh),
           listed: property.listingType === "sale" ? (property.price ?? 0) : (property.rent ?? 0),
           yoyGrowth: Number(manualEst.yoyGrowthPct),
-          demandLevel: manualEst.demandLevel,
-          source: manualEst.source as "manual" | "derived" | "hybrid",
-          priceTrend: manualEst.priceTrend as { quarter: string; avgPrice: number }[],
+          demandLevel: manualEst.demandLevel as string,
+          source: (manualEst.source as "manual" | "derived" | "hybrid") ?? "manual",
+          priceTrend: manualEst.priceTrend as { quarter: string; avgPrice: number }[] | undefined,
         });
       } else {
         const { data: comps } = await supabase
@@ -131,7 +131,7 @@ export function PropertyPriceEstimate({ property }: { property: Property }) {
     };
 
     fetchData().catch(() => setLoaded(true));
-  }, [property.id, property.state, property.listingType, property.price, property.rent]);
+  }, [property.id, property.city, property.state, property.listingType, property.price, property.rent]);
 
   const estimate = useMemo(() => {
     if (dbEstimate) return dbEstimate;

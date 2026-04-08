@@ -124,6 +124,11 @@ export interface Property extends BaseEntity {
   // Photos & Media
   images: Image[];
   videoTourUrl?: string;
+
+  /** Moderation / listing lifecycle (DB columns) */
+  status?: "active" | "inactive" | "pending" | "booked" | "sold";
+  isBooked?: boolean;
+  featured?: boolean;
 }
 
 export interface PropertyInput {
@@ -159,7 +164,6 @@ export interface PropertyInput {
   dishwasher?: boolean;
   fireplace?: boolean;
   otherAmenities?: string;
-  country?: string;
   address: string;
   city: string;
   state: string;
@@ -182,61 +186,7 @@ export interface PropertyInput {
   viewingAvailability?: string;
   images: Image[];
   videoTourUrl?: string;
+  country?: string;
 }
 
-export interface PropertyUpdateInput {
-  title?: string;
-  listingType?: ListingType;
-  propertyType?: PropertyType;
-  numBedrooms?: number;
-  numBathrooms?: number;
-  furnishing?: FurnishingType;
-  area?: number;
-  floorNumber?: number;
-  totalFloors?: number;
-  price?: number;
-  rent?: number;
-  securityDeposit?: number;
-  leaseLength?: number;
-  availableFrom?: string;
-  paymentFrequency?: PaymentFrequency;
-  utilitiesIncluded?: boolean;
-  isShared?: boolean;
-  sharingDetails?: SharingDetails;
-  parkingAvailable?: boolean;
-  laundry?: boolean;
-  heatingCooling?: boolean;
-  balcony?: boolean;
-  wifi?: boolean;
-  gym?: boolean;
-  pool?: boolean;
-  elevator?: boolean;
-  security?: boolean;
-  garden?: boolean;
-  dishwasher?: boolean;
-  fireplace?: boolean;
-  otherAmenities?: string;
-  country?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  nearbyTransit?: string;
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
-  smokingAllowed?: boolean;
-  petsAllowed?: boolean;
-  guestsAllowed?: boolean;
-  sublettingAllowed?: boolean;
-  partiesAllowed?: boolean;
-  quietHours?: boolean;
-  maintenanceResponsibility?: boolean;
-  contactName?: string;
-  preferredContactMethod?: ContactMethod[];
-  contactInfo?: ContactInfo;
-  viewingAvailability?: string;
-  images?: Image[];
-  videoTourUrl?: string;
-}
+export type PropertyUpdateInput = Partial<PropertyInput>;

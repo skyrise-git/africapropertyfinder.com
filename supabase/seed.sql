@@ -12,47 +12,58 @@
 -- Password for all seed users: Password123!
 -- ============================================================
 
+-- Token columns must be '' (not NULL) or password sign-in returns
+-- "Database error querying schema" — see https://github.com/supabase/auth/issues/1940
 INSERT INTO auth.users (
   instance_id, id, aud, role, email, encrypted_password,
   email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
-  created_at, updated_at, is_sso_user, is_anonymous
+  created_at, updated_at, is_sso_user, is_anonymous,
+  confirmation_token, recovery_token, email_change, email_change_token_new
 ) VALUES
   -- Admin
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated',
    'admin@africapropertyfinder.com', crypt('Password123!', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}',
-   '{"name":"Thabo Mokoena","role":"admin"}', '2025-01-10T08:00:00Z', now(), false, false),
+   '{"name":"Thabo Mokoena","role":"admin"}', '2025-01-10T08:00:00Z', now(), false, false,
+   '', '', '', ''),
   -- Staff 1
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated',
    'naledi@africapropertyfinder.com', crypt('Password123!', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}',
-   '{"name":"Naledi Dlamini","role":"staff"}', '2025-02-01T09:00:00Z', now(), false, false),
+   '{"name":"Naledi Dlamini","role":"staff"}', '2025-02-01T09:00:00Z', now(), false, false,
+   '', '', '', ''),
   -- Staff 2
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated',
    'james@africapropertyfinder.com', crypt('Password123!', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}',
-   '{"name":"James van der Merwe","role":"staff"}', '2025-02-15T10:00:00Z', now(), false, false),
+   '{"name":"James van der Merwe","role":"staff"}', '2025-02-15T10:00:00Z', now(), false, false,
+   '', '', '', ''),
   -- Regular users
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000004', 'authenticated', 'authenticated',
    'sipho@gmail.com', crypt('Password123!', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}',
-   '{"name":"Sipho Ndlovu","role":"user"}', '2025-03-01T12:00:00Z', now(), false, false),
+   '{"name":"Sipho Ndlovu","role":"user"}', '2025-03-01T12:00:00Z', now(), false, false,
+   '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000005', 'authenticated', 'authenticated',
    'zanele@outlook.com', crypt('Password123!', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}',
-   '{"name":"Zanele Khumalo","role":"user"}', '2025-03-10T14:00:00Z', now(), false, false),
+   '{"name":"Zanele Khumalo","role":"user"}', '2025-03-10T14:00:00Z', now(), false, false,
+   '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000006', 'authenticated', 'authenticated',
    'david.t@gmail.com', crypt('Password123!', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}',
-   '{"name":"David Thompson","role":"user"}', '2025-04-05T08:30:00Z', now(), false, false),
+   '{"name":"David Thompson","role":"user"}', '2025-04-05T08:30:00Z', now(), false, false,
+   '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000007', 'authenticated', 'authenticated',
    'fatima.patel@yahoo.com', crypt('Password123!', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}',
-   '{"name":"Fatima Patel","role":"user"}', '2025-04-20T16:00:00Z', now(), false, false),
+   '{"name":"Fatima Patel","role":"user"}', '2025-04-20T16:00:00Z', now(), false, false,
+   '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000008', 'authenticated', 'authenticated',
    'lerato.m@icloud.com', crypt('Password123!', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}',
-   '{"name":"Lerato Molefe","role":"user"}', '2025-05-01T11:00:00Z', now(), false, false)
+   '{"name":"Lerato Molefe","role":"user"}', '2025-05-01T11:00:00Z', now(), false, false,
+   '', '', '', '')
 ON CONFLICT (id) DO NOTHING;
 
 -- Enrich the profile rows created by the trigger

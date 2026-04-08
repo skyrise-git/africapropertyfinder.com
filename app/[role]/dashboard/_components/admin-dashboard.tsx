@@ -7,6 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import type { Property } from "@/lib/types/property.type";
 import type { User } from "@/lib/types/user.type";
+import { DashboardExtraKpis } from "./dashboard-extra-kpis";
+import { DashboardQuickLinks } from "./dashboard-quick-links";
 import { DashboardStats } from "./dashboard-stats";
 import { FurnishingStatsCard } from "./furnishing-stats-card";
 import { LocationDemandCard } from "./location-demand-card";
@@ -165,6 +167,10 @@ export function AdminDashboard() {
         totalBookedProperties={bookedProperties.length}
         totalProperties={properties.length}
       />
+
+      <DashboardExtraKpis />
+
+      <DashboardQuickLinks />
 
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
         {loading ? (

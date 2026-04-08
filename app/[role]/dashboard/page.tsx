@@ -11,7 +11,7 @@ interface DashboardPageProps {
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { role } = await params;
 
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "staff") {
     redirect("/");
   }
 
