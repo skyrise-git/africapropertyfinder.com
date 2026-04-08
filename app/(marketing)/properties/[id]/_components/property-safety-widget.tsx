@@ -97,7 +97,8 @@ export function PropertySafetyWidget({ property }: { property: Property }) {
     stations,
     property.city,
     property.state,
-    property.address
+    property.address,
+    property.country
   );
 
   if (!station) return null;

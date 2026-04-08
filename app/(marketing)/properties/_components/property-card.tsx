@@ -87,8 +87,8 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
   const { stations } = useCrimeData();
 
   const safetyStation = useMemo(
-    () => matchPropertyToStation(stations, property.city, property.state, property.address),
-    [stations, property.city, property.state, property.address]
+    () => matchPropertyToStation(stations, property.city, property.state, property.address, property.country),
+    [stations, property.city, property.state, property.address, property.country]
   );
 
   const content = (

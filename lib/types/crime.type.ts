@@ -17,6 +17,7 @@ export interface CrimeStation {
   station: string;
   district: string;
   province: string;
+  country: string;
   safety_rating: SafetyRating;
   safety_label: SafetyLabel;
   crime_index: number;

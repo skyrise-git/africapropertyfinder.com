@@ -22,22 +22,38 @@ export function getStationsByDistrict(
   return stations.filter((s) => s.district === district);
 }
 
+export function getStationsByCountry(
+  stations: CrimeStation[],
+  country: string
+): CrimeStation[] {
+  return stations.filter((s) => s.country === country);
+}
+
+export function getCountries(stations: CrimeStation[]): string[] {
+  return [...new Set(stations.map((s) => s.country))].sort();
+}
+
 export function matchPropertyToStation(
   stations: CrimeStation[],
   city: string,
   state: string,
-  address?: string
+  address?: string,
+  country?: string
 ): CrimeStation | undefined {
+  const pool = country
+    ? stations.filter((s) => s.country === country)
+    : stations;
+
   const cityLower = city.toLowerCase().trim();
   const stateLower = state.toLowerCase().trim();
 
-  for (const station of stations) {
+  for (const station of pool) {
     if (station.station.toLowerCase() === cityLower) {
       return station;
     }
   }
 
-  for (const station of stations) {
+  for (const station of pool) {
     const stationLower = station.station.toLowerCase();
     if (
       cityLower.includes(stationLower) ||
@@ -54,14 +70,14 @@ export function matchPropertyToStation(
 
   if (address) {
     const addrLower = address.toLowerCase();
-    for (const station of stations) {
+    for (const station of pool) {
       if (addrLower.includes(station.station.toLowerCase())) {
         return station;
       }
     }
   }
 
-  const provinceStations = stations.filter(
+  const provinceStations = pool.filter(
     (s) =>
       s.province.toLowerCase().includes(stateLower) ||
       stateLower.includes(s.province.toLowerCase())

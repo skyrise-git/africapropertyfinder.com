@@ -25,7 +25,7 @@ import { motion } from "motion/react";
 type ViewLevel = "provinces" | "districts" | "stations";
 
 export default function AreaSafetyPage() {
-  const { stations, loading } = useCrimeData();
+  const { stations, loading, selectedCountry, setCountry, countries } = useCrimeData();
   const [activeTab, setActiveTab] = useState("explore");
   const [viewLevel, setViewLevel] = useState<ViewLevel>("provinces");
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
@@ -113,10 +113,33 @@ export default function AreaSafetyPage() {
           Area Safety Ratings
         </h1>
         <p className="text-muted-foreground max-w-xl mx-auto">
-          Official SAPS crime data for {stations.length} police areas. Explore
+          Crime safety data for {stations.length} areas in {selectedCountry}. Explore
           safety ratings, compare areas, and make informed property decisions.
         </p>
       </motion.div>
+
+      {/* Country Selector */}
+      {countries.length > 1 && (
+        <div className="flex justify-center gap-2">
+          {countries.map((c) => (
+            <Button
+              key={c}
+              variant={selectedCountry === c ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setCountry(c);
+                setViewLevel("provinces");
+                setSelectedProvince(null);
+                setSelectedDistrict(null);
+                setSelectedStation(null);
+              }}
+              className={selectedCountry === c ? "" : "border-primary/30 text-primary hover:bg-primary/5"}
+            >
+              {c}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative max-w-md mx-auto">

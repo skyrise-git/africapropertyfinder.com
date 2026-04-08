@@ -95,6 +95,7 @@ export interface Property extends BaseEntity {
   otherAmenities?: string;
 
   // Location
+  country: string;
   address: string;
   city: string;
   state: string;
@@ -158,6 +159,7 @@ export interface PropertyInput {
   dishwasher?: boolean;
   fireplace?: boolean;
   otherAmenities?: string;
+  country?: string;
   address: string;
   city: string;
   state: string;
@@ -214,6 +216,7 @@ export interface PropertyUpdateInput {
   dishwasher?: boolean;
   fireplace?: boolean;
   otherAmenities?: string;
+  country?: string;
   address?: string;
   city?: string;
   state?: string;

@@ -127,7 +127,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                       <div className="text-sm text-muted-foreground">
                         Property Type
                       </div>
-                      <div className="font-semibold capitalize">
+                      <div className="font-medium text-slate-700 dark:text-gray-100 capitalize">
                         {property.propertyType.replace("-", " ")}
                       </div>
                     </div>
@@ -135,14 +135,14 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                       <div className="text-sm text-muted-foreground">
                         Furnishing
                       </div>
-                      <div className="font-semibold capitalize">
+                      <div className="font-medium text-slate-700 dark:text-gray-100 capitalize">
                         {property.furnishing.replace("-", " ")}
                       </div>
                     </div>
                     {property.floorNumber && (
                       <div>
                         <div className="text-sm text-muted-foreground">Floor</div>
-                        <div className="font-semibold">
+                        <div className="font-medium text-slate-700 dark:text-gray-100">
                           {property.floorNumber}
                           {property.totalFloors && ` of ${property.totalFloors}`}
                         </div>
@@ -153,7 +153,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                         <div className="text-sm text-muted-foreground">
                           Available From
                         </div>
-                        <div className="font-semibold">
+                        <div className="font-medium text-slate-700 dark:text-gray-100">
                           {new Date(
                             property.availableFrom,
                           ).toLocaleDateString()}
@@ -168,7 +168,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <Users className="h-4 w-4 text-primary" />
-                          <span className="font-semibold">Shared Property</span>
+                          <span className="font-medium text-primary">Shared Property</span>
                         </div>
                         {property.sharingDetails.sharingType && (
                           <div className="text-sm text-muted-foreground ml-6">
@@ -243,7 +243,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5" />
+                      <MapPin className="h-5 w-5 text-primary" />
                       Location
                     </CardTitle>
                   </CardHeader>
@@ -253,7 +253,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                         <div className="text-sm text-muted-foreground">
                           Address
                         </div>
-                        <div className="font-semibold">
+                        <div className="font-medium text-slate-700 dark:text-gray-100">
                           {property.address}, {property.city}, {property.state}{" "}
                           {property.zipCode}
                         </div>
@@ -263,7 +263,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                           <div className="text-sm text-muted-foreground">
                             Nearby Transit
                           </div>
-                          <div className="font-semibold">
+                          <div className="font-medium text-slate-700 dark:text-gray-100">
                             {property.nearbyTransit}
                           </div>
                         </div>
@@ -281,60 +281,72 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" />
+                    <DollarSign className="h-5 w-5 text-primary" />
                     Pricing Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-3xl font-light text-slate-700 dark:text-gray-100">
-                    {formatPrice(property)}
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-muted-foreground">
+                        {property.listingType === "sale" ? "Sale Price" : "Monthly Rent"}
+                      </div>
+                      <div className="text-xl font-medium text-primary">
+                        {formatPrice(property)}
+                      </div>
+                    </div>
+                    {property.securityDeposit != null && (
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Security Deposit
+                        </div>
+                        <div className="font-medium text-slate-700 dark:text-gray-100">
+                          {(() => {
+                            try {
+                              return formatCurrency(property.securityDeposit, "USD");
+                            } catch {
+                              return new Intl.NumberFormat("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0,
+                              }).format(property.securityDeposit);
+                            }
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                    {property.leaseLength != null && (
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Lease Length
+                        </div>
+                        <div className="font-medium text-slate-700 dark:text-gray-100">
+                          {property.leaseLength} months
+                        </div>
+                      </div>
+                    )}
+                    {property.paymentFrequency != null && (
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Payment Frequency
+                        </div>
+                        <div className="font-medium text-slate-700 dark:text-gray-100 capitalize">
+                          {property.paymentFrequency}
+                        </div>
+                      </div>
+                    )}
+                    {property.utilitiesIncluded !== undefined && (
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Utilities
+                        </div>
+                        <div className="font-medium text-slate-700 dark:text-gray-100">
+                          {property.utilitiesIncluded ? "Included" : "Not Included"}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {property.securityDeposit && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">
-                        Security Deposit
-                      </div>
-                      <div className="font-semibold">
-                        {(() => {
-                          try {
-                            return formatCurrency(
-                              property.securityDeposit,
-                              "USD",
-                            );
-                          } catch {
-                            return new Intl.NumberFormat("en-US", {
-                              style: "currency",
-                              currency: "USD",
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 0,
-                            }).format(property.securityDeposit);
-                          }
-                        })()}
-                      </div>
-                    </div>
-                  )}
-                  {property.leaseLength && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">
-                        Lease Length
-                      </div>
-                      <div className="font-semibold">
-                        {property.leaseLength} months
-                      </div>
-                    </div>
-                  )}
-                  {property.utilitiesIncluded !== undefined && (
-                    <div>
-                      <div className="text-sm text-muted-foreground">
-                        Utilities
-                      </div>
-                      <div className="font-semibold">
-                        {property.utilitiesIncluded
-                          ? "Included"
-                          : "Not Included"}
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -416,7 +428,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                     {property.quietHours !== undefined && (
                       <div className="flex items-center gap-2">
                         {property.quietHours ? (
-                          <Clock className="h-4 w-4 text-blue-600" />
+                          <Clock className="h-4 w-4 text-primary" />
                         ) : null}
                         <span className="text-sm">
                           Quiet Hours: {property.quietHours ? "Yes" : "No"}
@@ -447,14 +459,14 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                   <div className="text-muted-foreground">
                     Maintenance Responsibility
                   </div>
-                  <div className="font-semibold">
+                  <div className="font-medium text-slate-700 dark:text-gray-100">
                     {property.maintenanceResponsibility ? "Tenant" : "Landlord"}
                   </div>
                 </div>
               )}
               <div>
                 <div className="text-muted-foreground">Listed</div>
-                <div className="font-semibold">
+                <div className="font-medium text-slate-700 dark:text-gray-100">
                   {new Date(property.createdAt).toLocaleDateString()}
                 </div>
               </div>

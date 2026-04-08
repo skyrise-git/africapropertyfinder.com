@@ -6,6 +6,8 @@ import {
   useEffect,
   useState,
   useRef,
+  useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -14,14 +16,22 @@ import type { SafetyRating, SafetyLabel, CrimeTrend } from "@/lib/types/crime.ty
 
 interface CrimeDataContextValue {
   stations: CrimeStation[];
+  allStations: CrimeStation[];
   loading: boolean;
   error: string | null;
+  selectedCountry: string;
+  setCountry: (country: string) => void;
+  countries: string[];
 }
 
 const CrimeDataContext = createContext<CrimeDataContextValue>({
   stations: [],
+  allStations: [],
   loading: true,
   error: null,
+  selectedCountry: "South Africa",
+  setCountry: () => {},
+  countries: [],
 });
 
 let cachedStations: CrimeStation[] | null = null;
@@ -31,6 +41,7 @@ function mapRow(row: Record<string, unknown>): CrimeStation {
     station: row.station as string,
     district: row.district as string,
     province: row.province as string,
+    country: (row.country as string) ?? "South Africa",
     safety_rating: row.safety_rating as SafetyRating,
     safety_label: row.safety_label as SafetyLabel,
     crime_index: Number(row.crime_index),
@@ -42,11 +53,12 @@ function mapRow(row: Record<string, unknown>): CrimeStation {
 }
 
 export function CrimeDataProvider({ children }: { children: ReactNode }) {
-  const [stations, setStations] = useState<CrimeStation[]>(
+  const [allStations, setAllStations] = useState<CrimeStation[]>(
     cachedStations ?? []
   );
   const [loading, setLoading] = useState(!cachedStations);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState("South Africa");
   const fetched = useRef(false);
 
   useEffect(() => {
@@ -67,13 +79,27 @@ export function CrimeDataProvider({ children }: { children: ReactNode }) {
         }
         const mapped = (data ?? []).map(mapRow);
         cachedStations = mapped;
-        setStations(mapped);
+        setAllStations(mapped);
         setLoading(false);
       });
   }, []);
 
+  const countries = useMemo(() => {
+    const unique = [...new Set(allStations.map(s => s.country))].sort();
+    return unique.length > 0 ? unique : ["South Africa"];
+  }, [allStations]);
+
+  const stations = useMemo(
+    () => allStations.filter(s => s.country === selectedCountry),
+    [allStations, selectedCountry]
+  );
+
+  const setCountry = useCallback((country: string) => {
+    setSelectedCountry(country);
+  }, []);
+
   return (
-    <CrimeDataContext.Provider value={{ stations, loading, error }}>
+    <CrimeDataContext.Provider value={{ stations, allStations, loading, error, selectedCountry, setCountry, countries }}>
       {children}
     </CrimeDataContext.Provider>
   );

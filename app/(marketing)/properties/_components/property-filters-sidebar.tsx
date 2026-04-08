@@ -145,6 +145,10 @@ const amenities = [
 export function PropertyFiltersSidebar({
   properties,
 }: PropertyFiltersSidebarProps) {
+  const [selectedCountry, setSelectedCountry] = useQueryState(
+    "country",
+    parseAsString.withDefault("")
+  );
   const [selectedListingTypes, setSelectedListingTypes] = useQueryState(
     "listingTypes",
     parseAsArrayOf(parseAsString).withDefault([])
@@ -294,6 +298,26 @@ export function PropertyFiltersSidebar({
           </div>
         </CardHeader>
         <CardContent className="space-y-6 h-auto">
+          {/* Country */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold">Country</Label>
+            <Select
+              value={selectedCountry || "all"}
+              onValueChange={(val) => setSelectedCountry(val === "all" ? "" : val)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All Countries" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                <SelectItem value="South Africa">South Africa</SelectItem>
+                <SelectItem value="Zimbabwe">Zimbabwe</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
           {/* Listing Type */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold">Listing Type</Label>
