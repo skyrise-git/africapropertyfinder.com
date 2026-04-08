@@ -56,11 +56,11 @@ type Props = {
   onSaved: () => void;
 };
 
-function numOrNull(v: string): number | null {
+function numOrUndef(v: string): number | undefined {
   const t = v.trim();
-  if (t === "") return null;
+  if (t === "") return undefined;
   const n = Number(t);
-  return Number.isFinite(n) ? n : null;
+  return Number.isFinite(n) ? n : undefined;
 }
 
 export function PriceEstimateDialog({
@@ -158,26 +158,26 @@ export function PriceEstimateDialog({
 
     const payload = {
       country: country.trim(),
-      province: province.trim(),
-      city: city.trim(),
+      province: province.trim() || undefined,
+      city: city.trim() || undefined,
       suburb: suburb.trim(),
-      listingType: listingType || null,
-      propertyType: propertyType.trim() || null,
-      estimateLow: numOrNull(estimateLow),
-      estimateMid: numOrNull(estimateMid),
-      estimateHigh: numOrNull(estimateHigh),
-      yoyGrowthPct: numOrNull(yoyGrowthPct),
-      demandLevel: demandLevel.trim() || null,
-      priceTrend: priceTrend.trim() || null,
-      forecast6m: numOrNull(forecast6m),
-      forecast12m: numOrNull(forecast12m),
-      forecast36m: numOrNull(forecast36m),
+      listingType: listingType || undefined,
+      propertyType: propertyType.trim() || undefined,
+      estimateLow: numOrUndef(estimateLow),
+      estimateMid: numOrUndef(estimateMid),
+      estimateHigh: numOrUndef(estimateHigh),
+      yoyGrowthPct: numOrUndef(yoyGrowthPct),
+      demandLevel: demandLevel.trim() || undefined,
+      priceTrend: priceTrend.trim() || undefined,
+      forecast6m: numOrUndef(forecast6m),
+      forecast12m: numOrUndef(forecast12m),
+      forecast36m: numOrUndef(forecast36m),
       historicalPrices,
       comparableCount:
         comparableCount.trim() === ""
-          ? null
-          : Math.round(Number(comparableCount)) || null,
-      avgPricePerSqm: numOrNull(avgPricePerSqm),
+          ? undefined
+          : Math.round(Number(comparableCount)) || undefined,
+      avgPricePerSqm: numOrUndef(avgPricePerSqm),
       source: source.trim() || "manual",
     };
 
