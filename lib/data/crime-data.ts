@@ -6,6 +6,7 @@ function mapRow(row: Record<string, unknown>): CrimeStation {
     station: row.station as string,
     district: row.district as string,
     province: row.province as string,
+    country: (row.country as string) ?? "South Africa",
     safety_rating: row.safety_rating as SafetyRating,
     safety_label: row.safety_label as SafetyLabel,
     crime_index: Number(row.crime_index),
