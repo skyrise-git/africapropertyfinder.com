@@ -15,7 +15,7 @@ export function SupabaseProvider({ children }: SupabaseProviderProps) {
   const setUser = useAppStore((state) => state.setUser);
   const [isInitializing, setIsInitializing] = useState(true);
 
-  useAuthGuard(["/signin", "/signup"]);
+  useAuthGuard(["/signin", "/signup", "/signup/agent"]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -43,6 +43,46 @@ export function SupabaseProvider({ children }: SupabaseProviderProps) {
           updatedAt: (row.updatedAt as string) ?? undefined,
         };
         setUser(userData);
+        return;
+      }
+
+      const { data: sessionData } = await supabase.auth.getUser();
+      const authUser = sessionData?.user;
+      if (!authUser) return;
+
+      const meta = (authUser.user_metadata ?? {}) as Record<string, string>;
+      const role = (meta.role || "user") as User["role"];
+
+      const { error: insertError } = await supabase.from("profiles").upsert(
+        {
+          id: authUser.id,
+          email: authUser.email ?? "",
+          name: meta.name ?? "",
+          role,
+          status: "active",
+        },
+        { onConflict: "id" }
+      );
+
+      if (!insertError) {
+        const userData: User = {
+          id: authUser.id,
+          uid: authUser.id,
+          name: meta.name ?? "",
+          email: authUser.email ?? "",
+          role,
+          status: "active",
+          password: "",
+          createdAt: authUser.created_at ?? new Date().toISOString(),
+        };
+        setUser(userData);
+
+        if (role === "agent") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (supabase as any)
+            .from("agent_profiles")
+            .upsert({ user_id: authUser.id }, { onConflict: "user_id" });
+        }
       }
     };
 
