@@ -12,6 +12,7 @@ import { PropertyTabsAndSidebar } from "./_components/property-tabs-and-sidebar"
 import { PropertyDetailLoading } from "./_components/property-detail-loading";
 import { PropertyDetailError } from "./_components/property-detail-error";
 import { PropertySafetyWidget } from "./_components/property-safety-widget";
+import { PropertyAgentCard } from "./_components/property-agent-card";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -67,6 +68,10 @@ export default function PropertyDetailPage() {
         </div>
         <PropertyContactAndSchedule property={property} />
       </div>
+
+      {property.userId && (
+        <PropertyAgentCard userId={property.userId} />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
         <PropertyPriceEstimate property={property} />

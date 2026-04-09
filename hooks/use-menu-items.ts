@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Shield,
   LineChart,
+  Contact,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/user.type";
 
@@ -26,19 +27,25 @@ export function useMenuItems() {
       title: "Dashboard",
       url: "/dashboard",
       icon: Home,
-      roles: ["admin", "staff"],
+      roles: ["admin", "staff", "agent"],
     },
     {
       title: "Properties",
       url: "/properties",
       icon: Building2,
-      roles: ["admin", "staff"],
+      roles: ["admin", "staff", "agent"],
     },
     {
       title: "Appointments",
       url: "/appointments",
       icon: CalendarDays,
-      roles: ["admin", "staff"],
+      roles: ["admin", "staff", "agent"],
+    },
+    {
+      title: "My Leads",
+      url: "/leads",
+      icon: Contact,
+      roles: ["agent"],
     },
     {
       title: "Area safety",

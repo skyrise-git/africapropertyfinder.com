@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { AuthForm, type AuthFormData } from "../_components/auth-form";
+import { AuthForm, type AuthFormData } from "../../_components/auth-form";
 import {
   Dialog,
   DialogContent,
@@ -14,10 +13,10 @@ import {
 import { CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
 
-export default function SignUpPage() {
+export default function AgentSignUpPage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  const handleEmailSignUp = async (data: AuthFormData) => {
+  const handleAgentSignUp = async (data: AuthFormData) => {
     try {
       const supabase = createClient();
 
@@ -28,7 +27,7 @@ export default function SignUpPage() {
           data: {
             name: data.name || "",
             phone: data.phone || "",
-            role: "user",
+            role: "agent",
           },
         },
       });
@@ -63,10 +62,10 @@ export default function SignUpPage() {
   return (
     <>
       <AuthForm
-        title="Create an account"
-        description="Sign up to get started with your account"
-        submitText="Sign up"
-        onSubmit={handleEmailSignUp}
+        title="Register as an Agent"
+        description="Create your free agent account and start listing properties at no cost"
+        submitText="Create Agent Account"
+        onSubmit={handleAgentSignUp}
         showNameField={true}
         showPhoneField={true}
         requireTermsAcceptance={true}
@@ -74,15 +73,6 @@ export default function SignUpPage() {
         footerLinkText="Sign in"
         footerLinkHref="/signin"
       />
-      <p className="mt-4 text-center text-sm text-muted-foreground">
-        Are you a real estate agent?{" "}
-        <Link
-          href="/signup/agent"
-          className="font-medium text-primary underline-offset-4 hover:underline"
-        >
-          Register as an Agent — it&apos;s free
-        </Link>
-      </p>
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md" showCloseButton={false}>
@@ -100,11 +90,12 @@ export default function SignUpPage() {
               <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
             </motion.div>
             <DialogTitle className="text-center text-2xl">
-              Account Created Successfully!
+              Agent Account Created!
             </DialogTitle>
             <DialogDescription className="text-center">
-              Your account has been created. You will be redirected to your
-              dashboard shortly.
+              Your free agent account is ready. You can now list unlimited
+              properties at no cost. You will be redirected to your dashboard
+              shortly.
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

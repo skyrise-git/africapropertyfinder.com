@@ -133,6 +133,11 @@ export function MarketingNavbar() {
                     Sign in
                   </Link>
                 </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/signup/agent" className="flex items-center gap-1">
+                    Agent Sign Up
+                  </Link>
+                </Button>
                 <Button size="sm" asChild>
                   <Link href="/signup" className="flex items-center gap-1">
                     Get started
