@@ -22,6 +22,7 @@ interface PropertySplitViewProps {
   totalPages: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  initialSelectedId?: string | null;
 }
 
 export function PropertySplitView({
@@ -30,8 +31,9 @@ export function PropertySplitView({
   totalPages,
   currentPage,
   onPageChange,
+  initialSelectedId,
 }: PropertySplitViewProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const cardsContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -88,6 +90,20 @@ export function PropertySplitView({
   useEffect(() => {
     setSelectedId(null);
   }, [currentPage]);
+
+  // Scroll to the initially-selected card when mounting from map view
+  useEffect(() => {
+    if (!initialSelectedId) return;
+    setSelectedId(initialSelectedId);
+    requestAnimationFrame(() => {
+      const el = cardRefs.current[initialSelectedId];
+      const container = cardsContainerRef.current;
+      if (el && container) {
+        const targetScroll = el.offsetTop - container.clientHeight / 2 + el.offsetHeight / 2;
+        container.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+      }
+    });
+  }, [initialSelectedId]);
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">

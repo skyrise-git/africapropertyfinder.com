@@ -595,7 +595,7 @@ export function PropertyFiltersSidebar({
             <Label className="text-sm font-semibold">Keyword</Label>
             <Input
               type="text"
-              placeholder="e.g. pool, garden, ocean view"
+              placeholder="e.g. lakefront, garage, detached, pool"
               value={keywordSearch}
               onChange={(e) => setKeywordSearch(e.target.value)}
               className="h-9 text-sm"

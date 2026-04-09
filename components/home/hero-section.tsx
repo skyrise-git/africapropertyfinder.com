@@ -251,7 +251,7 @@ export function HeroSection() {
               </div>
 
               {/* Search Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 items-end">
                 {/* Location Search */}
                 <div className="sm:col-span-2 lg:col-span-2 space-y-1 sm:space-y-1.5 md:space-y-2">
                   <label
@@ -296,8 +296,8 @@ export function HeroSection() {
                   </div>
                 </div>
 
-                {/* Search Term */}
-                <div className="sm:col-span-1 lg:col-span-1 space-y-1 sm:space-y-1.5 md:space-y-2">
+                {/* Keywords — features & amenities */}
+                <div className="sm:col-span-1 lg:col-span-2 space-y-1 sm:space-y-1.5 md:space-y-2">
                   <label
                     htmlFor="search-keywords"
                     className="block text-[10px] sm:text-xs md:text-sm font-semibold text-white/95 mb-0.5 sm:mb-1"
@@ -310,7 +310,7 @@ export function HeroSection() {
                       id="search-keywords"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="City, neighborhood..."
+                      placeholder="Lakefront, garage, detached, pool…"
                       className="h-8 sm:h-9 md:h-10 pl-8 sm:pl-10 text-[10px] sm:text-xs md:text-sm bg-white/60 backdrop-blur-sm border-white/40 text-gray-900 placeholder:text-gray-600"
                       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />

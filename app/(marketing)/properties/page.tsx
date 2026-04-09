@@ -70,7 +70,8 @@ export default function PropertiesPage() {
     parseAsString.withDefault("")
   );
   const [page, setPage] = useQueryState("page", parseAsString.withDefault("1"));
-  const [viewMode] = useQueryState("view", parseAsString.withDefault("cards"));
+  const [viewMode, setViewMode] = useQueryState("view", parseAsString.withDefault("cards"));
+  const [mapSelectedPropertyId, setMapSelectedPropertyId] = useState<string | null>(null);
   const [sortOption] = useQueryState(
     "sort",
     parseAsString.withDefault("new-first")
@@ -836,19 +837,19 @@ export default function PropertiesPage() {
               transition={{ duration: 0.35, ease: "easeOut" }}
               className="rounded-2xl border border-border/60 bg-card/80 p-4 sm:p-5 shadow-sm"
             >
-              {/* Search Inputs Row */}
+              {/* Search Inputs Row — location first, keyword second */}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-4 sm:mb-5">
+                <div className="relative flex-1 min-w-0 sm:max-w-[320px]">
+                  <PropertyLocationSearch />
+                </div>
                 <div className="relative flex-1 min-w-0">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     value={search}
                     onChange={(e) => setSearch(e.target.value || null)}
-                    placeholder="Search by title, address, city…"
+                    placeholder="Lakefront, garage, pool, detached…"
                     className="h-9 pl-9 text-sm w-full"
                   />
-                </div>
-                <div className="relative flex-1 min-w-0 sm:flex-shrink-0 sm:max-w-[280px]">
-                  <PropertyLocationSearch />
                 </div>
               </div>
 
@@ -877,7 +878,13 @@ export default function PropertiesPage() {
             </motion.div>
 
             {viewMode === "map" ? (
-              <PropertyMapView properties={filteredSorted} />
+              <PropertyMapView
+                properties={filteredSorted}
+                onMarkerClick={(id) => {
+                  setMapSelectedPropertyId(id);
+                  setViewMode("split");
+                }}
+              />
             ) : viewMode === "split" ? (
               <PropertySplitView
                 properties={filteredSorted}
@@ -885,6 +892,7 @@ export default function PropertiesPage() {
                 totalPages={totalPages}
                 currentPage={Number(page) || 1}
                 onPageChange={handlePageChange}
+                initialSelectedId={mapSelectedPropertyId}
               />
             ) : (
               <AnimatePresence mode="popLayout">
