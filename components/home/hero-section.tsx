@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { Search, Home, Building, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -68,14 +68,16 @@ export function HeroSection() {
   const [searchError, setSearchError] = useState<string | null>(null);
 
   // Fetch properties for stats
-  const { data: propertiesData } = useSupabaseRealtime<Property>("properties");
+  const { data: propertiesData } = useSupabaseRealtime<Property>("properties", {
+    realtime: false,
+  });
   const properties = propertiesData || [];
 
   // Fetch users for client count
   const { data: usersData } = useSupabaseRealtime<{
     id: string;
     status?: string;
-  }>("profiles");
+  }>("profiles", { realtime: false });
   const users = usersData || [];
 
   // Calculate stats

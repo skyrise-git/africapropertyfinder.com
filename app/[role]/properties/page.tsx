@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -68,6 +69,7 @@ export default function AdminPropertiesPage() {
   const [search, setSearch] = useState("");
   const [listingFilter, setListingFilter] = useState<string>("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     const supabase = createClient();
@@ -172,10 +174,75 @@ export default function AdminPropertiesPage() {
     setDeleteId(null);
   };
 
+  const selectedRows = useMemo(
+    () => rows.filter((r) => selectedIds.includes(r.id)),
+    [rows, selectedIds]
+  );
+
+  const exportCsv = () => {
+    const exportRows = selectedRows.length > 0 ? selectedRows : filtered;
+    const header = [
+      "id",
+      "title",
+      "owner",
+      "city",
+      "country",
+      "listingType",
+      "status",
+      "featured",
+      "price",
+      "rent",
+      "createdAt",
+    ];
+    const csv = [
+      header.join(","),
+      ...exportRows.map((r) =>
+        [
+          r.id,
+          `"${r.title.replaceAll('"', '""')}"`,
+          `"${(r.userId && profiles[r.userId]) || ""}"`,
+          `"${r.city}"`,
+          `"${r.country}"`,
+          r.listingType,
+          r.status ?? "active",
+          String(!!r.featured),
+          r.price ?? "",
+          r.rent ?? "",
+          r.createdAt,
+        ].join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "properties-export.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const bulkSetStatus = async (status: NonNullable<PropertyRow["status"]>) => {
+    if (selectedIds.length === 0) return;
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("properties")
+      .update({ status })
+      .in("id", selectedIds);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Updated ${selectedIds.length} listing(s)`);
+    setRows((prev) =>
+      prev.map((r) => (selectedIds.includes(r.id) ? { ...r, status } : r))
+    );
+    setSelectedIds([]);
+  };
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <Building2 className="size-6 text-primary" />
@@ -197,7 +264,7 @@ export default function AdminPropertiesPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -218,6 +285,21 @@ export default function AdminPropertiesPage() {
                 <SelectItem value="student-housing">Student housing</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" size="sm" className="lg:ml-auto" onClick={exportCsv}>
+              Export CSV
+            </Button>
+            <Select onValueChange={(v) => bulkSetStatus(v as NonNullable<PropertyRow["status"]>)}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Bulk status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Set active</SelectItem>
+                <SelectItem value="inactive">Set inactive</SelectItem>
+                <SelectItem value="pending">Set pending</SelectItem>
+                <SelectItem value="booked">Set booked</SelectItem>
+                <SelectItem value="sold">Set sold</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {loading ? (
@@ -227,6 +309,17 @@ export default function AdminPropertiesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={filtered.length > 0 && filtered.every((r) => selectedIds.includes(r.id))}
+                        onCheckedChange={(checked) =>
+                          setSelectedIds(
+                            checked ? filtered.map((r) => r.id) : []
+                          )
+                        }
+                        aria-label="Select all properties"
+                      />
+                    </TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Owner</TableHead>
                     <TableHead>City</TableHead>
@@ -239,13 +332,26 @@ export default function AdminPropertiesPage() {
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-10">
+                      <TableCell colSpan={8} className="text-center py-10">
                         No properties match your filters.
                       </TableCell>
                     </TableRow>
                   ) : (
                     filtered.map((p) => (
                       <TableRow key={p.id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedIds.includes(p.id)}
+                            onCheckedChange={(checked) =>
+                              setSelectedIds((prev) =>
+                                checked
+                                  ? [...prev, p.id]
+                                  : prev.filter((id) => id !== p.id)
+                              )
+                            }
+                            aria-label={`Select ${p.title}`}
+                          />
+                        </TableCell>
                         <TableCell className="max-w-[200px] font-medium">
                           <div className="flex flex-wrap items-center gap-1">
                             {p.featured && (

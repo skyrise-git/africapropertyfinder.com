@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQueryState, parseAsString, parseAsArrayOf } from "nuqs";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Home, Filter } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import type { Property } from "@/lib/types/property.type";
@@ -122,23 +123,31 @@ export default function PropertiesPage() {
     "amenities",
     parseAsArrayOf(parseAsString).withDefault([])
   );
-  const [selectedCity] = useQueryState("city", parseAsString.withDefault(""));
-  const [selectedProvince] = useQueryState("province", parseAsString.withDefault(""));
+  const [selectedCountry, setSelectedCountry] = useQueryState("country", parseAsString.withDefault(""));
+  const [selectedCity, setSelectedCity] = useQueryState("city", parseAsString.withDefault(""));
+  const [selectedProvince, setSelectedProvince] = useQueryState("province", parseAsString.withDefault(""));
   const [minAreaStr, setMinAreaStr] = useQueryState("minArea", parseAsString.withDefault(""));
   const [maxAreaStr, setMaxAreaStr] = useQueryState("maxArea", parseAsString.withDefault(""));
-  const [petsAllowed] = useQueryState("pets", parseAsString.withDefault(""));
-  const [smokingAllowed] = useQueryState("smoking", parseAsString.withDefault(""));
-  const [guestsAllowed] = useQueryState("guests", parseAsString.withDefault(""));
-  const [nearTransit] = useQueryState("transit", parseAsString.withDefault(""));
-  const [featuredOnly] = useQueryState("featured", parseAsString.withDefault(""));
-  const [dateListed] = useQueryState("listed", parseAsString.withDefault(""));
-  const [keywordSearch] = useQueryState("keyword", parseAsString.withDefault(""));
+  const [petsAllowed, setPetsAllowed] = useQueryState("pets", parseAsString.withDefault(""));
+  const [smokingAllowed, setSmokingAllowed] = useQueryState("smoking", parseAsString.withDefault(""));
+  const [guestsAllowed, setGuestsAllowed] = useQueryState("guests", parseAsString.withDefault(""));
+  const [nearTransit, setNearTransit] = useQueryState("transit", parseAsString.withDefault(""));
+  const [featuredOnly, setFeaturedOnly] = useQueryState("featured", parseAsString.withDefault(""));
+  const [dateListed, setDateListed] = useQueryState("listed", parseAsString.withDefault(""));
+  const [keywordSearch, setKeywordSearch] = useQueryState("keyword", parseAsString.withDefault(""));
+  const [minSafetyRatingStr, setMinSafetyRatingStr] = useQueryState("minSafety", parseAsString.withDefault("1"));
+  const [maxCrimeIndexStr, setMaxCrimeIndexStr] = useQueryState("maxCrime", parseAsString.withDefault("100"));
+  const [improvingOnlyStr, setImprovingOnlyStr] = useQueryState("improvingOnly", parseAsString.withDefault("false"));
+  const searchParams = useSearchParams();
 
   // Convert string filters to numbers
   const minPrice = minPriceStr ? Number(minPriceStr) : null;
   const maxPrice = maxPriceStr ? Number(maxPriceStr) : null;
   const minBedrooms = minBedroomsStr ? Number(minBedroomsStr) : null;
   const minBathrooms = minBathroomsStr ? Number(minBathroomsStr) : null;
+  const minSafetyRating = Number(minSafetyRatingStr) || 1;
+  const maxCrimeIndex = Number(maxCrimeIndexStr) || 100;
+  const improvingOnly = improvingOnlyStr === "true";
 
   // Sync legacy listingType with sidebar filters
   useEffect(() => {
@@ -185,6 +194,7 @@ export default function PropertiesPage() {
     minBathrooms,
     selectedFurnishing,
     selectedAmenities,
+    selectedCountry,
     selectedCity,
     selectedProvince,
     minAreaStr,
@@ -196,6 +206,9 @@ export default function PropertiesPage() {
     featuredOnly,
     dateListed,
     keywordSearch,
+    minSafetyRating,
+    maxCrimeIndex,
+    improvingOnly,
   ]);
 
   const { filteredSorted, paginated, totalPages } = useMemo(() => {
@@ -280,6 +293,9 @@ export default function PropertiesPage() {
         return false;
       }
 
+      // Filter by country
+      if (selectedCountry && property.country !== selectedCountry) return false;
+
       // Filter by city
       if (selectedCity && property.city !== selectedCity) return false;
 
@@ -328,6 +344,19 @@ export default function PropertiesPage() {
           .toLowerCase();
         if (!haystack.includes(kw)) return false;
       }
+
+      // Safety filter controls
+      const safetySource = property as Property & {
+        safetyRating?: number;
+        crimeIndex?: number;
+        crimeTrend?: string;
+      };
+      const safetyRating = safetySource.safetyRating ?? 0;
+      const safetyCrimeIndex = safetySource.crimeIndex ?? 100;
+      const safetyTrend = safetySource.crimeTrend ?? "";
+      if (minSafetyRating > 1 && safetyRating < minSafetyRating) return false;
+      if (maxCrimeIndex < 100 && safetyCrimeIndex > maxCrimeIndex) return false;
+      if (improvingOnly && safetyTrend !== "improving") return false;
 
       // Filter by amenities
       if ((selectedAmenities as string[]).length > 0) {
@@ -445,6 +474,7 @@ export default function PropertiesPage() {
     minBathrooms,
     selectedFurnishing,
     selectedAmenities,
+    selectedCountry,
     selectedCity,
     selectedProvince,
     minAreaStr,
@@ -456,6 +486,9 @@ export default function PropertiesPage() {
     featuredOnly,
     dateListed,
     keywordSearch,
+    minSafetyRating,
+    maxCrimeIndex,
+    improvingOnly,
   ]);
 
   const handlePageChange = (newPage: number) => {
@@ -597,13 +630,23 @@ export default function PropertiesPage() {
           },
         ]
       : []),
+    ...(selectedCountry
+      ? [
+          {
+            id: "country",
+            label: "Country",
+            value: selectedCountry,
+            onRemove: () => setSelectedCountry(""),
+          },
+        ]
+      : []),
     // Province
     ...(selectedProvince
-      ? [{ id: "province", label: "Province", value: selectedProvince, onRemove: () => {} }]
+      ? [{ id: "province", label: "Province", value: selectedProvince, onRemove: () => setSelectedProvince("") }]
       : []),
     // City
     ...(selectedCity
-      ? [{ id: "city", label: "City", value: selectedCity, onRemove: () => {} }]
+      ? [{ id: "city", label: "City", value: selectedCity, onRemove: () => setSelectedCity("") }]
       : []),
     // Area
     ...(minAreaStr || maxAreaStr
@@ -616,21 +659,21 @@ export default function PropertiesPage() {
       : []),
     // Policies
     ...(petsAllowed === "true"
-      ? [{ id: "pets", label: "Policy", value: "Pets allowed", onRemove: () => {} }]
+      ? [{ id: "pets", label: "Policy", value: "Pets allowed", onRemove: () => setPetsAllowed("") }]
       : []),
     ...(smokingAllowed === "true"
-      ? [{ id: "smoking", label: "Policy", value: "Smoking allowed", onRemove: () => {} }]
+      ? [{ id: "smoking", label: "Policy", value: "Smoking allowed", onRemove: () => setSmokingAllowed("") }]
       : []),
     ...(guestsAllowed === "true"
-      ? [{ id: "guests", label: "Policy", value: "Guests allowed", onRemove: () => {} }]
+      ? [{ id: "guests", label: "Policy", value: "Guests allowed", onRemove: () => setGuestsAllowed("") }]
       : []),
     // Transit
     ...(nearTransit === "true"
-      ? [{ id: "transit", label: "Location", value: "Near transit", onRemove: () => {} }]
+      ? [{ id: "transit", label: "Location", value: "Near transit", onRemove: () => setNearTransit("") }]
       : []),
     // Featured
     ...(featuredOnly === "true"
-      ? [{ id: "featured", label: "Listing", value: "Featured only", onRemove: () => {} }]
+      ? [{ id: "featured", label: "Listing", value: "Featured only", onRemove: () => setFeaturedOnly("") }]
       : []),
     // Date listed
     ...(dateListed
@@ -638,12 +681,21 @@ export default function PropertiesPage() {
           id: "dateListed",
           label: "Listed",
           value: `Last ${dateListed} days`,
-          onRemove: () => {},
+          onRemove: () => setDateListed(""),
         }]
       : []),
     // Keyword
     ...(keywordSearch
-      ? [{ id: "keyword", label: "Keyword", value: keywordSearch, onRemove: () => {} }]
+      ? [{ id: "keyword", label: "Keyword", value: keywordSearch, onRemove: () => setKeywordSearch("") }]
+      : []),
+    ...(minSafetyRating > 1
+      ? [{ id: "minSafety", label: "Safety", value: `${minSafetyRating}+`, onRemove: () => setMinSafetyRatingStr("1") }]
+      : []),
+    ...(maxCrimeIndex < 100
+      ? [{ id: "maxCrime", label: "Crime", value: `<= ${maxCrimeIndex}`, onRemove: () => setMaxCrimeIndexStr("100") }]
+      : []),
+    ...(improvingOnly
+      ? [{ id: "improvingOnly", label: "Trend", value: "Improving only", onRemove: () => setImprovingOnlyStr("false") }]
       : []),
     // Amenities
     ...(selectedAmenities as string[]).map((amenity) => {
@@ -687,6 +739,27 @@ export default function PropertiesPage() {
     setMinBathroomsStr("");
     setSelectedFurnishing("");
     setSelectedAmenities([]);
+    setSelectedCountry("");
+    setSelectedProvince("");
+    setSelectedCity("");
+    setMinAreaStr("");
+    setMaxAreaStr("");
+    setPetsAllowed("");
+    setSmokingAllowed("");
+    setGuestsAllowed("");
+    setNearTransit("");
+    setFeaturedOnly("");
+    setDateListed("");
+    setKeywordSearch("");
+    setMinSafetyRatingStr("1");
+    setMaxCrimeIndexStr("100");
+    setImprovingOnlyStr("false");
+  };
+
+  const pageHref = (nextPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(nextPage));
+    return `?${params.toString()}`;
   };
 
   if (loading) {
@@ -698,17 +771,17 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl p-4 md:p-6">
+    <div className="container mx-auto max-w-7xl p-4 md:p-6 lg:p-8">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="w-full space-y-8"
+        className="w-full space-y-6"
       >
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="space-y-3 text-center"
+          className="space-y-2 text-center"
         >
           <div className="inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
             <Home className="h-3.5 w-3.5" />
@@ -724,14 +797,14 @@ export default function PropertiesPage() {
         </motion.div>
 
         {/* Main Content with Sidebar */}
-        <div className="relative w-full flex flex-col lg:flex-row gap-6 items-start">
+        <div className="relative w-full flex flex-col lg:flex-row gap-5 items-start">
           {/* Filters Sidebar - Desktop (Sticky) */}
           <aside className="hidden lg:block lg:w-80 shrink-0 sticky top-24 z-20 transition-all duration-300 ease-in-out">
             <PropertyFiltersSidebar properties={properties} />
           </aside>
 
           {/* Main Content - Scrollable */}
-          <div className="flex-1 min-w-0 space-y-5">
+          <div className="flex-1 min-w-0 space-y-4">
             {/* Mobile Filter Button */}
             {isMobile && (
               <Sheet
@@ -761,7 +834,7 @@ export default function PropertiesPage() {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="rounded-xl border-2 border-border/60 bg-card/70 p-4 sm:p-5 shadow-sm"
+              className="rounded-2xl border border-border/60 bg-card/80 p-4 sm:p-5 shadow-sm"
             >
               {/* Search Inputs Row */}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 mb-4 sm:mb-5">
@@ -864,7 +937,7 @@ export default function PropertiesPage() {
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      href={`?page=${Math.max(1, (Number(page) || 1) - 1)}`}
+                      href={pageHref(Math.max(1, (Number(page) || 1) - 1))}
                       onClick={(e) => {
                         e.preventDefault();
                         handlePageChange(Math.max(1, (Number(page) || 1) - 1));
@@ -879,7 +952,7 @@ export default function PropertiesPage() {
                     return (
                       <PaginationItem key={pageNumber}>
                         <PaginationLink
-                          href={`?page=${pageNumber}`}
+                          href={pageHref(pageNumber)}
                           isActive={isActive}
                           onClick={(e) => {
                             e.preventDefault();
@@ -894,10 +967,9 @@ export default function PropertiesPage() {
 
                   <PaginationItem>
                     <PaginationNext
-                      href={`?page=${Math.min(
-                        totalPages,
-                        (Number(page) || 1) + 1
-                      )}`}
+                      href={pageHref(
+                        Math.min(totalPages, (Number(page) || 1) + 1)
+                      )}
                       onClick={(e) => {
                         e.preventDefault();
                         handlePageChange(

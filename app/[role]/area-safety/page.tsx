@@ -131,7 +131,7 @@ export default function AreaSafetyAdminPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <Shield className="size-6 text-primary" />

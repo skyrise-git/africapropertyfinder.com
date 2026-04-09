@@ -8,6 +8,7 @@ interface UseSupabaseRealtimeOptions<T> {
   filter?: (item: T) => boolean;
   sort?: (a: T, b: T) => number;
   enabled?: boolean;
+  realtime?: boolean;
   eq?: { column: string; value: string };
 }
 
@@ -21,7 +22,7 @@ export function useSupabaseRealtime<T extends { id: string }>(
   table: string,
   options?: UseSupabaseRealtimeOptions<T>
 ): UseSupabaseRealtimeReturn<T> {
-  const { filter, sort, enabled = true, eq } = options || {};
+  const { filter, sort, enabled = true, realtime = true, eq } = options || {};
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -49,22 +50,53 @@ export function useSupabaseRealtime<T extends { id: string }>(
     setLoading(true);
     setError(null);
 
+    const cacheKey = `${table}:${eq?.column ?? ""}:${eq?.value ?? ""}`;
+    const globalStore = globalThis as typeof globalThis & {
+      __apfRealtimeCache?: Record<string, unknown[]>;
+      __apfRealtimeInflight?: Record<string, Promise<{ data: unknown[] | null; error: { message: string } | null }>>;
+    };
+    if (!globalStore.__apfRealtimeCache) globalStore.__apfRealtimeCache = {};
+    if (!globalStore.__apfRealtimeInflight) globalStore.__apfRealtimeInflight = {};
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = (supabase as any).from(table).select("*");
     if (eq) {
       query = query.eq(eq.column, eq.value);
     }
 
-    query.then(({ data: rows, error: err }: { data: unknown[] | null; error: { message: string } | null }) => {
+    if (globalStore.__apfRealtimeCache[cacheKey]) {
+      setData(
+        applyTransforms(
+          (globalStore.__apfRealtimeCache[cacheKey] ?? []) as T[]
+        )
+      );
+      setLoading(false);
+    }
+
+    const inflight =
+      globalStore.__apfRealtimeInflight[cacheKey] ??
+      query.then(
+        ({ data: rows, error: err }: { data: unknown[] | null; error: { message: string } | null }) => ({
+          data: rows,
+          error: err,
+        })
+      );
+    globalStore.__apfRealtimeInflight[cacheKey] = inflight;
+
+    inflight.then(({ data: rows, error: err }) => {
       if (err) {
         setError(new Error(err.message));
         setLoading(false);
         return;
       }
       const typed = (rows ?? []) as T[];
+      globalStore.__apfRealtimeCache![cacheKey] = typed as unknown[];
       setData(applyTransforms(typed));
       setLoading(false);
+      delete globalStore.__apfRealtimeInflight![cacheKey];
     });
+
+    if (!realtime) return;
 
     const channel = supabase
       .channel(`${table}-realtime`)
@@ -103,7 +135,7 @@ export function useSupabaseRealtime<T extends { id: string }>(
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [table, enabled, eq?.column, eq?.value, applyTransforms]);
+  }, [table, enabled, eq?.column, eq?.value, applyTransforms, realtime]);
 
   return { data, loading, error };
 }

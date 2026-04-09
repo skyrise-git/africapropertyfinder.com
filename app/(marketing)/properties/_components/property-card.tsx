@@ -19,6 +19,7 @@ import {
   PawPrint,
 } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { SafetyBadge } from "@/components/safety/safety-badge";
@@ -105,11 +106,12 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
           <div className="relative h-40 sm:h-48 md:h-56 w-full overflow-hidden bg-muted">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 transition-opacity duration-500 group-hover:opacity-100 opacity-90" />
 
-            <img
+            <Image
               src={imageUrl}
               alt={property.title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-              loading="lazy"
             />
 
             <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 p-4">

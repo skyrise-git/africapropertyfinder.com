@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { marketingSite } from "@/lib/config";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import { MarketingProfileDropdown } from "@/components/core/marketing-profile-dr
 
 export function MarketingNavbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const { theme, resolvedTheme, setTheme } = useTheme();
   const { user } = useAppStore();
 
@@ -58,20 +60,16 @@ export function MarketingNavbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2.5 group" title="Go to homepage">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
+          <Link href="/" className="flex items-center group" title="Go to homepage" aria-label="Go to homepage">
             <Image
               src="/logo-icon.png"
               alt="Africa Property Finder"
-              width={44}
-              height={44}
-              className="h-9 w-9 transition group-hover:scale-105"
+              width={68}
+              height={68}
+              className="h-14 w-14 transition group-hover:scale-105"
               priority
             />
-            <div className="hidden sm:flex flex-col leading-none">
-              <span className="text-[15px] font-bold text-[#1e3a5f] dark:text-gray-100 tracking-tight">Africa</span>
-              <span className="text-[11px] font-medium text-[#1e3a5f]/70 dark:text-gray-400 tracking-tight">Property Finder</span>
-            </div>
           </Link>
 
           <NavigationMenu className="hidden md:flex">
@@ -88,9 +86,13 @@ export function MarketingNavbar() {
                   <NavigationMenuLink asChild>
                     <Link
                       href={item.href}
+                      aria-current={pathname === item.href ? "page" : undefined}
                       className={cn(
                         navigationMenuTriggerStyle(),
-                        "h-9 text-sm text-muted-foreground hover:text-foreground"
+                        "h-9 text-sm hover:text-foreground",
+                        pathname === item.href
+                          ? "text-primary"
+                          : "text-muted-foreground"
                       )}
                     >
                       {item.label}

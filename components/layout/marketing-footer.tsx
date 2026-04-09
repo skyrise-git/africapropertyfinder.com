@@ -69,18 +69,14 @@ export function MarketingFooter() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-8">
             {/* Company Information */}
             <div className="space-y-4">
-              <Link href="/" className="flex items-center gap-2.5">
+              <Link href="/" className="flex items-center gap-2.5" aria-label="Back to homepage">
                 <Image
                   src="/logo-icon.png"
                   alt="Africa Property Finder"
-                  width={40}
-                  height={40}
-                  className="h-9 w-9"
+                  width={56}
+                  height={56}
+                  className="h-12 w-12"
                 />
-                <div className="flex flex-col leading-none">
-                  <span className="text-[15px] font-bold text-[#1e3a5f] dark:text-gray-100 tracking-tight">Africa</span>
-                  <span className="text-[11px] font-medium text-[#1e3a5f]/70 dark:text-gray-400 tracking-tight">Property Finder</span>
-                </div>
               </Link>
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-2">

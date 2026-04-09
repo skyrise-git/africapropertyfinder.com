@@ -80,6 +80,7 @@ export function PropertyMapView({
   const [lng] = useQueryState("lng", parseAsString.withDefault(""));
   const [selectedCity] = useQueryState("city", parseAsString.withDefault(""));
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
+  const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const boundaryRef = useRef<google.maps.Polygon | null>(null);
 
@@ -202,6 +203,19 @@ export function PropertyMapView({
     if (externalSelectedId === undefined) setInternalSelectedId(null);
   }, [onPropertySelect, externalSelectedId]);
 
+  const visibleProperties = useMemo(() => {
+    if (!mapBounds) return properties.slice(0, 400);
+    return properties
+      .filter((property) => {
+        const loc = property.location;
+        if (!loc || typeof loc.latitude !== "number" || typeof loc.longitude !== "number") {
+          return false;
+        }
+        return mapBounds.contains({ lat: loc.latitude, lng: loc.longitude });
+      })
+      .slice(0, 400);
+  }, [properties, mapBounds]);
+
   if (loadError) {
     return (
       <div className="flex h-[60vh] items-center justify-center rounded-xl border bg-destructive/5">
@@ -249,6 +263,10 @@ export function PropertyMapView({
             map.fitBounds(bounds, 60);
           }
         }}
+        onIdle={() => {
+          const bounds = mapRef.current?.getBounds();
+          if (bounds) setMapBounds(bounds);
+        }}
         options={{
           disableDefaultUI: false,
           zoomControl: true,
@@ -257,7 +275,7 @@ export function PropertyMapView({
           fullscreenControl: true,
         }}
       >
-        {properties.map((property) => {
+        {visibleProperties.map((property) => {
           const loc = property.location;
           if (
             !loc ||

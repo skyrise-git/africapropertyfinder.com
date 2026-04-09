@@ -1,6 +1,7 @@
 "use client";
 
 import { BarChart3, LogOut } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
@@ -113,9 +114,17 @@ export function AppSidebar() {
             variants={logoVariants}
             initial="hidden"
             animate="visible"
-            className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+            className="flex aspect-square size-10 items-center justify-center rounded-lg bg-sidebar-primary/10 text-sidebar-primary-foreground overflow-hidden"
           >
-            <BarChart3 className="size-4" />
+            <Link href="/" aria-label="Go to marketing home">
+              <Image
+                src="/logo-icon.png"
+                alt="Africa Property Finder"
+                width={40}
+                height={40}
+                className="size-8"
+              />
+            </Link>
           </motion.div>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold capitalize">

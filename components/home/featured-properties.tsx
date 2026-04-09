@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   ArrowRight,
   MapPin,
@@ -20,6 +20,7 @@ import { useCrimeData } from "@/contexts/crime-data-context";
 import { matchPropertyToStation } from "@/lib/utils/crime-helpers";
 import type { Property } from "@/lib/types/property.type";
 import Link from "next/link";
+import Image from "next/image";
 
 const formatPrice = (price: number | undefined, listingType: string) => {
   if (!price) return "Contact for price";
@@ -69,14 +70,15 @@ const PropertyCard = ({
         <div className="relative h-52 md:h-56 overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
           {property.images && property.images[0] ? (
             <>
-              <img
+              <Image
                 src={property.images[0].url}
                 alt={property.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
                 className={`w-full h-full object-cover transition-all duration-500 ${
                   imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
                 } group-hover:scale-105`}
                 onLoad={() => setImageLoaded(true)}
-                loading="lazy"
               />
               {!imageLoaded && (
                 <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
@@ -198,7 +200,9 @@ const PropertyCard = ({
 };
 
 export function FeaturedProperties() {
-  const { data, loading, error } = useSupabaseRealtime<Property>("properties");
+  const { data, loading, error } = useSupabaseRealtime<Property>("properties", {
+    realtime: false,
+  });
 
   const properties = data || [];
 

@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PropertyErrorViewProps {
   error: Error | null;
@@ -17,6 +18,11 @@ export function PropertyErrorView({ error }: PropertyErrorViewProps) {
         <p className="text-sm text-muted-foreground">
           {error?.message || "Failed to load properties. Please try again."}
         </p>
+        <div className="mt-4">
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
       </div>
     </div>
   );

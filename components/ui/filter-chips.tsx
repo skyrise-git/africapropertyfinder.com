@@ -25,7 +25,7 @@ export function FilterChips({
   if (filters.length === 0) return null;
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div className={cn("flex flex-wrap items-center gap-2", className)} aria-live="polite">
       <span className="text-xs text-muted-foreground font-medium">
         Active filters:
       </span>
@@ -38,6 +38,7 @@ export function FilterChips({
           <span className="text-xs text-muted-foreground">{filter.label}:</span>
           <span>{filter.value}</span>
           <Button
+            type="button"
             variant="ghost"
             size="icon"
             onClick={filter.onRemove}
@@ -51,6 +52,7 @@ export function FilterChips({
 
       {filters.length > 1 && onClearAll && (
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={onClearAll}

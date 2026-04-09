@@ -141,10 +141,37 @@ export default function AdminAppointmentsPage() {
     setSelected(null);
   };
 
+  const exportCsv = () => {
+    const header = ["id", "date", "time", "propertyTitle", "contactName", "contactEmail", "contactPhone", "status", "notes"];
+    const csv = [
+      header.join(","),
+      ...filtered.map((r) =>
+        [
+          r.id,
+          r.date,
+          r.time,
+          `"${(r.propertyTitle ?? "").replaceAll('"', '""')}"`,
+          `"${(r.contactName ?? "").replaceAll('"', '""')}"`,
+          r.contactEmail ?? "",
+          r.contactPhone ?? "",
+          r.status,
+          `"${(r.notes ?? "").replaceAll('"', '""')}"`,
+        ].join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "appointments-export.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
             <CalendarDays className="size-6 text-primary" />
             <div>
@@ -159,7 +186,7 @@ export default function AdminAppointmentsPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <Input
               placeholder="Search property, contact, date…"
               value={search}
@@ -181,6 +208,9 @@ export default function AdminAppointmentsPage() {
                 </SelectContent>
               </Select>
             </div>
+            <Button variant="outline" size="sm" className="lg:ml-auto" onClick={exportCsv}>
+              Export CSV
+            </Button>
           </div>
 
           {loading ? (

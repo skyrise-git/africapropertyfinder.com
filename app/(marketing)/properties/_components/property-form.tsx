@@ -135,17 +135,11 @@ export const PropertyForm = forwardRef<
           }
         : formData.location || { latitude: 0, longitude: 0 };
 
-    console.log("🏗️ Form initialization - initialLocation:", initialLocation);
-    console.log("🏗️ Form initialization - locLat:", locLat, "locLng:", locLng);
-    console.log(
-      "🏗️ Form initialization - formData.location:",
-      formData.location
-    );
 
     const { startUpload, isUploading } = useUploadThing("multipleImageUploader", {
       onClientUploadComplete: async (res) => {
         // This will be called when we upload on submit
-        console.log("Upload complete:", res);
+        void res;
       },
       onUploadError: (error: Error) => {
         toast.error(`Upload failed: ${error.message}`);
@@ -312,10 +306,6 @@ export const PropertyForm = forwardRef<
     };
 
     const handleFormSubmit = async (data: PropertyFormData) => {
-      console.log("✅ handleFormSubmit called with data:", data);
-      console.log("📍 Location in submitted data:", data.location);
-      console.log("📋 Form errors:", form.formState.errors);
-      console.log("✅ Form is valid:", form.formState.isValid);
 
       if (isLastStep) {
         // Upload pending images first
@@ -369,7 +359,7 @@ export const PropertyForm = forwardRef<
             }
           } catch (error) {
             console.error("Error uploading images:", error);
-            toast.error("Failed to upload images. Please try again.", {
+            toast.error("Image upload failed. Check your network and try again.", {
               id: "uploading-images",
             });
             onLoadingChange?.(false);
@@ -473,10 +463,6 @@ export const PropertyForm = forwardRef<
 
     useImperativeHandle(ref, () => ({
       triggerSubmit: () => {
-        console.log("🔘 triggerSubmit called");
-        console.log("📍 Current step:", step);
-        console.log("📍 Current location value:", form.getValues("location"));
-        console.log("📋 Current form errors:", form.formState.errors);
 
         // Special validation for step 9 (images)
         if (step === 9) {
@@ -494,29 +480,16 @@ export const PropertyForm = forwardRef<
 
         // Get fields to validate for current step
         const fieldsToValidate = getFieldsToValidate(step);
-        console.log(
-          "📋 Fields to validate for step",
-          step,
-          ":",
-          fieldsToValidate
-        );
 
         // Trigger validation only for current step fields
         // @ts-expect-error - react-hook-form trigger accepts string[] but types are strict
         form.trigger(fieldsToValidate).then((isValid) => {
-          console.log("🔍 Validation result:", isValid);
-          console.log("📋 Errors after trigger:", form.formState.errors);
-
           if (isValid) {
-            console.log("✅ Step validation passed, proceeding to next step");
             // Get current form values and proceed without full form validation
             // This allows us to move between steps even if other steps aren't filled yet
             const currentFormData = form.getValues();
-            console.log("📝 Current form data:", currentFormData);
             handleFormSubmit(currentFormData as PropertyFormData);
           } else {
-            console.log("❌ Step validation failed, cannot proceed");
-            console.log("📋 Detailed errors:", form.formState.errors);
             // Show errors for current step only
             const stepErrors: Record<string, any> = {};
             fieldsToValidate.forEach((field) => {
@@ -531,7 +504,7 @@ export const PropertyForm = forwardRef<
                   ];
               }
             });
-            console.log("📋 Step-specific errors:", stepErrors);
+            void stepErrors;
           }
         });
       },
@@ -648,23 +621,12 @@ function LocationStep({
 
   // Seed form values from URL on first render if location is present
   useEffect(() => {
-    console.log("🔄 LocationStep useEffect - syncing from URL");
-    console.log("📍 URL values - locLat:", locLat, "locLng:", locLng);
-
     if (locLat && locLng && (locLat !== "0" || locLng !== "0")) {
       const latitude = Number(locLat);
       const longitude = Number(locLng);
 
-      console.log(
-        "📍 Parsed coordinates - latitude:",
-        latitude,
-        "longitude:",
-        longitude
-      );
-
       if (!Number.isNaN(latitude) && !Number.isNaN(longitude)) {
         const currentLocation = form.getValues("location");
-        console.log("📍 Current form location:", currentLocation);
 
         // Always sync from URL if URL has valid values and form doesn't match
         const shouldUpdate =
@@ -672,18 +634,11 @@ function LocationStep({
           currentLocation.latitude !== latitude ||
           currentLocation.longitude !== longitude;
 
-        console.log("🔄 Should update location?", shouldUpdate);
-
         if (shouldUpdate) {
-          console.log("✅ Setting location in form:", { latitude, longitude });
           form.setValue(
             "location",
             { latitude, longitude },
             { shouldValidate: true }
-          );
-          console.log(
-            "📍 Location after setValue:",
-            form.getValues("location")
           );
         }
       }
@@ -716,11 +671,7 @@ function LocationStep({
 
     // Trigger validation for location field after syncing from URL
     if (locLat && locLng && (locLat !== "0" || locLng !== "0")) {
-      console.log("🔍 Triggering location validation");
-      form.trigger("location").then((isValid) => {
-        console.log("🔍 Location validation result:", isValid);
-        console.log("📋 Location errors:", form.formState.errors.location);
-      });
+      form.trigger("location");
     }
   }, [locLat, locLng, locAddress, locCity, locState, locZip, form]);
   return (
