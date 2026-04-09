@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AuthForm, type AuthFormData } from "../../_components/auth-form";
 import {
@@ -14,7 +15,16 @@ import { CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
 
 export default function AgentSignUpPage() {
+  const router = useRouter();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  useEffect(() => {
+    if (!showSuccessDialog) return;
+    const timer = setTimeout(() => {
+      router.push("/agent/dashboard");
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [showSuccessDialog, router]);
 
   const handleAgentSignUp = async (data: AuthFormData) => {
     try {
@@ -94,8 +104,7 @@ export default function AgentSignUpPage() {
             </DialogTitle>
             <DialogDescription className="text-center">
               Your free agent account is ready. You can now list unlimited
-              properties at no cost. You will be redirected to your dashboard
-              shortly.
+              properties at no cost. Redirecting to your dashboard...
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

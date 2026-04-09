@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { AuthForm, type AuthFormData } from "../_components/auth-form";
@@ -15,7 +16,16 @@ import { CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+  useEffect(() => {
+    if (!showSuccessDialog) return;
+    const timer = setTimeout(() => {
+      router.push("/");
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [showSuccessDialog, router]);
 
   const handleEmailSignUp = async (data: AuthFormData) => {
     try {
@@ -103,8 +113,7 @@ export default function SignUpPage() {
               Account Created Successfully!
             </DialogTitle>
             <DialogDescription className="text-center">
-              Your account has been created. You will be redirected to your
-              dashboard shortly.
+              Your account has been created. Redirecting...
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
