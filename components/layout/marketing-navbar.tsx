@@ -33,6 +33,7 @@ export function MarketingNavbar() {
     ? [
         { label: "Area Safety", href: "/area-safety" },
         { label: "Blogs", href: "/blogs" },
+        { label: "Neighborhoods", href: "/neighborhoods" },
         { label: "Feed", href: "/feed" },
         { label: "Appointments", href: "/appointments" },
         { label: "Services", href: "#services" },
@@ -40,6 +41,7 @@ export function MarketingNavbar() {
     : [
         { label: "Area Safety", href: "/area-safety" },
         { label: "Blogs", href: "/blogs" },
+        { label: "Neighborhoods", href: "/neighborhoods" },
         { label: "Feed", href: "/feed" },
         { label: "Services", href: "#services" },
       ];

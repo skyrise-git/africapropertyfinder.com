@@ -262,12 +262,84 @@ export interface Database {
         };
         Relationships: [];
       };
+      agent_profiles: {
+        Row: Record<string, Json | undefined>;
+        Insert: Record<string, Json | undefined>;
+        Update: Record<string, Json | undefined>;
+        Relationships: [];
+      };
+      email_subscribers: {
+        Row: {
+          id: string;
+          email: string;
+          agent_id: string | null;
+          filters: Json;
+          verified: boolean;
+          unsubscribe_token: string;
+          createdAt: string;
+        };
+        Insert: {
+          email: string;
+          agent_id?: string | null;
+          filters?: Json;
+          verified?: boolean;
+        };
+        Update: {
+          email?: string;
+          agent_id?: string | null;
+          verified?: boolean;
+        };
+        Relationships: [];
+      };
+      email_campaigns: {
+        Row: Record<string, Json | undefined>;
+        Insert: Record<string, Json | undefined>;
+        Update: Record<string, Json | undefined>;
+        Relationships: [];
+      };
+      neighborhood_guides: {
+        Row: Record<string, Json | undefined>;
+        Insert: Record<string, Json | undefined>;
+        Update: Record<string, Json | undefined>;
+        Relationships: [];
+      };
+      property_views: {
+        Row: {
+          id: string;
+          property_id: string;
+          viewer_id: string | null;
+          session_id: string | null;
+          viewedAt: string;
+        };
+        Insert: {
+          property_id: string;
+          viewer_id?: string | null;
+          session_id?: string | null;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      property_price_history: {
+        Row: {
+          id: string;
+          property_id: string;
+          price: number | null;
+          rent: number | null;
+          changedAt: string;
+        };
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      unsubscribe_email_by_token: {
+        Args: { p_token: string };
+        Returns: boolean;
+      };
     };
     Enums: {
       [_ in never]: never;

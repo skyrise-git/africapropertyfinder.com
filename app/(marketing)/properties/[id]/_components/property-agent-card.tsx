@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Phone, Globe, Mail } from "lucide-react";
+import Link from "next/link";
+import { Building2, ExternalLink, Phone, Globe, Mail } from "lucide-react";
 
 interface AgentInfo {
   name: string;
@@ -15,6 +16,8 @@ interface AgentInfo {
   phone_display?: string;
   website?: string;
   bio?: string;
+  slug?: string | null;
+  microsite_enabled?: boolean | null;
 }
 
 interface PropertyAgentCardProps {
@@ -41,7 +44,9 @@ export function PropertyAgentCard({ userId }: PropertyAgentCardProps) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: agentProfile } = await (supabase as any)
         .from("agent_profiles")
-        .select("brokerage_name,phone_display,website,bio")
+        .select(
+          "brokerage_name,phone_display,website,bio,slug,microsite_enabled"
+        )
         .eq("user_id", userId)
         .single();
 
@@ -54,6 +59,11 @@ export function PropertyAgentCard({ userId }: PropertyAgentCardProps) {
         phone_display: agentProfile?.phone_display as string | undefined,
         website: agentProfile?.website as string | undefined,
         bio: agentProfile?.bio as string | undefined,
+        slug: agentProfile?.slug as string | null | undefined,
+        microsite_enabled: agentProfile?.microsite_enabled as
+          | boolean
+          | null
+          | undefined,
       });
     };
 
@@ -116,6 +126,15 @@ export function PropertyAgentCard({ userId }: PropertyAgentCardProps) {
                 <Globe className="size-3" />
                 Website
               </a>
+            )}
+            {agent.microsite_enabled && agent.slug && (
+              <Link
+                href={`/agents/${agent.slug}`}
+                className="flex items-center gap-1 text-primary hover:underline"
+              >
+                <ExternalLink className="size-3" />
+                All listings
+              </Link>
             )}
           </div>
         </div>

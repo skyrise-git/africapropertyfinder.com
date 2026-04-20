@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { motion } from "motion/react";
 import {
   Bath,
@@ -28,6 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import type { Property } from "@/lib/types/property.type";
 import { PropertyMapView } from "../../_components/property-map-view";
+import { PropertyPriceHistory } from "./property-price-history";
 import { formatCurrency } from "@ashirbad/js-core";
 
 type PropertyTabsAndSidebarProps = {
@@ -95,6 +99,23 @@ type AmenityConfig = (typeof amenitiesConfig)[number];
 import { Wifi } from "lucide-react";
 
 export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps) {
+  const [guideSlug, setGuideSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!property.city || !property.country) return;
+    const supabase = createClient();
+    void supabase
+      .from("neighborhood_guides")
+      .select("slug")
+      .eq("city", property.city)
+      .eq("country", property.country)
+      .eq("published", true)
+      .maybeSingle()
+      .then(({ data }) => {
+        setGuideSlug((data as { slug?: string } | null)?.slug ?? null);
+      });
+  }, [property.city, property.country]);
+
   const amenities: AmenityConfig[] = amenitiesConfig.filter(
     (amenity) => property[amenity.key as keyof Property],
   );
@@ -114,6 +135,7 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
               <TabsTrigger value="location">Location</TabsTrigger>
               <TabsTrigger value="pricing">Pricing</TabsTrigger>
               <TabsTrigger value="policies">Policies</TabsTrigger>
+              <TabsTrigger value="price-history">Price history</TabsTrigger>
             </TabsList>
 
             <TabsContent value="details" className="space-y-6 mt-6">
@@ -266,6 +288,16 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                           <div className="font-medium text-slate-700 dark:text-gray-100">
                             {property.nearbyTransit}
                           </div>
+                        </div>
+                      )}
+                      {guideSlug && (
+                        <div>
+                          <Link
+                            href={`/neighborhoods/${guideSlug}`}
+                            className="text-sm font-medium text-primary hover:underline"
+                          >
+                            View neighborhood guide for {property.city}
+                          </Link>
                         </div>
                       )}
                       <div className="h-[400px] rounded-lg overflow-hidden">
@@ -438,6 +470,10 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="price-history" className="space-y-6 mt-6">
+              <PropertyPriceHistory property={property} />
             </TabsContent>
           </Tabs>
         </motion.div>

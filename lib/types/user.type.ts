@@ -31,3 +31,19 @@ export interface UserUpdateInput {
   profilePicture?: string;
   profilePictureFileKey?: string;
 }
+
+export interface EmailSubscriberRow {
+  id: string;
+  email: string;
+  agent_id: string | null;
+  verified: boolean;
+  createdAt: string;
+}
+
+export interface NeighborhoodGuideContent {
+  schools?: Array<{ name?: string; type?: string; distance?: string }>;
+  transport?: Array<{ name?: string; type?: string; distance?: string }>;
+  healthcare?: Array<{ name?: string; type?: string }>;
+  lifestyle?: string;
+  safety_summary?: string;
+}

@@ -13,6 +13,8 @@ import { PropertyDetailLoading } from "./_components/property-detail-loading";
 import { PropertyDetailError } from "./_components/property-detail-error";
 import { PropertySafetyWidget } from "./_components/property-safety-widget";
 import { PropertyAgentCard } from "./_components/property-agent-card";
+import { PropertyDetailTrackView } from "./_components/property-detail-track-view";
+import { PropertySimilarListings } from "./_components/property-similar-listings";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -60,6 +62,7 @@ export default function PropertyDetailPage() {
       animate={{ opacity: 1 }}
       className="container mx-auto max-w-7xl p-4 md:p-6 space-y-6"
     >
+      <PropertyDetailTrackView propertyId={property.id} />
       <PropertyHeader property={property} onShare={handleShare} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -81,6 +84,8 @@ export default function PropertyDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <PropertyTabsAndSidebar property={property} />
       </div>
+
+      <PropertySimilarListings property={property} />
     </motion.div>
   );
 }

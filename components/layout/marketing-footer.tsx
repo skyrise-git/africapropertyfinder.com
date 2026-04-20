@@ -15,15 +15,37 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export function MarketingFooter() {
   const year = new Date().getFullYear();
   const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle newsletter subscription
-    console.log("Subscribe:", email);
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed) {
+      toast.error("Please enter your email.");
+      return;
+    }
+    setSubmitting(true);
+    const supabase = createClient();
+    const { error } = await supabase.from("email_subscribers").insert({
+      email: trimmed,
+      agent_id: null,
+    });
+    setSubmitting(false);
+    if (error) {
+      if (error.message.includes("duplicate") || error.code === "23505") {
+        toast.info("You are already subscribed.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
+    toast.success("Thanks for subscribing to listing alerts.");
     setEmail("");
   };
 
@@ -54,9 +76,10 @@ export function MarketingFooter() {
               />
               <Button
                 type="submit"
+                disabled={submitting}
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                Subscribe Now
+                {submitting ? "Saving…" : "Subscribe Now"}
               </Button>
             </form>
           </div>

@@ -11,6 +11,9 @@ import {
   Shield,
   LineChart,
   Contact,
+  Globe,
+  Mail,
+  Map,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/user.type";
 
@@ -48,6 +51,12 @@ export function useMenuItems() {
       roles: ["agent"],
     },
     {
+      title: "My micro-site",
+      url: "/microsite",
+      icon: Globe,
+      roles: ["agent"],
+    },
+    {
       title: "Area safety",
       url: "/area-safety",
       icon: Shield,
@@ -75,6 +84,18 @@ export function useMenuItems() {
       title: "Contacts",
       url: "/contacts",
       icon: MessageSquare,
+      roles: ["admin", "staff"],
+    },
+    {
+      title: "Subscribers",
+      url: "/subscribers",
+      icon: Mail,
+      roles: ["admin", "staff"],
+    },
+    {
+      title: "Neighborhood guides",
+      url: "/neighborhood-guides",
+      icon: Map,
       roles: ["admin", "staff"],
     },
     {

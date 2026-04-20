@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Building2,
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAppStore } from "@/hooks/use-app-store";
 import {
   Table,
   TableBody,
@@ -53,6 +55,8 @@ import {
 
 type PropertyRow = Property & { id: string };
 
+type ListingMetrics = { views: number; saved: number; viewings: number };
+
 function formatMoney(n: number | undefined | null, currency = "ZAR") {
   if (n == null || Number.isNaN(n)) return "—";
   return new Intl.NumberFormat("en-ZA", {
@@ -63,8 +67,12 @@ function formatMoney(n: number | undefined | null, currency = "ZAR") {
 }
 
 export default function AdminPropertiesPage() {
+  const params = useParams();
+  const role = params.role as string;
+  const { user } = useAppStore();
   const [rows, setRows] = useState<PropertyRow[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [metrics, setMetrics] = useState<Record<string, ListingMetrics>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [listingFilter, setListingFilter] = useState<string>("all");
@@ -74,15 +82,21 @@ export default function AdminPropertiesPage() {
   const load = useCallback(async () => {
     const supabase = createClient();
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from("properties")
       .select("*")
       .order("createdAt", { ascending: false });
+    if (role === "agent" && user?.uid) {
+      query = query.eq("userId", user.uid);
+    }
+    const { data, error } = await query;
     if (error) {
       toast.error(error.message);
       setRows([]);
+      setMetrics({});
     } else {
-      setRows((data ?? []) as unknown as PropertyRow[]);
+      const list = (data ?? []) as unknown as PropertyRow[];
+      setRows(list);
       const ids = [
         ...new Set(
           (data ?? [])
@@ -103,9 +117,37 @@ export default function AdminPropertiesPage() {
       } else {
         setProfiles({});
       }
+
+      if (role === "agent" && list.length > 0) {
+        const pids = list.map((p) => p.id);
+        const [viewsRes, savedRes, apptRes] = await Promise.all([
+          supabase.from("property_views").select("property_id").in("property_id", pids),
+          supabase.from("savedProperties").select("propertyId").in("propertyId", pids),
+          supabase.from("appointments").select("propertyId").in("propertyId", pids),
+        ]);
+        const next: Record<string, ListingMetrics> = {};
+        for (const id of pids) {
+          next[id] = { views: 0, saved: 0, viewings: 0 };
+        }
+        for (const r of viewsRes.data ?? []) {
+          const pid = (r as { property_id: string }).property_id;
+          if (next[pid]) next[pid].views += 1;
+        }
+        for (const r of savedRes.data ?? []) {
+          const pid = (r as { propertyId: string }).propertyId;
+          if (next[pid]) next[pid].saved += 1;
+        }
+        for (const r of apptRes.data ?? []) {
+          const pid = (r as { propertyId: string }).propertyId;
+          if (next[pid]) next[pid].viewings += 1;
+        }
+        setMetrics(next);
+      } else {
+        setMetrics({});
+      }
     }
     setLoading(false);
-  }, []);
+  }, [role, user?.uid]);
 
   useEffect(() => {
     load();
@@ -251,7 +293,9 @@ export default function AdminPropertiesPage() {
                   Properties
                 </CardTitle>
                 <CardDescription>
-                  Manage all listings, status, and featured placement.
+                  {role === "agent"
+                    ? "Your listings and engagement metrics."
+                    : "Manage all listings, status, and featured placement."}
                 </CardDescription>
               </div>
             </div>
@@ -288,18 +332,20 @@ export default function AdminPropertiesPage() {
             <Button variant="outline" size="sm" className="lg:ml-auto" onClick={exportCsv}>
               Export CSV
             </Button>
-            <Select onValueChange={(v) => bulkSetStatus(v as NonNullable<PropertyRow["status"]>)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Bulk status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Set active</SelectItem>
-                <SelectItem value="inactive">Set inactive</SelectItem>
-                <SelectItem value="pending">Set pending</SelectItem>
-                <SelectItem value="booked">Set booked</SelectItem>
-                <SelectItem value="sold">Set sold</SelectItem>
-              </SelectContent>
-            </Select>
+            {role !== "agent" && (
+              <Select onValueChange={(v) => bulkSetStatus(v as NonNullable<PropertyRow["status"]>)}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Bulk status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Set active</SelectItem>
+                  <SelectItem value="inactive">Set inactive</SelectItem>
+                  <SelectItem value="pending">Set pending</SelectItem>
+                  <SelectItem value="booked">Set booked</SelectItem>
+                  <SelectItem value="sold">Set sold</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {loading ? (
@@ -321,10 +367,17 @@ export default function AdminPropertiesPage() {
                       />
                     </TableHead>
                     <TableHead>Title</TableHead>
-                    <TableHead>Owner</TableHead>
+                    {role !== "agent" && <TableHead>Owner</TableHead>}
                     <TableHead>City</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead className="text-right">Price / Rent</TableHead>
+                    {role === "agent" && (
+                      <>
+                        <TableHead className="text-right">Views</TableHead>
+                        <TableHead className="text-right">Saved</TableHead>
+                        <TableHead className="text-right">Viewings</TableHead>
+                      </>
+                    )}
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -332,7 +385,10 @@ export default function AdminPropertiesPage() {
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-10">
+                      <TableCell
+                        colSpan={role === "agent" ? 10 : 8}
+                        className="text-center py-10"
+                      >
                         No properties match your filters.
                       </TableCell>
                     </TableRow>
@@ -362,13 +418,15 @@ export default function AdminPropertiesPage() {
                             <span className="truncate">{p.title}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {p.userId && profiles[p.userId]
-                            ? profiles[p.userId]
-                            : p.userId
-                              ? "—"
-                              : "—"}
-                        </TableCell>
+                        {role !== "agent" && (
+                          <TableCell className="text-muted-foreground text-sm">
+                            {p.userId && profiles[p.userId]
+                              ? profiles[p.userId]
+                              : p.userId
+                                ? "—"
+                                : "—"}
+                          </TableCell>
+                        )}
                         <TableCell>{p.city}</TableCell>
                         <TableCell>{p.listingType}</TableCell>
                         <TableCell className="text-right text-sm">
@@ -376,6 +434,19 @@ export default function AdminPropertiesPage() {
                             ? formatMoney(p.price)
                             : formatMoney(p.rent)}
                         </TableCell>
+                        {role === "agent" && (
+                          <>
+                            <TableCell className="text-right text-sm tabular-nums">
+                              {metrics[p.id]?.views ?? 0}
+                            </TableCell>
+                            <TableCell className="text-right text-sm tabular-nums">
+                              {metrics[p.id]?.saved ?? 0}
+                            </TableCell>
+                            <TableCell className="text-right text-sm tabular-nums">
+                              {metrics[p.id]?.viewings ?? 0}
+                            </TableCell>
+                          </>
+                        )}
                         <TableCell>
                           <Select
                             value={p.status ?? "active"}
@@ -400,17 +471,19 @@ export default function AdminPropertiesPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              title="Toggle featured"
-                              onClick={() => toggleFeatured(p)}
-                            >
-                              <Star
-                                className={`size-4 ${p.featured ? "fill-primary text-primary" : ""}`}
-                              />
-                            </Button>
+                            {role !== "agent" && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                title="Toggle featured"
+                                onClick={() => toggleFeatured(p)}
+                              >
+                                <Star
+                                  className={`size-4 ${p.featured ? "fill-primary text-primary" : ""}`}
+                                />
+                              </Button>
+                            )}
                             <Button variant="ghost" size="icon" asChild>
                               <Link href={`/properties/${p.id}/edit`}>
                                 <Pencil className="size-4" />
