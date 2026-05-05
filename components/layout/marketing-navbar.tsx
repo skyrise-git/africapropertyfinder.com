@@ -22,6 +22,7 @@ import { MobileMenu } from "@/components/layout/mobile-menu";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/hooks/use-app-store";
 import { MarketingProfileDropdown } from "@/components/core/marketing-profile-dropdown";
+import { CountrySwitcher } from "@/components/country/country-switcher";
 
 export function MarketingNavbar() {
   const [open, setOpen] = useState(false);
@@ -113,6 +114,7 @@ export function MarketingNavbar() {
           </NavigationMenu>
 
           <div className="hidden items-center gap-3 md:flex">
+            <CountrySwitcher />
             <ThemeToggle />
             {user ? (
               <>
@@ -150,13 +152,14 @@ export function MarketingNavbar() {
             )}
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={toggleMenu}
-            aria-label="Toggle navigation"
-          >
+          <div className="flex items-center gap-1 md:hidden">
+            <CountrySwitcher compact />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleMenu}
+              aria-label="Toggle navigation"
+            >
             <AnimatePresence mode="wait" initial={false}>
               {open ? (
                 <motion.span
@@ -178,7 +181,8 @@ export function MarketingNavbar() {
                 </motion.span>
               )}
             </AnimatePresence>
-          </Button>
+            </Button>
+          </div>
         </div>
       </header>
 

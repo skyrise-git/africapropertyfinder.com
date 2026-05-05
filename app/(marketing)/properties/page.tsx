@@ -7,6 +7,7 @@ import { Search, Home, Filter } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
+import { useCountry } from "@/contexts/country-context";
 import type { Property } from "@/lib/types/property.type";
 import { PropertyCard } from "./_components/property-card";
 import { PropertySortControls } from "./_components/property-sort-controls";
@@ -124,7 +125,9 @@ export default function PropertiesPage() {
     "amenities",
     parseAsArrayOf(parseAsString).withDefault([])
   );
-  const [selectedCountry, setSelectedCountry] = useQueryState("country", parseAsString.withDefault(""));
+  const [selectedCountryRaw, setSelectedCountry] = useQueryState("country", parseAsString.withDefault(""));
+  const { countryName } = useCountry();
+  const selectedCountry = selectedCountryRaw || countryName;
   const [selectedCity, setSelectedCity] = useQueryState("city", parseAsString.withDefault(""));
   const [selectedProvince, setSelectedProvince] = useQueryState("province", parseAsString.withDefault(""));
   const [minAreaStr, setMinAreaStr] = useQueryState("minArea", parseAsString.withDefault(""));

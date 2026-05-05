@@ -32,49 +32,27 @@ import { Badge } from "@/components/ui/badge";
 import type { Property } from "@/lib/types/property.type";
 import { PropertyMapView } from "../../_components/property-map-view";
 import { PropertyPriceHistory } from "./property-price-history";
-import { formatCurrency } from "@ashirbad/js-core";
+import { formatMoney, resolveCountryCode } from "@/lib/utils/country";
 
 type PropertyTabsAndSidebarProps = {
   property: Property;
 };
 
 function formatPrice(property: Property) {
+  const code = resolveCountryCode(property.country);
   if (property.listingType === "sale" && property.price != null) {
-    try {
-      return formatCurrency(property.price, "USD");
-    } catch {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(property.price);
-    }
+    return formatMoney(property.price, code);
   }
-
   if (
     (property.listingType === "rent" ||
       property.listingType === "student-housing") &&
     property.rent != null
   ) {
-    try {
-      const formatted = formatCurrency(property.rent, "USD");
-      return `${formatted}${
-        property.paymentFrequency ? ` / ${property.paymentFrequency}` : " / monthly"
-      }`;
-    } catch {
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(property.rent);
-      return `${formatted}${
-        property.paymentFrequency ? ` / ${property.paymentFrequency}` : " / monthly"
-      }`;
-    }
+    const suffix = property.paymentFrequency
+      ? ` / ${property.paymentFrequency}`
+      : " / monthly";
+    return formatMoney(property.rent, code, { suffix });
   }
-
   return "Price on request";
 }
 
@@ -333,18 +311,10 @@ export function PropertyTabsAndSidebar({ property }: PropertyTabsAndSidebarProps
                           Security Deposit
                         </div>
                         <div className="font-medium text-slate-700 dark:text-gray-100">
-                          {(() => {
-                            try {
-                              return formatCurrency(property.securityDeposit, "USD");
-                            } catch {
-                              return new Intl.NumberFormat("en-US", {
-                                style: "currency",
-                                currency: "USD",
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0,
-                              }).format(property.securityDeposit);
-                            }
-                          })()}
+                          {formatMoney(
+                            property.securityDeposit,
+                            resolveCountryCode(property.country)
+                          )}
                         </div>
                       </div>
                     )}

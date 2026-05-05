@@ -19,19 +19,18 @@ import { useSupabaseRealtime } from "@/hooks/use-supabase-realtime";
 import { useCrimeData } from "@/contexts/crime-data-context";
 import { matchPropertyToStation } from "@/lib/utils/crime-helpers";
 import type { Property } from "@/lib/types/property.type";
+import { formatMoney, resolveCountryCode } from "@/lib/utils/country";
 import Link from "next/link";
 import Image from "next/image";
 
-const formatPrice = (price: number | undefined, listingType: string) => {
+const formatPrice = (
+  price: number | undefined,
+  listingType: string,
+  countryName?: string
+) => {
   if (!price) return "Contact for price";
-
-  const formatted = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-
+  const code = resolveCountryCode(countryName);
+  const formatted = formatMoney(price, code);
   return listingType === "rent" ? `${formatted}/mo` : formatted;
 };
 
@@ -53,8 +52,8 @@ const PropertyCard = ({
 
   const displayPrice =
     property.listingType === "sale"
-      ? formatPrice(property.price, property.listingType)
-      : formatPrice(property.rent, property.listingType);
+      ? formatPrice(property.price, property.listingType, property.country)
+      : formatPrice(property.rent, property.listingType, property.country);
 
   return (
     <motion.div

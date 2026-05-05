@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowDownRight, ArrowUpRight, History } from "lucide-react";
 import type { Property, ListingType } from "@/lib/types/property.type";
-import { formatCurrency } from "@ashirbad/js-core";
+import { formatMoney as fmt, resolveCountryCode } from "@/lib/utils/country";
 
 type Row = {
   id: string;
@@ -20,19 +20,16 @@ type Props = {
   property: Property;
 };
 
-function money(n: number | null | undefined, listingType: ListingType) {
+function money(
+  n: number | null | undefined,
+  listingType: ListingType,
+  countryName?: string
+) {
   if (n == null) return "—";
-  try {
-    const f = formatCurrency(n, "USD");
-    if (listingType === "sale") return f;
-    return `${f} / mo`;
-  } catch {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(n);
-  }
+  const code = resolveCountryCode(countryName);
+  return listingType === "sale"
+    ? fmt(n, code)
+    : fmt(n, code, { suffix: " / mo" });
 }
 
 function primaryAmount(p: Property, row: Row) {
@@ -146,7 +143,8 @@ export function PropertyPriceHistory({ property }: Props) {
                   <div className="text-sm font-medium text-slate-700 dark:text-gray-100">
                     {money(
                       property.listingType === "sale" ? row.price : row.rent,
-                      property.listingType
+                      property.listingType,
+                      property.country
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground">

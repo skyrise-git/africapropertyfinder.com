@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { MarketingFooter } from "@/components/layout/marketing-footer";
 import { MarketingNavbar } from "@/components/layout/marketing-navbar";
 import { CrimeDataProvider } from "@/contexts/crime-data-context";
+import { CountryProvider } from "@/contexts/country-context";
+import { GeoDetectBanner } from "@/components/country/geo-detect-banner";
 import { marketingSite } from "@/lib/config";
 
 const ogImageUrl = new URL(
@@ -52,12 +54,15 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background text-foreground relative w-full max-w-full overflow-x-hidden">
-      <MarketingNavbar />
-      <CrimeDataProvider>
-        <main className="flex-1 relative z-0 w-full max-w-full overflow-x-hidden">{children}</main>
-      </CrimeDataProvider>
-      <MarketingFooter />
-    </div>
+    <CountryProvider>
+      <div className="min-h-screen bg-background text-foreground relative w-full max-w-full overflow-x-hidden">
+        <GeoDetectBanner />
+        <MarketingNavbar />
+        <CrimeDataProvider>
+          <main className="flex-1 relative z-0 w-full max-w-full overflow-x-hidden">{children}</main>
+        </CrimeDataProvider>
+        <MarketingFooter />
+      </div>
+    </CountryProvider>
   );
 }

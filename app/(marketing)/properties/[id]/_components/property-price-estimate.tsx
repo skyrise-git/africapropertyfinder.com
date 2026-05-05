@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import type { Property } from "@/lib/types/property.type";
+import { formatMoney as fmtCountry, resolveCountryCode } from "@/lib/utils/country";
 
 interface PriceEstimateData {
   low: number;
@@ -25,13 +26,8 @@ interface PriceEstimateData {
   priceTrend?: { quarter: string; avgPrice: number }[];
 }
 
-function formatZAR(amount: number) {
-  return new Intl.NumberFormat("en-ZA", {
-    style: "currency",
-    currency: "ZAR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+function formatLocal(amount: number, country?: string) {
+  return fmtCountry(amount, resolveCountryCode(country));
 }
 
 function deriveEstimate(property: Property, comparables: Property[]): PriceEstimateData | null {
@@ -70,13 +66,25 @@ function deriveEstimate(property: Property, comparables: Property[]): PriceEstim
   return { low, mid, high, listed: basePrice, yoyGrowth: Math.round(yoyGrowth * 10) / 10, demandLevel, source: "derived" };
 }
 
-function PriceTrendBar({ label, value, max }: { label: string; value: number; max: number }) {
+function PriceTrendBar({
+  label,
+  value,
+  max,
+  country,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  country?: string;
+}) {
   const pct = Math.min(Math.round((value / max) * 100), 100);
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-[11px]">
         <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium text-slate-600 dark:text-gray-300">{formatZAR(value)}</span>
+        <span className="font-medium text-slate-600 dark:text-gray-300">
+          {formatLocal(value, country)}
+        </span>
       </div>
       <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
         <motion.div
@@ -99,11 +107,14 @@ export function PropertyPriceEstimate({ property }: { property: Property }) {
     const supabase = createClient();
 
     const fetchData = async () => {
-      const { data: manualEst } = await supabase
+      let q = supabase
         .from("price_estimates")
         .select("*")
-        .eq("city", property.city)
-        .maybeSingle();
+        .eq("city", property.city);
+      if (property.country) {
+        q = q.eq("country", property.country);
+      }
+      const { data: manualEst } = await q.maybeSingle();
 
       if (manualEst) {
         setDbEstimate({
@@ -162,7 +173,7 @@ export function PropertyPriceEstimate({ property }: { property: Property }) {
             </div>
             <div>
               <div className="text-lg font-semibold text-slate-700 dark:text-gray-100">
-                {formatZAR(estimate.mid)}
+                {formatLocal(estimate.mid, property.country)}
                 {property.listingType !== "sale" && <span className="text-xs font-normal text-muted-foreground">/mo</span>}
               </div>
               <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -187,9 +198,9 @@ export function PropertyPriceEstimate({ property }: { property: Property }) {
           </div>
 
           <div className="space-y-2 mb-3">
-            <PriceTrendBar label="Low estimate" value={estimate.low} max={estimate.high} />
-            <PriceTrendBar label="APF estimate" value={estimate.mid} max={estimate.high} />
-            <PriceTrendBar label="High estimate" value={estimate.high} max={estimate.high} />
+            <PriceTrendBar label="Low estimate" value={estimate.low} max={estimate.high} country={property.country} />
+            <PriceTrendBar label="APF estimate" value={estimate.mid} max={estimate.high} country={property.country} />
+            <PriceTrendBar label="High estimate" value={estimate.high} max={estimate.high} country={property.country} />
           </div>
 
           <div className="flex items-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">

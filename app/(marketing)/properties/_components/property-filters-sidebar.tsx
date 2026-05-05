@@ -48,6 +48,7 @@ import {
   CalendarClock,
 } from "lucide-react";
 import { SafetyFilterControls } from "@/components/safety/safety-filter-controls";
+import { SUPPORTED_COUNTRIES } from "@/lib/utils/country";
 import type {
   Property,
   ListingType,
@@ -389,15 +390,20 @@ export function PropertyFiltersSidebar({
             <Label className="text-sm font-semibold">Country</Label>
             <Select
               value={selectedCountry || "all"}
-              onValueChange={(val) => setSelectedCountry(val === "all" ? "" : val)}
+              onValueChange={(val) =>
+                setSelectedCountry(val === "all" ? "" : val)
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Countries" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Countries</SelectItem>
-                <SelectItem value="South Africa">South Africa</SelectItem>
-                <SelectItem value="Zimbabwe">Zimbabwe</SelectItem>
+                {SUPPORTED_COUNTRIES.map((c) => (
+                  <SelectItem key={c.code} value={c.name}>
+                    {c.flag} {c.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

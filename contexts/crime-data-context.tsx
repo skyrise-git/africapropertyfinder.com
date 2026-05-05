@@ -13,6 +13,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import type { CrimeStation } from "@/lib/types/crime.type";
 import type { SafetyRating, SafetyLabel, CrimeTrend } from "@/lib/types/crime.type";
+import { useCountry } from "@/contexts/country-context";
 
 interface CrimeDataContextValue {
   stations: CrimeStation[];
@@ -53,13 +54,20 @@ function mapRow(row: Record<string, unknown>): CrimeStation {
 }
 
 export function CrimeDataProvider({ children }: { children: ReactNode }) {
+  const { countryName, setCountry: setGlobalCountry, countries: globalCountries } =
+    useCountry();
   const [allStations, setAllStations] = useState<CrimeStation[]>(
     cachedStations ?? []
   );
   const [loading, setLoading] = useState(!cachedStations);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState("South Africa");
+  const [selectedCountry, setSelectedCountry] = useState(countryName);
   const fetched = useRef(false);
+
+  // Keep crime data context in sync with the global country selection.
+  useEffect(() => {
+    setSelectedCountry(countryName);
+  }, [countryName]);
 
   useEffect(() => {
     if (cachedStations || fetched.current) return;
@@ -94,9 +102,16 @@ export function CrimeDataProvider({ children }: { children: ReactNode }) {
     [allStations, selectedCountry]
   );
 
-  const setCountry = useCallback((country: string) => {
-    setSelectedCountry(country);
-  }, []);
+  const setCountry = useCallback(
+    (country: string) => {
+      setSelectedCountry(country);
+      const match = globalCountries.find(
+        (c) => c.name.toLowerCase() === country.toLowerCase()
+      );
+      if (match) setGlobalCountry(match.code);
+    },
+    [globalCountries, setGlobalCountry]
+  );
 
   return (
     <CrimeDataContext.Provider value={{ stations, allStations, loading, error, selectedCountry, setCountry, countries }}>

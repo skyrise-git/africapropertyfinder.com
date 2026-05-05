@@ -14,6 +14,7 @@ import { Loader2, MapPin } from "lucide-react";
 import type { Property } from "@/lib/types/property.type";
 import { env } from "@/lib/env";
 import { PropertyCard } from "./property-card";
+import { formatCompactMoney, resolveCountryCode } from "@/lib/utils/country";
 
 const libraries: ("places" | "geometry")[] = ["places", "geometry"];
 
@@ -28,11 +29,11 @@ const defaultCenter = { lat: -29.0, lng: 25.0 };
 
 const containerStyle = { width: "100%", height: "100%" };
 
-function formatShortPrice(n: number | undefined | null): string {
-  if (n == null || n === 0) return "?";
-  if (n >= 1_000_000) return `R${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `R${(n / 1_000).toFixed(0)}K`;
-  return `R${n}`;
+function formatShortPrice(
+  n: number | undefined | null,
+  country?: string
+): string {
+  return formatCompactMoney(n ?? null, resolveCountryCode(country));
 }
 
 function PriceMarker({
@@ -46,7 +47,7 @@ function PriceMarker({
 }) {
   const price =
     property.listingType === "sale" ? property.price : property.rent;
-  const label = formatShortPrice(price);
+  const label = formatShortPrice(price, property.country);
   const suffix = property.listingType !== "sale" ? "/mo" : "";
 
   const bg = isActive

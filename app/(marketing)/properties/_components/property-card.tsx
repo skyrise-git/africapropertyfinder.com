@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Property } from "@/lib/types/property.type";
-import { formatCurrency } from "@ashirbad/js-core";
+import { formatMoney, resolveCountryCode } from "@/lib/utils/country";
 import {
   Bath,
   BedDouble,
@@ -38,48 +38,20 @@ const listingTypeLabel: Record<Property["listingType"], string> = {
 };
 
 function formatPrice(property: Property) {
+  const code = resolveCountryCode(property.country);
   if (property.listingType === "sale" && property.price != null) {
-    try {
-      return formatCurrency(property.price, "USD");
-    } catch {
-      // Fallback if formatCurrency is not available
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(property.price);
-    }
+    return formatMoney(property.price, code);
   }
-
   if (
     (property.listingType === "rent" ||
       property.listingType === "student-housing") &&
     property.rent != null
   ) {
-    try {
-      const formatted = formatCurrency(property.rent, "USD");
-      return `${formatted}${
-        property.paymentFrequency
-          ? ` / ${property.paymentFrequency}`
-          : " / monthly"
-      }`;
-    } catch {
-      // Fallback if formatCurrency is not available
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(property.rent);
-      return `${formatted}${
-        property.paymentFrequency
-          ? ` / ${property.paymentFrequency}`
-          : " / monthly"
-      }`;
-    }
+    const suffix = property.paymentFrequency
+      ? ` / ${property.paymentFrequency}`
+      : " / monthly";
+    return formatMoney(property.rent, code, { suffix });
   }
-
   return "Price on request";
 }
 
