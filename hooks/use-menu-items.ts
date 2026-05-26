@@ -1,19 +1,20 @@
 import {
-  Home,
-  Settings,
   Briefcase,
-  Users,
-  Clock,
-  FileText,
-  MessageSquare,
   Building2,
   CalendarDays,
-  Shield,
-  LineChart,
+  Clock,
   Contact,
+  FileText,
   Globe,
+  Home,
+  LineChart,
   Mail,
   Map,
+  MessageSquare,
+  Settings,
+  Shield,
+  Users,
+  Wallet,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types/user.type";
 
@@ -36,6 +37,12 @@ export function useMenuItems() {
       title: "Properties",
       url: "/properties",
       icon: Building2,
+      roles: ["admin", "staff", "agent"],
+    },
+    {
+      title: "Property management",
+      url: "/property-management",
+      icon: Wallet,
       roles: ["admin", "staff", "agent"],
     },
     {

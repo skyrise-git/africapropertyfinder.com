@@ -129,6 +129,12 @@ export interface Property extends BaseEntity {
   status?: "active" | "inactive" | "pending" | "booked" | "sold";
   isBooked?: boolean;
   featured?: boolean;
+
+  /** Property management lifecycle (DB columns added in Phase 3) */
+  is_under_management?: boolean;
+  management_owner_id?: string;
+  managed_since?: string;
+  management_terms?: Record<string, unknown>;
 }
 
 export interface PropertyInput {

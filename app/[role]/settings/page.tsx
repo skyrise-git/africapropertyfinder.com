@@ -1,7 +1,8 @@
 "use client";
 
-import { Lock, User } from "lucide-react";
+import { Lock, Shapes, User } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CapabilitySettings } from "./_components/capability-settings";
 import { PasswordSettings } from "./_components/password-settings";
 import { ProfileSettings } from "./_components/profile-settings";
 
@@ -18,13 +19,20 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger
             value="profile"
             className="flex items-center justify-center gap-2"
           >
             <User className="h-4 w-4" />
             <span>Profile</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="capabilities"
+            className="flex items-center justify-center gap-2"
+          >
+            <Shapes className="h-4 w-4" />
+            <span>Capabilities</span>
           </TabsTrigger>
           <TabsTrigger
             value="password"
@@ -40,6 +48,13 @@ export default function SettingsPage() {
           className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
         >
           <ProfileSettings />
+        </TabsContent>
+
+        <TabsContent
+          value="capabilities"
+          className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+        >
+          <CapabilitySettings />
         </TabsContent>
 
         <TabsContent

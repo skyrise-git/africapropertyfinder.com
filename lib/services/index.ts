@@ -4,3 +4,4 @@ export * from "./blog.service";
 export * from "./property.service";
 export * from "./contact.service";
 export * from "./saved-property.service";
+export * from "./property-management.service";

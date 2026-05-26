@@ -1,47 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Building2,
   ExternalLink,
+  Home as HomeIcon,
   Pencil,
   Search,
   Star,
   Trash2,
+  Wallet,
 } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
-import type { Property } from "@/lib/types/property.type";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useAppStore } from "@/hooks/use-app-store";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +24,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useAppStore } from "@/hooks/use-app-store";
+import { propertyService } from "@/lib/services/property.service";
+import { createClient } from "@/lib/supabase/client";
+import type { Property } from "@/lib/types/property.type";
 
 type PropertyRow = Property & { id: string };
 
@@ -111,7 +114,8 @@ export default function AdminPropertiesPage() {
           .in("id", ids);
         const map: Record<string, string> = {};
         (profs ?? []).forEach((p) => {
-          map[p.id as string] = (p.email as string) || (p.name as string) || p.id;
+          map[p.id as string] =
+            (p.email as string) || (p.name as string) || p.id;
         });
         setProfiles(map);
       } else {
@@ -121,9 +125,18 @@ export default function AdminPropertiesPage() {
       if (role === "agent" && list.length > 0) {
         const pids = list.map((p) => p.id);
         const [viewsRes, savedRes, apptRes] = await Promise.all([
-          supabase.from("property_views").select("property_id").in("property_id", pids),
-          supabase.from("savedProperties").select("propertyId").in("propertyId", pids),
-          supabase.from("appointments").select("propertyId").in("propertyId", pids),
+          supabase
+            .from("property_views")
+            .select("property_id")
+            .in("property_id", pids),
+          supabase
+            .from("savedProperties")
+            .select("propertyId")
+            .in("propertyId", pids),
+          supabase
+            .from("appointments")
+            .select("propertyId")
+            .in("propertyId", pids),
         ]);
         const next: Record<string, ListingMetrics> = {};
         for (const id of pids) {
@@ -201,6 +214,27 @@ export default function AdminPropertiesPage() {
     }
   };
 
+  const enableManagement = async (p: PropertyRow) => {
+    try {
+      await propertyService.enableManagement(p.id);
+      toast.success("Property enrolled in management", {
+        action: {
+          label: "Open PM",
+          onClick: () => {
+            window.location.href = `/${role}/property-management`;
+          },
+        },
+      });
+      setRows((prev) =>
+        prev.map((r) =>
+          r.id === p.id ? { ...r, is_under_management: true } : r,
+        ),
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to enroll");
+    }
+  };
+
   const confirmDelete = async () => {
     if (!deleteId) return;
     const supabase = createClient();
@@ -218,7 +252,7 @@ export default function AdminPropertiesPage() {
 
   const selectedRows = useMemo(
     () => rows.filter((r) => selectedIds.includes(r.id)),
-    [rows, selectedIds]
+    [rows, selectedIds],
   );
 
   const exportCsv = () => {
@@ -251,7 +285,7 @@ export default function AdminPropertiesPage() {
           r.price ?? "",
           r.rent ?? "",
           r.createdAt,
-        ].join(",")
+        ].join(","),
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -276,7 +310,7 @@ export default function AdminPropertiesPage() {
     }
     toast.success(`Updated ${selectedIds.length} listing(s)`);
     setRows((prev) =>
-      prev.map((r) => (selectedIds.includes(r.id) ? { ...r, status } : r))
+      prev.map((r) => (selectedIds.includes(r.id) ? { ...r, status } : r)),
     );
     setSelectedIds([]);
   };
@@ -329,11 +363,20 @@ export default function AdminPropertiesPage() {
                 <SelectItem value="student-housing">Student housing</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" className="lg:ml-auto" onClick={exportCsv}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="lg:ml-auto"
+              onClick={exportCsv}
+            >
               Export CSV
             </Button>
             {role !== "agent" && (
-              <Select onValueChange={(v) => bulkSetStatus(v as NonNullable<PropertyRow["status"]>)}>
+              <Select
+                onValueChange={(v) =>
+                  bulkSetStatus(v as NonNullable<PropertyRow["status"]>)
+                }
+              >
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Bulk status" />
                 </SelectTrigger>
@@ -348,6 +391,37 @@ export default function AdminPropertiesPage() {
             )}
           </div>
 
+          {(() => {
+            const rentUpsell = filtered.filter(
+              (p) => p.listingType === "rent" && !p.is_under_management,
+            );
+            if (rentUpsell.length === 0 || loading) return null;
+            return (
+              <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span className="font-medium text-emerald-900 dark:text-emerald-100">
+                      Convert your rentals to managed properties
+                    </span>
+                    <span className="ml-2 text-emerald-800/80 dark:text-emerald-200/80">
+                      {rentUpsell.length} rent listing
+                      {rentUpsell.length === 1 ? "" : "s"} can collect rent,
+                      track tenants, and invoice automatically.
+                    </span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => enableManagement(rentUpsell[0])}
+                  >
+                    Enable for {rentUpsell[0].title.slice(0, 28)}
+                    {rentUpsell[0].title.length > 28 ? "…" : ""}
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+
           {loading ? (
             <Skeleton className="h-96 w-full" />
           ) : (
@@ -357,10 +431,13 @@ export default function AdminPropertiesPage() {
                   <TableRow>
                     <TableHead className="w-10">
                       <Checkbox
-                        checked={filtered.length > 0 && filtered.every((r) => selectedIds.includes(r.id))}
+                        checked={
+                          filtered.length > 0 &&
+                          filtered.every((r) => selectedIds.includes(r.id))
+                        }
                         onCheckedChange={(checked) =>
                           setSelectedIds(
-                            checked ? filtered.map((r) => r.id) : []
+                            checked ? filtered.map((r) => r.id) : [],
                           )
                         }
                         aria-label="Select all properties"
@@ -402,7 +479,7 @@ export default function AdminPropertiesPage() {
                               setSelectedIds((prev) =>
                                 checked
                                   ? [...prev, p.id]
-                                  : prev.filter((id) => id !== p.id)
+                                  : prev.filter((id) => id !== p.id),
                               )
                             }
                             aria-label={`Select ${p.title}`}
@@ -484,6 +561,29 @@ export default function AdminPropertiesPage() {
                                 />
                               </Button>
                             )}
+                            {p.is_under_management ? (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                asChild
+                                title="Open in Property Management"
+                              >
+                                <Link href={`/${role}/property-management`}>
+                                  <HomeIcon className="size-4 text-emerald-600" />
+                                </Link>
+                              </Button>
+                            ) : (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                title="Enroll in Property Management"
+                                onClick={() => enableManagement(p)}
+                              >
+                                <Wallet className="size-4" />
+                              </Button>
+                            )}
                             <Button variant="ghost" size="icon" asChild>
                               <Link href={`/properties/${p.id}/edit`}>
                                 <Pencil className="size-4" />
@@ -525,7 +625,9 @@ export default function AdminPropertiesPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

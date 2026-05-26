@@ -56,10 +56,7 @@ class PropertyService {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.db
-      .from("properties")
-      .delete()
-      .eq("id", id);
+    const { error } = await this.db.from("properties").delete().eq("id", id);
 
     if (error) throw new Error(error.message);
   }
@@ -80,7 +77,7 @@ class PropertyService {
       .from("properties")
       .select("*")
       .or(
-        `title.ilike.%${query}%,address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`
+        `title.ilike.%${query}%,address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`,
       )
       .order("createdAt", { ascending: false });
 
@@ -95,6 +92,33 @@ class PropertyService {
       .eq("userId", userId)
       .order("createdAt", { ascending: false });
 
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as Property[];
+  }
+
+  /**
+   * Enable property management for a property. Backed by the SECURITY
+   * DEFINER RPC pm_enable_management which enforces ownership.
+   */
+  async enableManagement(
+    propertyId: string,
+    terms?: Record<string, unknown>,
+  ): Promise<void> {
+    const { error } = await this.db.rpc("pm_enable_management", {
+      p_property: propertyId,
+      p_terms: terms ?? null,
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  async getManaged(ownerId?: string): Promise<Property[]> {
+    let q = this.db
+      .from("properties")
+      .select("*")
+      .eq("is_under_management", true)
+      .order("managed_since", { ascending: false });
+    if (ownerId) q = q.eq("management_owner_id", ownerId);
+    const { data, error } = await q;
     if (error) throw new Error(error.message);
     return (data ?? []) as unknown as Property[];
   }

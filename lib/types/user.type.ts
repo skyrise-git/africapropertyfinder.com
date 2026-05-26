@@ -1,9 +1,25 @@
-import { BaseEntity } from "./common.type";
+import type { BaseEntity } from "./common.type";
 
 // Status types
 export type Status = "active" | "inactive";
 export type UserStatus = "active" | "inactive" | "pending";
 export type UserRole = "admin" | "staff" | "agent" | "user";
+
+export interface UserCapabilities {
+  canList: boolean;
+  canBuy: boolean;
+  canManageProperty: boolean;
+  canLeaseAsTenant: boolean;
+}
+
+export type CapabilityName = keyof UserCapabilities;
+
+export const DEFAULT_CAPABILITIES: UserCapabilities = {
+  canList: false,
+  canBuy: true,
+  canManageProperty: false,
+  canLeaseAsTenant: false,
+};
 
 export interface User extends BaseEntity {
   uid: string;
@@ -14,6 +30,7 @@ export interface User extends BaseEntity {
   role: UserRole;
   profilePicture?: string;
   profilePictureFileKey?: string;
+  capabilities?: UserCapabilities;
 }
 
 // Input types for user creation

@@ -11,6 +11,17 @@ export const breadcrumbLabelMap: Record<string, string> = {
   update: "Edit Staff",
   password: "Change Password",
   profile: "Profile",
+  "property-management": "Property management",
+  tenants: "Tenants",
+  leases: "Leases",
+  invoices: "Invoices",
+  payments: "Payments",
+  expenses: "Expenses",
+  maintenance: "Maintenance",
+  reminders: "Reminders",
+  receipt: "Receipt",
+  reports: "Reports",
+  payouts: "Payouts",
 };
 
 /**

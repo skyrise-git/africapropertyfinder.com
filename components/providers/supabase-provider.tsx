@@ -1,11 +1,38 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { Spinner } from "@/components/ui/spinner";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
-import { Spinner } from "@/components/ui/spinner";
-import type { User } from "@/lib/types/user.type";
+import { createClient } from "@/lib/supabase/client";
+import {
+  DEFAULT_CAPABILITIES,
+  type User,
+  type UserCapabilities,
+} from "@/lib/types/user.type";
+
+function normalizeCapabilities(
+  raw: unknown,
+  role: User["role"],
+): UserCapabilities {
+  const incoming = (raw && typeof raw === "object" ? raw : {}) as Partial<
+    Record<keyof UserCapabilities, unknown>
+  >;
+  const isStaffish = role === "admin" || role === "staff" || role === "agent";
+  return {
+    canList:
+      typeof incoming.canList === "boolean" ? incoming.canList : isStaffish,
+    canBuy: typeof incoming.canBuy === "boolean" ? incoming.canBuy : true,
+    canManageProperty:
+      typeof incoming.canManageProperty === "boolean"
+        ? incoming.canManageProperty
+        : isStaffish,
+    canLeaseAsTenant:
+      typeof incoming.canLeaseAsTenant === "boolean"
+        ? incoming.canLeaseAsTenant
+        : DEFAULT_CAPABILITIES.canLeaseAsTenant,
+  };
+}
 
 interface SupabaseProviderProps {
   children: React.ReactNode;
@@ -29,18 +56,21 @@ export function SupabaseProvider({ children }: SupabaseProviderProps) {
 
       if (data) {
         const row = data as Record<string, unknown>;
+        const role = ((row.role as string) ?? "user") as User["role"];
         const userData: User = {
           id: row.id as string,
           uid: row.id as string,
           name: (row.name as string) ?? "",
           email: (row.email as string) ?? "",
-          role: ((row.role as string) ?? "user") as User["role"],
+          role,
           status: ((row.status as string) ?? "active") as User["status"],
           password: "",
           profilePicture: (row.profilePicture as string) ?? undefined,
-          profilePictureFileKey: (row.profilePictureFileKey as string) ?? undefined,
+          profilePictureFileKey:
+            (row.profilePictureFileKey as string) ?? undefined,
           createdAt: (row.createdAt as string) ?? new Date().toISOString(),
           updatedAt: (row.updatedAt as string) ?? undefined,
+          capabilities: normalizeCapabilities(row.capabilities, role),
         };
         setUser(userData);
         return;
@@ -61,7 +91,7 @@ export function SupabaseProvider({ children }: SupabaseProviderProps) {
           role,
           status: "active",
         },
-        { onConflict: "id" }
+        { onConflict: "id" },
       );
 
       if (!insertError) {
@@ -74,6 +104,7 @@ export function SupabaseProvider({ children }: SupabaseProviderProps) {
           status: "active",
           password: "",
           createdAt: authUser.created_at ?? new Date().toISOString(),
+          capabilities: normalizeCapabilities(undefined, role),
         };
         setUser(userData);
 
