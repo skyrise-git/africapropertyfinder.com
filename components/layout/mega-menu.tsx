@@ -23,6 +23,7 @@ import {
   Key,
   TrendingUp,
   Heart,
+  Wallet,
 } from "lucide-react";
 import type { MarketingSite } from "@/lib/config";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ const iconMap = {
   Key,
   TrendingUp,
   Heart,
+  Wallet,
 } as const;
 
 type MegaMenuItem = MarketingSite["megaMenu"][number]["items"][number];

@@ -19,6 +19,7 @@ import {
   Search,
   Plus,
   Heart,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +45,7 @@ const iconMap = {
   Key,
   TrendingUp,
   Heart,
+  Wallet,
 } as const;
 
 type MegaMenuItem = MarketingSite["megaMenu"][number]["items"][number];

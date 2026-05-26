@@ -74,6 +74,14 @@ export const marketingSite = {
           featured: true,
         },
         {
+          label: "Property Management",
+          href: "/agent/property-management",
+          icon: "Wallet",
+          description:
+            "Tenants, leases, rent collection, invoices, and maintenance — all in one place",
+          featured: false,
+        },
+        {
           label: "Contact Us",
           href: "/contact",
           icon: "FileCode",
@@ -111,6 +119,14 @@ export const marketingSite = {
           featured: true,
         },
         {
+          label: "Property Management",
+          href: "/agent/property-management",
+          icon: "Wallet",
+          description:
+            "Collect rent, manage tenants and leases, automate invoicing — for owners and agents",
+          featured: true,
+        },
+        {
           label: "View All",
           href: "/properties",
           icon: "Home",
@@ -135,6 +151,7 @@ export const marketingSite = {
       properties: [
         { label: "View All Properties", href: "/properties" },
         { label: "List Your Property", href: "/properties/create" },
+        { label: "Property Management", href: "/agent/property-management" },
         { label: "My Saved Properties", href: "/saved-properties" },
       ],
       categories: [
