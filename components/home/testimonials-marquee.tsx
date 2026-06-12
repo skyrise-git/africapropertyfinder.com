@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { Marquee } from "@/components/ui/marquee";
 
-export function Highlight({
+function Highlight({
   children,
   className,
 }: {
@@ -33,7 +33,7 @@ export interface TestimonialCardProps {
   [key: string]: any;
 }
 
-export function TestimonialCard({
+function TestimonialCard({
   description,
   name,
   img,

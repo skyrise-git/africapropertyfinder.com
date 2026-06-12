@@ -10,8 +10,10 @@
     "format": "biome format --write"
   },
   "dependencies": {
-    "@ashirbad/js-core": "^1.0.6",
+    "zustand": "^5.0.8",
+    "zod": "^4.1.12",
     "@hookform/resolvers": "^5.2.2",
+    "vaul": "^1.1.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -72,10 +74,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "uploadthing": "^7.7.4",
-    "use-places-autocomplete": "^4.0.1",
-    "vaul": "^1.1.2",
-    "zod": "^4.1.12",
-    "zustand": "^5.0.8"
+    "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",

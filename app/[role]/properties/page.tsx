@@ -54,7 +54,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type PropertyRow = Property & { id: string };
-
 type ListingMetrics = { views: number; saved: number; viewings: number };
 
 function formatMoney(n: number | undefined | null, currency = "ZAR") {
@@ -66,6 +65,74 @@ function formatMoney(n: number | undefined | null, currency = "ZAR") {
   }).format(n);
 }
 
+// --- extracted data fetching helpers ---
+async function fetchProperties(role: string, userId?: string): Promise<PropertyRow[]> {
+  const supabase = createClient();
+  let query = supabase
+    .from("properties")
+    .select("*")
+    .order("createdAt", { ascending: false });
+  if (role === "agent" && userId) {
+    query = query.eq("userId", userId);
+  }
+  const { data, error } = await query;
+  if (error) {
+    toast.error(error.message);
+    return [];
+  }
+  return (data ?? []) as unknown as PropertyRow[];
+}
+
+async function fetchProfiles(rows: PropertyRow[]): Promise<Record<string, string>> {
+  const ids = rows
+    .map((r) => r.userId)
+    .filter((id): id is string => !!id);
+  if (ids.length === 0) return {};
+
+  const supabase = createClient();
+  const { data: profs } = await supabase
+    .from("profiles")
+    .select("id,email,name")
+    .in("id", ids);
+
+  const map: Record<string, string> = {};
+  (profs ?? []).forEach((p) => {
+    map[p.id as string] = (p.email as string) || (p.name as string) || p.id;
+  });
+  return map;
+}
+
+async function fetchMetricsForAgent(propertyIds: string[]): Promise<Record<string, ListingMetrics>> {
+  if (propertyIds.length === 0) return {};
+
+  const supabase = createClient();
+  const [viewsRes, savedRes, apptRes] = await Promise.all([
+    supabase.from("property_views").select("property_id").in("property_id", propertyIds),
+    supabase.from("savedProperties").select("propertyId").in("propertyId", propertyIds),
+    supabase.from("appointments").select("propertyId").in("propertyId", propertyIds),
+  ]);
+
+  const metrics: Record<string, ListingMetrics> = {};
+  for (const id of propertyIds) {
+    metrics[id] = { views: 0, saved: 0, viewings: 0 };
+  }
+
+  for (const r of viewsRes.data ?? []) {
+    const pid = (r as { property_id: string }).property_id;
+    if (metrics[pid]) metrics[pid].views += 1;
+  }
+  for (const r of savedRes.data ?? []) {
+    const pid = (r as { propertyId: string }).propertyId;
+    if (metrics[pid]) metrics[pid].saved += 1;
+  }
+  for (const r of apptRes.data ?? []) {
+    const pid = (r as { propertyId: string }).propertyId;
+    if (metrics[pid]) metrics[pid].viewings += 1;
+  }
+  return metrics;
+}
+
+// --- main component ---
 export default function AdminPropertiesPage() {
   const params = useParams();
   const role = params.role as string;
@@ -80,72 +147,22 @@ export default function AdminPropertiesPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const load = useCallback(async () => {
-    const supabase = createClient();
     setLoading(true);
-    let query = supabase
-      .from("properties")
-      .select("*")
-      .order("createdAt", { ascending: false });
-    if (role === "agent" && user?.uid) {
-      query = query.eq("userId", user.uid);
-    }
-    const { data, error } = await query;
-    if (error) {
-      toast.error(error.message);
-      setRows([]);
-      setMetrics({});
-    } else {
-      const list = (data ?? []) as unknown as PropertyRow[];
-      setRows(list);
-      const ids = [
-        ...new Set(
-          (data ?? [])
-            .map((r) => (r as { userId?: string }).userId)
-            .filter(Boolean),
-        ),
-      ] as string[];
-      if (ids.length) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("id,email,name")
-          .in("id", ids);
-        const map: Record<string, string> = {};
-        (profs ?? []).forEach((p) => {
-          map[p.id as string] = (p.email as string) || (p.name as string) || p.id;
-        });
-        setProfiles(map);
-      } else {
-        setProfiles({});
-      }
 
-      if (role === "agent" && list.length > 0) {
-        const pids = list.map((p) => p.id);
-        const [viewsRes, savedRes, apptRes] = await Promise.all([
-          supabase.from("property_views").select("property_id").in("property_id", pids),
-          supabase.from("savedProperties").select("propertyId").in("propertyId", pids),
-          supabase.from("appointments").select("propertyId").in("propertyId", pids),
-        ]);
-        const next: Record<string, ListingMetrics> = {};
-        for (const id of pids) {
-          next[id] = { views: 0, saved: 0, viewings: 0 };
-        }
-        for (const r of viewsRes.data ?? []) {
-          const pid = (r as { property_id: string }).property_id;
-          if (next[pid]) next[pid].views += 1;
-        }
-        for (const r of savedRes.data ?? []) {
-          const pid = (r as { propertyId: string }).propertyId;
-          if (next[pid]) next[pid].saved += 1;
-        }
-        for (const r of apptRes.data ?? []) {
-          const pid = (r as { propertyId: string }).propertyId;
-          if (next[pid]) next[pid].viewings += 1;
-        }
-        setMetrics(next);
-      } else {
-        setMetrics({});
-      }
+    const propertyRows = await fetchProperties(role, user?.uid);
+    setRows(propertyRows);
+
+    const profileMap = await fetchProfiles(propertyRows);
+    setProfiles(profileMap);
+
+    if (role === "agent" && propertyRows.length > 0) {
+      const propertyIds = propertyRows.map((p) => p.id);
+      const agentMetrics = await fetchMetricsForAgent(propertyIds);
+      setMetrics(agentMetrics);
+    } else {
+      setMetrics({});
     }
+
     setLoading(false);
   }, [role, user?.uid]);
 
@@ -154,15 +171,14 @@ export default function AdminPropertiesPage() {
   }, [load]);
 
   const filtered = useMemo(() => {
-    const t = search.trim().toLowerCase();
+    const term = search.trim().toLowerCase();
     return rows.filter((p) => {
-      if (listingFilter !== "all" && p.listingType !== listingFilter)
-        return false;
-      if (!t) return true;
+      if (listingFilter !== "all" && p.listingType !== listingFilter) return false;
+      if (!term) return true;
       return (
-        p.title.toLowerCase().includes(t) ||
-        p.city.toLowerCase().includes(t) ||
-        p.address.toLowerCase().includes(t)
+        p.title.toLowerCase().includes(term) ||
+        p.city.toLowerCase().includes(term) ||
+        p.address.toLowerCase().includes(term)
       );
     });
   }, [rows, search, listingFilter]);
@@ -174,51 +190,44 @@ export default function AdminPropertiesPage() {
       .from("properties")
       .update({ featured: next })
       .eq("id", p.id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success(next ? "Marked featured" : "Removed from featured");
-      setRows((prev) =>
-        prev.map((r) => (r.id === p.id ? { ...r, featured: next } : r)),
-      );
+    if (error) {
+      toast.error(error.message);
+      return;
     }
+    toast.success(next ? "Marked featured" : "Removed from featured");
+    setRows((prev) => prev.map((r) => (r.id === p.id ? { ...r, featured: next } : r)));
   };
 
-  const setStatus = async (
-    p: PropertyRow,
-    status: NonNullable<PropertyRow["status"]>,
-  ) => {
+  const setStatus = async (p: PropertyRow, status: NonNullable<PropertyRow["status"]>) => {
     const supabase = createClient();
     const { error } = await supabase
       .from("properties")
       .update({ status })
       .eq("id", p.id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Status updated");
-      setRows((prev) =>
-        prev.map((r) => (r.id === p.id ? { ...r, status } : r)),
-      );
+    if (error) {
+      toast.error(error.message);
+      return;
     }
+    toast.success("Status updated");
+    setRows((prev) => prev.map((r) => (r.id === p.id ? { ...r, status } : r)));
   };
 
   const confirmDelete = async () => {
     if (!deleteId) return;
     const supabase = createClient();
-    const { error } = await supabase
-      .from("properties")
-      .delete()
-      .eq("id", deleteId);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Property deleted");
-      setRows((prev) => prev.filter((r) => r.id !== deleteId));
+    const { error } = await supabase.from("properties").delete().eq("id", deleteId);
+    if (error) {
+      toast.error(error.message);
+      return;
     }
+    toast.success("Property deleted");
+    setRows((prev) => prev.filter((r) => r.id !== deleteId));
     setDeleteId(null);
   };
 
   const selectedRows = useMemo(
     () => rows.filter((r) => selectedIds.includes(r.id)),
-    [rows, selectedIds]
+    [rows, selectedIds],
   );
 
   const exportCsv = () => {
@@ -251,7 +260,7 @@ export default function AdminPropertiesPage() {
           r.price ?? "",
           r.rent ?? "",
           r.createdAt,
-        ].join(",")
+        ].join(","),
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -275,9 +284,7 @@ export default function AdminPropertiesPage() {
       return;
     }
     toast.success(`Updated ${selectedIds.length} listing(s)`);
-    setRows((prev) =>
-      prev.map((r) => (selectedIds.includes(r.id) ? { ...r, status } : r))
-    );
+    setRows((prev) => prev.map((r) => (selectedIds.includes(r.id) ? { ...r, status } : r)));
     setSelectedIds([]);
   };
 
@@ -289,9 +296,7 @@ export default function AdminPropertiesPage() {
             <div className="flex items-center gap-2">
               <Building2 className="size-6 text-primary" />
               <div>
-                <CardTitle className="font-light tracking-tight">
-                  Properties
-                </CardTitle>
+                <CardTitle className="font-light tracking-tight">Properties</CardTitle>
                 <CardDescription>
                   {role === "agent"
                     ? "Your listings and engagement metrics."
@@ -359,9 +364,7 @@ export default function AdminPropertiesPage() {
                       <Checkbox
                         checked={filtered.length > 0 && filtered.every((r) => selectedIds.includes(r.id))}
                         onCheckedChange={(checked) =>
-                          setSelectedIds(
-                            checked ? filtered.map((r) => r.id) : []
-                          )
+                          setSelectedIds(checked ? filtered.map((r) => r.id) : [])
                         }
                         aria-label="Select all properties"
                       />
@@ -385,10 +388,7 @@ export default function AdminPropertiesPage() {
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={role === "agent" ? 10 : 8}
-                        className="text-center py-10"
-                      >
+                      <TableCell colSpan={role === "agent" ? 10 : 8} className="text-center py-10">
                         No properties match your filters.
                       </TableCell>
                     </TableRow>
@@ -400,9 +400,7 @@ export default function AdminPropertiesPage() {
                             checked={selectedIds.includes(p.id)}
                             onCheckedChange={(checked) =>
                               setSelectedIds((prev) =>
-                                checked
-                                  ? [...prev, p.id]
-                                  : prev.filter((id) => id !== p.id)
+                                checked ? [...prev, p.id] : prev.filter((id) => id !== p.id),
                               )
                             }
                             aria-label={`Select ${p.title}`}
@@ -420,19 +418,13 @@ export default function AdminPropertiesPage() {
                         </TableCell>
                         {role !== "agent" && (
                           <TableCell className="text-muted-foreground text-sm">
-                            {p.userId && profiles[p.userId]
-                              ? profiles[p.userId]
-                              : p.userId
-                                ? "—"
-                                : "—"}
+                            {p.userId && profiles[p.userId] ? profiles[p.userId] : p.userId ? "—" : "—"}
                           </TableCell>
                         )}
                         <TableCell>{p.city}</TableCell>
                         <TableCell>{p.listingType}</TableCell>
                         <TableCell className="text-right text-sm">
-                          {p.listingType === "sale"
-                            ? formatMoney(p.price)
-                            : formatMoney(p.rent)}
+                          {p.listingType === "sale" ? formatMoney(p.price) : formatMoney(p.rent)}
                         </TableCell>
                         {role === "agent" && (
                           <>
@@ -450,12 +442,7 @@ export default function AdminPropertiesPage() {
                         <TableCell>
                           <Select
                             value={p.status ?? "active"}
-                            onValueChange={(v) =>
-                              setStatus(
-                                p,
-                                v as NonNullable<PropertyRow["status"]>,
-                              )
-                            }
+                            onValueChange={(v) => setStatus(p, v as NonNullable<PropertyRow["status"]>)}
                           >
                             <SelectTrigger className="h-8 w-[130px]">
                               <SelectValue />
@@ -479,9 +466,7 @@ export default function AdminPropertiesPage() {
                                 title="Toggle featured"
                                 onClick={() => toggleFeatured(p)}
                               >
-                                <Star
-                                  className={`size-4 ${p.featured ? "fill-primary text-primary" : ""}`}
-                                />
+                                <Star className={`size-4 ${p.featured ? "fill-primary text-primary" : ""}`} />
                               </Button>
                             )}
                             <Button variant="ghost" size="icon" asChild>
@@ -519,8 +504,7 @@ export default function AdminPropertiesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this property?</AlertDialogTitle>
             <AlertDialogDescription>
-              This cannot be undone. Saved favourites and related appointments
-              may be affected.
+              This cannot be undone. Saved favourites and related appointments may be affected.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

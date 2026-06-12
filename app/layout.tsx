@@ -5,6 +5,7 @@ import { SupabaseProvider } from "@/components/providers/supabase-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+import PropertyChatbot from "@/components/chartbot/PropertyChatbot";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -32,11 +33,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -45,15 +42,11 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <NuqsAdapter>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
             <SupabaseProvider>
               {children}
               <Toaster />
+              <PropertyChatbot />
             </SupabaseProvider>
           </ThemeProvider>
         </NuqsAdapter>

@@ -1,6 +1,6 @@
 import type { Variants } from "motion/react";
 
-export const fadeInUp: Variants = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -29,7 +29,7 @@ export const staggerContainer: Variants = {
   },
 };
 
-export const staggerItem: Variants = {
+const staggerItem: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -38,7 +38,7 @@ export const staggerItem: Variants = {
   },
 };
 
-export const slideInFromLeft: Variants = {
+const slideInFromLeft: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: {
     opacity: 1,
@@ -47,7 +47,7 @@ export const slideInFromLeft: Variants = {
   },
 };
 
-export const slideInFromRight: Variants = {
+const slideInFromRight: Variants = {
   hidden: { opacity: 0, x: 20 },
   visible: {
     opacity: 1,

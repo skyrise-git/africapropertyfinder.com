@@ -175,3 +175,8 @@
 .group:hover .animate-marquee-vertical {
   animation-play-state: paused;
 }
+
+
+body.no-scroll {
+  overflow: hidden !important;
+}

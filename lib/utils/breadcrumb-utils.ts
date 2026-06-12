@@ -3,7 +3,7 @@
  */
 
 // Mapping of route segments to readable labels
-export const breadcrumbLabelMap: Record<string, string> = {
+const breadcrumbLabelMap: Record<string, string> = {
   dashboard: "Dashboard",
   settings: "Settings",
   staffs: "Staffs",
@@ -19,7 +19,7 @@ export const breadcrumbLabelMap: Record<string, string> = {
  * @param previousSegment - The previous segment for context
  * @returns A readable label
  */
-export function getSegmentLabel(
+function getSegmentLabel(
   segment: string,
   previousSegment?: string,
 ): string {

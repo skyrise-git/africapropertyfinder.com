@@ -73,7 +73,14 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="h-full"
     >
-      <Card className="group h-full overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 hover:shadow-lg">
+      <Card className="group h-full overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 hover:shadow-lg relative">
+        {href && (
+          <Link
+            href={href}
+            className="absolute inset-0 z-10"
+            aria-label={property.title}
+          />
+        )}
         {imageUrl && (
           <div className="relative h-40 sm:h-48 md:h-56 w-full overflow-hidden bg-muted">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 transition-opacity duration-500 group-hover:opacity-100 opacity-90" />
@@ -86,15 +93,15 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             />
 
-            <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 p-4">
+            <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 p-4 pointer-events-none">
               <Badge
                 variant="destructive"
-                className="bg-destructive/90 backdrop-blur-sm px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide shadow-lg"
+                className="bg-destructive/90 backdrop-blur-sm px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide shadow-lg pointer-events-auto"
               >
                 {listingTypeLabel[property.listingType]}
               </Badge>
 
-              <span className="rounded-md bg-black/80 backdrop-blur-sm px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold text-white shadow-lg">
+              <span className="rounded-md bg-black/80 backdrop-blur-sm px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold text-white shadow-lg pointer-events-auto">
                 {formatPrice(property)}
               </span>
             </div>
@@ -123,7 +130,7 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
             </span>
           </div>
           {safetyStation && (
-            <div className="mt-1">
+            <div className="mt-1 relative z-20">
               <SafetyBadge station={safetyStation} compact />
             </div>
           )}
@@ -217,14 +224,6 @@ export function PropertyCard({ property, href }: PropertyCardProps) {
       </Card>
     </motion.div>
   );
-
-  if (href) {
-    return (
-      <Link href={href} className="block h-full">
-        {content}
-      </Link>
-    );
-  }
 
   return content;
 }

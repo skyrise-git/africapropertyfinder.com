@@ -54,7 +54,7 @@ export async function optimizeImage(
 /**
  * Get image file size in MB
  */
-export function getFileSizeMB(file: File): number {
+function getFileSizeMB(file: File): number {
   return file.size / (1024 * 1024);
 }
 

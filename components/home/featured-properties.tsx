@@ -65,7 +65,12 @@ const PropertyCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Card className="overflow-hidden h-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-primary/30 flex flex-col rounded-xl">
+      <Card className="overflow-hidden h-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-primary/30 flex flex-col rounded-xl relative">
+        <Link
+          href={`/properties/${property.id}`}
+          className="absolute inset-0 z-10"
+          aria-label={property.title || "Property Details"}
+        />
         <div className="relative h-52 md:h-56 overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
           {property.images && property.images[0] ? (
             <>
@@ -101,7 +106,7 @@ const PropertyCard = ({
             </Badge>
           </div>
 
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-3 right-3 z-20">
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
                 size="icon"
@@ -132,13 +137,13 @@ const PropertyCard = ({
           </div>
 
           {matchedStation && (
-            <div className="absolute bottom-3 right-3" onClick={(e) => e.preventDefault()}>
+            <div className="absolute bottom-3 right-3 z-20" onClick={(e) => e.preventDefault()}>
               <SafetyBadge station={matchedStation} compact />
             </div>
           )}
 
           <motion.div
-            className="absolute inset-0 flex items-center justify-center bg-black/20"
+            className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
             transition={{ duration: 0.2 }}
@@ -270,13 +275,7 @@ export function FeaturedProperties() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {featuredProperties.slice(0, 8).map((property, index) => (
-            <Link
-              key={property.id}
-              href={`/properties/${property.id}`}
-              className="block"
-            >
-              <PropertyCard property={property} index={index} />
-            </Link>
+            <PropertyCard key={property.id} property={property} index={index} />
           ))}
         </div>
       </div>

@@ -1,6 +1,6 @@
-import type { CrimeStation, SafetyRating } from "@/lib/types/crime.type";
+import type { CrimeStation, SafetyRating, SafetyLabel, CrimeTrend } from "@/lib/types/crime.type";
 
-export function findStationByName(
+function findStationByName(
   stations: CrimeStation[],
   name: string
 ): CrimeStation | undefined {
@@ -8,28 +8,28 @@ export function findStationByName(
   return stations.find((s) => s.station.toLowerCase() === lower);
 }
 
-export function getStationsByProvince(
+function getStationsByProvince(
   stations: CrimeStation[],
   province: string
 ): CrimeStation[] {
   return stations.filter((s) => s.province === province);
 }
 
-export function getStationsByDistrict(
+function getStationsByDistrict(
   stations: CrimeStation[],
   district: string
 ): CrimeStation[] {
   return stations.filter((s) => s.district === district);
 }
 
-export function getStationsByCountry(
+function getStationsByCountry(
   stations: CrimeStation[],
   country: string
 ): CrimeStation[] {
   return stations.filter((s) => s.country === country);
 }
 
-export function getCountries(stations: CrimeStation[]): string[] {
+function getCountries(stations: CrimeStation[]): string[] {
   return [...new Set(stations.map((s) => s.country))].sort();
 }
 
@@ -93,7 +93,7 @@ export function matchPropertyToStation(
   return undefined;
 }
 
-export function getTopStations(
+function getTopStations(
   stations: CrimeStation[],
   count: number,
   order: "safest" | "riskiest"
@@ -157,4 +157,20 @@ export function getSafetyColorClasses(rating: SafetyRating) {
     },
   };
   return map[rating];
+}
+
+export function mapRow(row: Record<string, unknown>): CrimeStation {
+  return {
+    station: row.station as string,
+    district: row.district as string,
+    province: row.province as string,
+    country: (row.country as string) ?? "South Africa",
+    safety_rating: row.safety_rating as SafetyRating,
+    safety_label: row.safety_label as SafetyLabel,
+    crime_index: Number(row.crime_index),
+    total_serious_crimes_q1_2025: row.total_serious_crimes_q1_2025 as number,
+    total_serious_crimes_q1_2024: row.total_serious_crimes_q1_2024 as number,
+    trend: row.trend as CrimeTrend,
+    crime_breakdown: (row.crime_breakdown ?? {}) as Record<string, number>,
+  };
 }

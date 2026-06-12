@@ -95,9 +95,11 @@ export default function FeedPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {personalizedFeed.map((property) => (
-              <Link key={property.id} href={`/properties/${property.id}`} className="block">
-                <PropertyCard property={property} href={`/properties/${property.id}`} />
-              </Link>
+              <PropertyCard
+                key={property.id}
+                property={property}
+                href={`/properties/${property.id}`}
+              />
             ))}
           </div>
         </section>
@@ -139,9 +141,11 @@ export default function FeedPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {trendingProperties.map((property) => (
-            <Link key={property.id} href={`/properties/${property.id}`} className="block">
-              <PropertyCard property={property} href={`/properties/${property.id}`} />
-            </Link>
+            <PropertyCard
+              key={property.id}
+              property={property}
+              href={`/properties/${property.id}`}
+            />
           ))}
         </div>
       </section>

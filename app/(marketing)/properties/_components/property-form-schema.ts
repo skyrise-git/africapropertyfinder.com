@@ -136,78 +136,93 @@ const studentHousingSchema = basePropertySchema.extend({
 });
 
 // Conditional schema based on listingType
-export const propertyFormSchema = z.discriminatedUnion("listingType", [
+const propertyFormSchema = z.discriminatedUnion("listingType", [
   saleSchema,
   rentSchema,
   studentHousingSchema,
 ]);
 
-// Refinement for shared property details and contact info
-export const refinedPropertyFormSchema = propertyFormSchema.superRefine(
-  (data, ctx) => {
-    // Shared property validation
-    if (
-      (data.listingType === "rent" || data.listingType === "student-housing") &&
-      data.isShared === true
-    ) {
-      if (!data.sharingDetails) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Sharing details are required when property is shared",
-          path: ["sharingDetails"],
-        });
-      } else {
-        if (!data.sharingDetails.sharingType) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Sharing type is required",
-            path: ["sharingDetails", "sharingType"],
-          });
-        }
-        if (data.sharingDetails.currentOccupants === undefined) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Current occupants is required",
-            path: ["sharingDetails", "currentOccupants"],
-          });
-        }
-        if (!data.sharingDetails.preferredTenantType) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Preferred tenant type is required",
-            path: ["sharingDetails", "preferredTenantType"],
-          });
-        }
-      }
-    }
+// --- Validation helpers (pure, low complexity) ---
 
-    // Contact info validation based on preferred method
-    if (data.preferredContactMethod === "phone" || data.preferredContactMethod === "both") {
-      if (!data.contactInfo.phone || data.contactInfo.phone.trim() === "") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Phone number is required",
-          path: ["contactInfo", "phone"],
-        });
-      }
+function validateSharedDetails(data: any, ctx: z.RefinementCtx): void {
+  // Only applies to rent or student-housing with isShared === true
+  const isRelevant =
+    (data.listingType === "rent" || data.listingType === "student-housing") &&
+    data.isShared === true;
+
+  if (!isRelevant) return;
+
+  if (!data.sharingDetails) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Sharing details are required when property is shared",
+      path: ["sharingDetails"],
+    });
+    return;
+  }
+
+  const details = data.sharingDetails;
+  if (!details.sharingType) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Sharing type is required",
+      path: ["sharingDetails", "sharingType"],
+    });
+  }
+  if (details.currentOccupants === undefined) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Current occupants is required",
+      path: ["sharingDetails", "currentOccupants"],
+    });
+  }
+  if (!details.preferredTenantType) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Preferred tenant type is required",
+      path: ["sharingDetails", "preferredTenantType"],
+    });
+  }
+}
+
+function validateContactInfo(data: any, ctx: z.RefinementCtx): void {
+  const method = data.preferredContactMethod;
+
+  // Phone required if method is 'phone' or 'both'
+  if (method === "phone" || method === "both") {
+    const phone = data.contactInfo?.phone;
+    if (!phone || phone.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone number is required",
+        path: ["contactInfo", "phone"],
+      });
     }
-    if (data.preferredContactMethod === "email" || data.preferredContactMethod === "both") {
-      if (!data.contactInfo.email || data.contactInfo.email.trim() === "") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Email address is required",
-          path: ["contactInfo", "email"],
-        });
-      } else if (!z.string().email().safeParse(data.contactInfo.email).success) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Please enter a valid email address",
-          path: ["contactInfo", "email"],
-        });
-      }
+  }
+
+  // Email required if method is 'email' or 'both'
+  if (method === "email" || method === "both") {
+    const email = data.contactInfo?.email;
+    if (!email || email.trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Email address is required",
+        path: ["contactInfo", "email"],
+      });
+    } else if (!z.string().email().safeParse(email).success) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please enter a valid email address",
+        path: ["contactInfo", "email"],
+      });
     }
-  },
-);
+  }
+}
+
+// --- Final refined schema ---
+export const refinedPropertyFormSchema = propertyFormSchema.superRefine((data, ctx) => {
+  validateSharedDetails(data, ctx);
+  validateContactInfo(data, ctx);
+});
 
 export type PropertyFormData = z.infer<typeof refinedPropertyFormSchema>;
-

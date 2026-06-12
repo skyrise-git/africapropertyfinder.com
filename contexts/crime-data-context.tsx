@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { CrimeStation } from "@/lib/types/crime.type";
 import type { SafetyRating, SafetyLabel, CrimeTrend } from "@/lib/types/crime.type";
 import { useCountry } from "@/contexts/country-context";
+import { mapRow } from "@/lib/utils/crime-helpers";
 
 interface CrimeDataContextValue {
   stations: CrimeStation[];
@@ -36,22 +37,6 @@ const CrimeDataContext = createContext<CrimeDataContextValue>({
 });
 
 let cachedStations: CrimeStation[] | null = null;
-
-function mapRow(row: Record<string, unknown>): CrimeStation {
-  return {
-    station: row.station as string,
-    district: row.district as string,
-    province: row.province as string,
-    country: (row.country as string) ?? "South Africa",
-    safety_rating: row.safety_rating as SafetyRating,
-    safety_label: row.safety_label as SafetyLabel,
-    crime_index: Number(row.crime_index),
-    total_serious_crimes_q1_2025: row.total_serious_crimes_q1_2025 as number,
-    total_serious_crimes_q1_2024: row.total_serious_crimes_q1_2024 as number,
-    trend: row.trend as CrimeTrend,
-    crime_breakdown: (row.crime_breakdown ?? {}) as Record<string, number>,
-  };
-}
 
 export function CrimeDataProvider({ children }: { children: ReactNode }) {
   const { countryName, setCountry: setGlobalCountry, countries: globalCountries } =

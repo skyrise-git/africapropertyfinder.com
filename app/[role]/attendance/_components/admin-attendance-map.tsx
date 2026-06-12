@@ -10,11 +10,9 @@ import {
 import dynamic from "next/dynamic";
 import { Loader2, MapPin, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { attendanceService } from "@/lib/services";
+import { useAttendanceRecords } from "../_hooks/use-attendance-records";
 import { formatTime } from "@/lib/utils/date";
-import type { Attendance } from "@/lib/types/attendance.type";
 import { format, parse, isValid } from "date-fns";
-import { toast } from "sonner";
 
 const AttendanceMapClient = dynamic(
   () =>
@@ -37,8 +35,11 @@ export const AdminAttendanceMap = forwardRef<
   AdminAttendanceMapRef,
   AdminAttendanceMapProps
 >(({ selectedStaffId, dateStr }, ref) => {
-  const [records, setRecords] = useState<Attendance[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { records, loading, refetch } = useAttendanceRecords({
+    selectedStaffId,
+    dateStr,
+    fetchRange30Days: false,
+  });
 
   // Convert date string to Date object
   const selectedDate = dateStr
@@ -48,35 +49,8 @@ export const AdminAttendanceMap = forwardRef<
       })()
     : new Date();
 
-  const loadRecords = useCallback(async () => {
-    if (!dateStr) return;
-
-    try {
-      setLoading(true);
-      let data: Attendance[];
-
-      if (selectedStaffId === "all") {
-        data = await attendanceService.getByDate(dateStr);
-      } else {
-        const allData = await attendanceService.getByStaffId(selectedStaffId);
-        data = allData.filter((record) => record.date === dateStr);
-      }
-
-      setRecords(data);
-    } catch (error) {
-      console.error("Failed to load attendance records:", error);
-      toast.error("Failed to load attendance records");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedStaffId, dateStr]);
-
-  useEffect(() => {
-    loadRecords();
-  }, [loadRecords]);
-
   useImperativeHandle(ref, () => ({
-    refetch: loadRecords,
+    refetch,
   }));
 
   const dateWithRecords = new Set(records.map((r) => r.date));

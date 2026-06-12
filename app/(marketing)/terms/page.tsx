@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { marketingSite } from "@/lib/config";
+import { PolicyContactCard } from "@/components/policy/PolicyContactCard";
 
 export default function TermsPage() {
   const lastUpdated = new Date("November 15, 2025").toLocaleDateString(
@@ -779,58 +780,7 @@ export default function TermsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <h2 className="text-2xl font-semibold">Contact Us</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground">
-              In order to resolve a complaint regarding the Service or to receive
-              further information regarding use of the Service, please contact us
-              at:
-            </p>
-            <ul className="space-y-2 list-disc pl-6">
-              <li>
-                <p>
-                  By email:{" "}
-                  <Link
-                    href={`mailto:${marketingSite.contactEmail}`}
-                    className="text-primary underline hover:no-underline"
-                  >
-                    {marketingSite.contactEmail}
-                  </Link>
-                </p>
-              </li>
-              <li>
-                <p>
-                  By visiting this page on our website:{" "}
-                  <Link
-                    href={marketingSite.url}
-                    target="_blank"
-                    rel="external nofollow noopener"
-                    className="text-primary underline hover:no-underline"
-                  >
-                    {marketingSite.url}
-                  </Link>
-                </p>
-              </li>
-              <li>
-                <p>
-                  By phone:{" "}
-                  <Link
-                    href={`tel:${marketingSite.contactPhone.replace(
-                      /[^\d+]/g,
-                      "",
-                    )}`}
-                    className="text-primary underline hover:no-underline"
-                  >
-                    {marketingSite.contactPhone}
-                  </Link>
-                </p>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+        <PolicyContactCard description="In order to resolve a complaint regarding the Service or to receive further information regarding use of the Service, please contact us at:" />
       </div>
     </div>
   );

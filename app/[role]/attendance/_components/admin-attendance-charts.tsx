@@ -36,9 +36,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { attendanceService } from "@/lib/services";
-import type { Attendance } from "@/lib/types/attendance.type";
-import { toast } from "sonner";
+import { useAttendanceRecords } from "../_hooks/use-attendance-records";
 
 export interface AdminAttendanceChartsRef {
   refetch: () => void;
@@ -53,39 +51,14 @@ export const AdminAttendanceCharts = forwardRef<
   AdminAttendanceChartsRef,
   AdminAttendanceChartsProps
 >(({ selectedStaffId, dateStr }, ref) => {
-  const [records, setRecords] = useState<Attendance[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const loadRecords = useCallback(async () => {
-    try {
-      setLoading(true);
-      let data: Attendance[];
-
-      if (selectedStaffId === "all") {
-        // Get records for the last 30 days for trend analysis
-        const endDate = dateStr || format(new Date(), "yyyy-MM-dd");
-        const parsedEndDate = parse(endDate, "yyyy-MM-dd", new Date());
-        const startDate = format(subDays(parsedEndDate, 30), "yyyy-MM-dd");
-        data = await attendanceService.getAll(startDate, endDate);
-      } else {
-        data = await attendanceService.getByStaffId(selectedStaffId);
-      }
-
-      setRecords(data);
-    } catch (error) {
-      console.error("Failed to load attendance records:", error);
-      toast.error("Failed to load attendance records");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedStaffId, dateStr]);
-
-  useEffect(() => {
-    loadRecords();
-  }, [loadRecords]);
+  const { records, loading, refetch } = useAttendanceRecords({
+    selectedStaffId,
+    dateStr,
+    fetchRange30Days: true,
+  });
 
   useImperativeHandle(ref, () => ({
-    refetch: loadRecords,
+    refetch,
   }));
 
   // Process data for charts

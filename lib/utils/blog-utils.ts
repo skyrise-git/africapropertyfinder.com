@@ -15,7 +15,7 @@ export function generateSlug(title: string): string {
 /**
  * Extract excerpt from TipTap content
  */
-export function generateExcerpt(
+function generateExcerpt(
   content: Record<string, unknown>,
   maxLength: number = 150,
 ): string {
@@ -110,7 +110,7 @@ export function getRelatedBlogs(
 /**
  * Get unique categories from blogs
  */
-export function getUniqueCategories(blogs: Blog[]): BlogCategory[] {
+function getUniqueCategories(blogs: Blog[]): BlogCategory[] {
   const categories = new Set<BlogCategory>();
   blogs.forEach((blog) => {
     categories.add(blog.category);
@@ -121,7 +121,7 @@ export function getUniqueCategories(blogs: Blog[]): BlogCategory[] {
 /**
  * Get all unique tags from blogs
  */
-export function getAllTags(blogs: Blog[]): string[] {
+function getAllTags(blogs: Blog[]): string[] {
   const tags = new Set<string>();
   blogs.forEach((blog) => {
     if (blog.tags && blog.tags.length > 0) {

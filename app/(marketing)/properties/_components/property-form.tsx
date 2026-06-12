@@ -587,6 +587,80 @@ export const PropertyForm = forwardRef<
 
 PropertyForm.displayName = "PropertyForm";
 
+// Helper Component to avoid selector button grid duplication
+interface SelectorOption<T> {
+  value: T;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+}
+
+interface PropertyFormGridSelectorProps<T> {
+  options: SelectorOption<T>[];
+  value: T;
+  onChange: (val: T) => void;
+  layoutId: string;
+  columnsClassName?: string;
+}
+
+function PropertyFormGridSelector({
+  options,
+  value,
+  onChange,
+  layoutId,
+  columnsClassName = "grid-cols-3",
+}: PropertyFormGridSelectorProps<any>) {
+  return (
+    <div className={`grid gap-3 ${columnsClassName}`}>
+      {options.map((option) => {
+        const Icon = option.icon;
+        const isSelected = value === option.value;
+        return (
+          <motion.button
+            key={String(option.value)}
+            type="button"
+            onClick={() => onChange(option.value)}
+            className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+              isSelected
+                ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
+                : "border-border bg-muted/30 hover:bg-muted/50"
+            }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {isSelected && (
+              <motion.div
+                className={`absolute inset-0 rounded-lg ${option.bgColor}`}
+                layoutId={layoutId}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+            <div className="relative z-10 flex flex-col items-center gap-2">
+              <Icon
+                className={`h-6 w-6 ${
+                  isSelected ? option.color : "text-muted-foreground"
+                }`}
+              />
+              <span
+                className={`text-sm font-medium ${
+                  isSelected ? "text-foreground" : "text-muted-foreground"
+                }`}
+              >
+                {option.label}
+              </span>
+            </div>
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
 // Step 1: Location Selection
 function LocationStep({
   form,
@@ -796,8 +870,8 @@ function PropertyTypeStep({
             <FormItem>
               <FormLabel>Property Type *</FormLabel>
               <FormControl>
-                <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-                  {[
+                <PropertyFormGridSelector
+                  options={[
                     {
                       value: "apartment",
                       label: "Apartment",
@@ -854,50 +928,12 @@ function PropertyTypeStep({
                       bgColor: "bg-gray-50 dark:bg-gray-950/20",
                       borderColor: "border-gray-200 dark:border-gray-800",
                     },
-                  ].map((option) => {
-                    const Icon = option.icon;
-                    const isSelected = field.value === option.value;
-                    return (
-                      <motion.button
-                        key={option.value}
-                        type="button"
-                        onClick={() => field.onChange(option.value)}
-                        className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                          isSelected
-                            ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
-                            : "border-border bg-muted/30 hover:bg-muted/50"
-                        }`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {isSelected && (
-                          <motion.div
-                            className={`absolute inset-0 rounded-lg ${option.bgColor}`}
-                            layoutId="propertyTypeBg"
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                          />
-                        )}
-                        <div className="relative z-10 flex flex-col items-center gap-2">
-                          <Icon
-                            className={`h-6 w-6 ${
-                              isSelected ? option.color : "text-muted-foreground"
-                            }`}
-                          />
-                          <span
-                            className={`text-sm font-medium ${
-                              isSelected ? "text-foreground" : "text-muted-foreground"
-                            }`}
-                          >
-                            {option.label}
-                          </span>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                </div>
+                  ]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  layoutId="propertyTypeBg"
+                  columnsClassName="grid-cols-3 md:grid-cols-4"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -931,8 +967,8 @@ function BasicInfoStep({
             <FormItem>
               <FormLabel>Listing Type *</FormLabel>
               <FormControl>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
+                <PropertyFormGridSelector
+                  options={[
                     {
                       value: "sale",
                       label: "Sale",
@@ -957,50 +993,11 @@ function BasicInfoStep({
                       bgColor: "bg-purple-50 dark:bg-purple-950/20",
                       borderColor: "border-purple-200 dark:border-purple-800",
                     },
-                  ].map((option) => {
-                    const Icon = option.icon;
-                    const isSelected = field.value === option.value;
-                    return (
-                      <motion.button
-                        key={option.value}
-                        type="button"
-                        onClick={() => field.onChange(option.value)}
-                        className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                          isSelected
-                            ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
-                            : "border-border bg-muted/30 hover:bg-muted/50"
-                        }`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {isSelected && (
-                          <motion.div
-                            className={`absolute inset-0 rounded-lg ${option.bgColor}`}
-                            layoutId="listingTypeBg"
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                          />
-                        )}
-                        <div className="relative z-10 flex flex-col items-center gap-2">
-                          <Icon
-                            className={`h-6 w-6 ${
-                              isSelected ? option.color : "text-muted-foreground"
-                            }`}
-                          />
-                          <span
-                            className={`text-sm font-medium ${
-                              isSelected ? "text-foreground" : "text-muted-foreground"
-                            }`}
-                          >
-                            {option.label}
-                          </span>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                </div>
+                  ]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  layoutId="listingTypeBg"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -1051,8 +1048,8 @@ function BasicInfoStep({
                   Furnishing *
                 </FormLabel>
                 <FormControl>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
+                  <PropertyFormGridSelector
+                    options={[
                       {
                         value: "furnished",
                         label: "Furnished",
@@ -1077,50 +1074,11 @@ function BasicInfoStep({
                         bgColor: "bg-gray-50 dark:bg-gray-950/20",
                         borderColor: "border-gray-200 dark:border-gray-800",
                       },
-                    ].map((option) => {
-                      const Icon = option.icon;
-                      const isSelected = field.value === option.value;
-                      return (
-                        <motion.button
-                          key={option.value}
-                          type="button"
-                          onClick={() => field.onChange(option.value)}
-                          className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                            isSelected
-                              ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
-                              : "border-border bg-muted/30 hover:bg-muted/50"
-                          }`}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {isSelected && (
-                            <motion.div
-                              className={`absolute inset-0 rounded-lg ${option.bgColor}`}
-                              layoutId="furnishingBg"
-                              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            />
-                          )}
-                          <div className="relative z-10 flex flex-col items-center gap-2">
-                            <Icon
-                              className={`h-6 w-6 ${
-                                isSelected ? option.color : "text-muted-foreground"
-                              }`}
-                            />
-                            <span
-                              className={`text-sm font-medium ${
-                                isSelected ? "text-foreground" : "text-muted-foreground"
-                              }`}
-                            >
-                              {option.label}
-                            </span>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
+                    ]}
+                    value={field.value}
+                    onChange={field.onChange}
+                    layoutId="furnishingBg"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -1583,85 +1541,46 @@ function SharedPropertyStep({
                 <FormItem>
                   <FormLabel>Sharing Type *</FormLabel>
                   <FormControl>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        {
-                          value: "room",
-                          label: "Room",
-                          icon: HomeIcon,
-                          color: "text-blue-600",
-                          bgColor: "bg-blue-50 dark:bg-blue-950/20",
-                          borderColor: "border-blue-200 dark:border-blue-800",
-                        },
-                        {
-                          value: "apartment",
-                          label: "Apartment",
-                          icon: Building2,
-                          color: "text-green-600",
-                          bgColor: "bg-green-50 dark:bg-green-950/20",
-                          borderColor: "border-green-200 dark:border-green-800",
-                        },
-                        {
-                          value: "house",
-                          label: "House",
-                          icon: Home,
-                          color: "text-purple-600",
-                          bgColor: "bg-purple-50 dark:bg-purple-950/20",
-                          borderColor: "border-purple-200 dark:border-purple-800",
-                        },
-                      ].map((option) => {
-                        const Icon = option.icon;
-                        const isSelected = field.value === option.value;
-                        return (
-                          <motion.button
-                            key={option.value}
-                            type="button"
-                            onClick={() => {
-                              const currentDetails = form.getValues("sharingDetails");
-                              form.setValue("sharingDetails", {
-                                sharingType: option.value as "room" | "apartment" | "house",
-                                currentOccupants: currentDetails?.currentOccupants ?? 0,
-                                preferredTenantType:
-                                  currentDetails?.preferredTenantType ?? "anyone",
-                              });
-                              field.onChange(option.value);
-                            }}
-                            className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                              isSelected
-                                ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
-                                : "border-border bg-muted/30 hover:bg-muted/50"
-                            }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            {isSelected && (
-                              <motion.div
-                                className={`absolute inset-0 rounded-lg ${option.bgColor}`}
-                                layoutId="sharingTypeBg"
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                              />
-                            )}
-                            <div className="relative z-10 flex flex-col items-center gap-2">
-                              <Icon
-                                className={`h-6 w-6 ${
-                                  isSelected ? option.color : "text-muted-foreground"
-                                }`}
-                              />
-                              <span
-                                className={`text-sm font-medium ${
-                                  isSelected ? "text-foreground" : "text-muted-foreground"
-                                }`}
-                              >
-                                {option.label}
-                              </span>
-                            </div>
-                          </motion.button>
-                        );
-                      })}
-                    </div>
+                <PropertyFormGridSelector
+                  options={[
+                    {
+                      value: "room",
+                      label: "Room",
+                      icon: HomeIcon,
+                      color: "text-blue-600",
+                      bgColor: "bg-blue-50 dark:bg-blue-950/20",
+                      borderColor: "border-blue-200 dark:border-blue-800",
+                    },
+                    {
+                      value: "apartment",
+                      label: "Apartment",
+                      icon: Building2,
+                      color: "text-green-600",
+                      bgColor: "bg-green-50 dark:bg-green-950/20",
+                      borderColor: "border-green-200 dark:border-green-800",
+                    },
+                    {
+                      value: "house",
+                      label: "House",
+                      icon: Home,
+                      color: "text-purple-600",
+                      bgColor: "bg-purple-50 dark:bg-purple-950/20",
+                      borderColor: "border-purple-200 dark:border-purple-800",
+                    },
+                  ]}
+                  value={field.value}
+                  onChange={(val) => {
+                    const currentDetails = form.getValues("sharingDetails");
+                    form.setValue("sharingDetails", {
+                      sharingType: val as "room" | "apartment" | "house",
+                      currentOccupants: currentDetails?.currentOccupants ?? 0,
+                      preferredTenantType:
+                        currentDetails?.preferredTenantType ?? "anyone",
+                    });
+                    field.onChange(val);
+                  }}
+                  layoutId="sharingTypeBg"
+                />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -1705,8 +1624,8 @@ function SharedPropertyStep({
                 <FormItem>
                   <FormLabel>Preferred Tenant Type *</FormLabel>
                   <FormControl>
-                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                      {[
+                    <PropertyFormGridSelector
+                      options={[
                         {
                           value: "students",
                           label: "Students",
@@ -1739,62 +1658,24 @@ function SharedPropertyStep({
                           bgColor: "bg-orange-50 dark:bg-orange-950/20",
                           borderColor: "border-orange-200 dark:border-orange-800",
                         },
-                      ].map((option) => {
-                        const Icon = option.icon;
-                        const isSelected = field.value === option.value;
-                        return (
-                          <motion.button
-                            key={option.value}
-                            type="button"
-                            onClick={() => {
-                              const currentDetails = form.getValues("sharingDetails");
-                              form.setValue("sharingDetails", {
-                                sharingType: currentDetails?.sharingType ?? "room",
-                                currentOccupants: currentDetails?.currentOccupants ?? 0,
-                                preferredTenantType: option.value as
-                                  | "students"
-                                  | "professionals"
-                                  | "families"
-                                  | "anyone",
-                              });
-                              field.onChange(option.value);
-                            }}
-                            className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                              isSelected
-                                ? `${option.borderColor} ${option.bgColor} border-2 shadow-md`
-                                : "border-border bg-muted/30 hover:bg-muted/50"
-                            }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            {isSelected && (
-                              <motion.div
-                                className={`absolute inset-0 rounded-lg ${option.bgColor}`}
-                                layoutId="preferredTenantTypeBg"
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                              />
-                            )}
-                            <div className="relative z-10 flex flex-col items-center gap-2">
-                              <Icon
-                                className={`h-6 w-6 ${
-                                  isSelected ? option.color : "text-muted-foreground"
-                                }`}
-                              />
-                              <span
-                                className={`text-sm font-medium ${
-                                  isSelected ? "text-foreground" : "text-muted-foreground"
-                                }`}
-                              >
-                                {option.label}
-                              </span>
-                            </div>
-                          </motion.button>
-                        );
-                      })}
-                    </div>
+                      ]}
+                      value={field.value}
+                      onChange={(val) => {
+                        const currentDetails = form.getValues("sharingDetails");
+                        form.setValue("sharingDetails", {
+                          sharingType: currentDetails?.sharingType ?? "room",
+                          currentOccupants: currentDetails?.currentOccupants ?? 0,
+                          preferredTenantType: val as
+                            | "students"
+                            | "professionals"
+                            | "families"
+                            | "anyone",
+                        });
+                        field.onChange(val);
+                      }}
+                      layoutId="preferredTenantTypeBg"
+                      columnsClassName="grid-cols-2 md:grid-cols-4"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

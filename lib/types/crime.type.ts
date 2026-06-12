@@ -46,7 +46,7 @@ export interface DistrictData {
   yoyChange: number;
 }
 
-export const SAFETY_COLORS: Record<
+const SAFETY_COLORS: Record<
   SafetyRating,
   { fg: string; bg: string; border: string }
 > = {

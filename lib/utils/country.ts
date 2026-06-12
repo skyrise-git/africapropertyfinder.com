@@ -31,7 +31,7 @@ export const COUNTRIES: Record<CountryCode, CountryConfig> = {
   },
 };
 
-export const SUPPORTED_COUNTRY_CODES = Object.keys(COUNTRIES) as CountryCode[];
+const SUPPORTED_COUNTRY_CODES = Object.keys(COUNTRIES) as CountryCode[];
 export const SUPPORTED_COUNTRIES = SUPPORTED_COUNTRY_CODES.map(
   (c) => COUNTRIES[c]
 );
@@ -52,7 +52,7 @@ export function resolveCountryCode(value?: string | null): CountryCode {
   return NAME_TO_CODE[k] ?? "ZA";
 }
 
-export function getCountryByCode(code?: string | null): CountryConfig {
+function getCountryByCode(code?: string | null): CountryConfig {
   const c = (code ?? "").toUpperCase() as CountryCode;
   return COUNTRIES[c] ?? COUNTRIES.ZA;
 }
