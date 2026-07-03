@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-export type AppointmentRow = {
+type AppointmentRow = {
   id: string;
   propertyId: string | null;
   propertyTitle: string | null;

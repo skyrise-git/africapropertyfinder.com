@@ -29,6 +29,7 @@ interface BlogCardProps {
   onDelete: (blog: Blog) => void;
 }
 
+// fallow-ignore-next-line unused-export
 export const cardVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {

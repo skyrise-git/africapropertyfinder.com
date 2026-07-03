@@ -18,7 +18,7 @@ import { formatDateTime } from "@/lib/utils/date";
 import type { Attendance } from "@/lib/types/attendance.type";
 import { toast } from "sonner";
 
-export interface PunchControlRef {
+interface PunchControlRef {
   refetch: () => void;
 }
 

@@ -17,7 +17,6 @@ interface FeatureItemProps {
   description: string;
   icon: React.ReactNode;
   className?: string;
-  size?: "small" | "medium" | "large";
 }
 
 const FeatureItem = ({
@@ -25,7 +24,6 @@ const FeatureItem = ({
   description,
   icon,
   className,
-  size = "small",
 }: FeatureItemProps) => {
   const variants = {
     hidden: { opacity: 0, y: 20 },
@@ -159,7 +157,6 @@ export function FeaturesSection() {
               title={feature.title}
               description={feature.description}
               icon={feature.icon}
-              size={feature.size}
               className={cn(
                 "col-span-1",
                 feature.size === "large"

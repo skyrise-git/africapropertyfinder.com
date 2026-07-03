@@ -28,7 +28,7 @@ const containerVariants = {
   },
 };
 
-export interface AdminAttendanceRef {
+interface AdminAttendanceRef {
   refetch: () => void;
 }
 

@@ -18,7 +18,7 @@ import { formatTime } from "@/lib/utils/date";
 import type { Attendance } from "@/lib/types/attendance.type";
 import { toast } from "sonner";
 
-export interface AttendanceStatsRef {
+interface AttendanceStatsRef {
   refetch: () => void;
 }
 

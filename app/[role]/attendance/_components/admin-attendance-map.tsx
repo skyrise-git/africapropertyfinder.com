@@ -22,7 +22,7 @@ const AttendanceMapClient = dynamic(
   { ssr: false },
 );
 
-export interface AdminAttendanceMapRef {
+interface AdminAttendanceMapRef {
   refetch: () => void;
 }
 

@@ -17,7 +17,7 @@ const AttendanceMapClient = dynamic(
   { ssr: false },
 );
 
-export interface AttendanceMapRef {
+interface AttendanceMapRef {
   refetch: () => void;
 }
 

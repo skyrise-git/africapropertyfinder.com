@@ -1,7 +1,7 @@
 import { BaseEntity } from "./common.type";
 
 // Status types
-export type Status = "active" | "inactive";
+type Status = "active" | "inactive";
 export type UserStatus = "active" | "inactive" | "pending";
 export type UserRole = "admin" | "staff" | "agent" | "user";
 
@@ -32,7 +32,7 @@ export interface UserUpdateInput {
   profilePictureFileKey?: string;
 }
 
-export interface EmailSubscriberRow {
+interface EmailSubscriberRow {
   id: string;
   email: string;
   agent_id: string | null;

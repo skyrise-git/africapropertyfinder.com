@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/chart";
 import { useAttendanceRecords } from "../_hooks/use-attendance-records";
 
-export interface AdminAttendanceChartsRef {
+interface AdminAttendanceChartsRef {
   refetch: () => void;
 }
 

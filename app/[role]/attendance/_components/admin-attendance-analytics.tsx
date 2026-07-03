@@ -21,7 +21,7 @@ import { attendanceService } from "@/lib/services";
 import type { AdminAnalytics } from "@/lib/types/attendance.type";
 import { toast } from "sonner";
 
-export interface AdminAttendanceAnalyticsRef {
+interface AdminAttendanceAnalyticsRef {
   refetch: () => void;
 }
 

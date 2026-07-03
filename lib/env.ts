@@ -42,4 +42,4 @@ function validateEnv() {
 
 export const env = validateEnv();
 
-export type Env = z.infer<typeof envSchema>;
+type Env = z.infer<typeof envSchema>;

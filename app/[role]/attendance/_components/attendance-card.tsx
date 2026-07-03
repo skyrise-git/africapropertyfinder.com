@@ -23,6 +23,7 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
+// fallow-ignore-next-line unused-export
 export const cardVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {

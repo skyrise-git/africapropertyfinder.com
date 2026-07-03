@@ -6,6 +6,7 @@ import { CircleIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+// fallow-ignore-next-line unused-export
 export function RadioGroup({
   className,
   ...props
@@ -19,6 +20,7 @@ export function RadioGroup({
   );
 }
 
+// fallow-ignore-next-line unused-export
 export function RadioGroupItem({
   className,
   ...props

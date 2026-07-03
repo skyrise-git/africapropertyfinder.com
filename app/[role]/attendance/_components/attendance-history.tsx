@@ -22,7 +22,7 @@ const containerVariants = {
   },
 };
 
-export interface AttendanceHistoryRef {
+interface AttendanceHistoryRef {
   refetch: () => void;
 }
 

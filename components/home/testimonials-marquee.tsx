@@ -24,7 +24,7 @@ function Highlight({
   );
 }
 
-export interface TestimonialCardProps {
+interface TestimonialCardProps {
   name: string;
   role: string;
   img?: string;
