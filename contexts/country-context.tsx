@@ -2,20 +2,21 @@
 
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
-  type ReactNode,
 } from "react";
+import { getCountryCodeFromHost } from "@/lib/config/country-domain";
 import {
   COUNTRIES,
-  SUPPORTED_COUNTRIES,
   type CountryCode,
   type CountryConfig,
   formatCompactMoney,
   formatMoney,
+  SUPPORTED_COUNTRIES,
 } from "@/lib/utils/country";
 
 const STORAGE_KEY = "apf_country";
@@ -54,7 +55,7 @@ const CountryContext = createContext<CountryContextValue>({
 
 function readCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
-  const m = document.cookie.match(new RegExp("(^|; )" + name + "=([^;]+)"));
+  const m = document.cookie.match(new RegExp(`(^|; )${name}=([^;]+)`));
   return m ? decodeURIComponent(m[2]) : null;
 }
 
@@ -69,6 +70,21 @@ export function CountryProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    const hostCountry = getCountryCodeFromHost(window.location.host);
+    if (hostCountry) {
+      setCode(hostCountry);
+      setAutoDetected(false);
+      setShowGeoBanner(false);
+      try {
+        window.localStorage.setItem(STORAGE_KEY, hostCountry);
+        window.localStorage.setItem(GEO_BANNER_KEY, "1");
+      } catch {
+        /* ignore */
+      }
+      setHydrated(true);
+      return;
+    }
+
     let saved: string | null = null;
     try {
       saved = window.localStorage.getItem(STORAGE_KEY);
@@ -129,10 +145,18 @@ export function CountryProvider({ children }: { children: ReactNode }) {
       autoDetected,
       showGeoBanner: hydrated && showGeoBanner,
       dismissGeoBanner,
-      formatMoney: (a, suffix) => formatMoney(a, code, suffix ? { suffix } : undefined),
+      formatMoney: (a, suffix) =>
+        formatMoney(a, code, suffix ? { suffix } : undefined),
       formatCompactMoney: (a) => formatCompactMoney(a, code),
     };
-  }, [code, autoDetected, showGeoBanner, hydrated, setCountry, dismissGeoBanner]);
+  }, [
+    code,
+    autoDetected,
+    showGeoBanner,
+    hydrated,
+    setCountry,
+    dismissGeoBanner,
+  ]);
 
   return (
     <CountryContext.Provider value={value}>{children}</CountryContext.Provider>

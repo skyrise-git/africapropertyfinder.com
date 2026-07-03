@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, Check } from "lucide-react";
+import { Check, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,8 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCountry } from "@/contexts/country-context";
-import type { CountryCode } from "@/lib/utils/country";
+import { getCountryDomainConfig } from "@/lib/config/country-domain";
 import { cn } from "@/lib/utils";
+import type { CountryCode } from "@/lib/utils/country";
 
 type Props = {
   className?: string;
@@ -22,6 +23,20 @@ type Props = {
 
 export function CountrySwitcher({ className, compact = false }: Props) {
   const { country, countryCode, countries, setCountry } = useCountry();
+
+  const handleSelectCountry = (code: CountryCode) => {
+    setCountry(code);
+
+    const target = getCountryDomainConfig(code);
+    const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    const targetUrl = new URL(currentPath, target.origin);
+
+    if (window.location.host.toLowerCase() === targetUrl.host.toLowerCase()) {
+      return;
+    }
+
+    window.location.assign(targetUrl.toString());
+  };
 
   return (
     <DropdownMenu>
@@ -51,7 +66,7 @@ export function CountrySwitcher({ className, compact = false }: Props) {
           return (
             <DropdownMenuItem
               key={c.code}
-              onClick={() => setCountry(c.code as CountryCode)}
+              onClick={() => handleSelectCountry(c.code as CountryCode)}
               className="flex items-center justify-between gap-2"
             >
               <span className="flex items-center gap-2">
